@@ -40,7 +40,7 @@ This project requires:
 
         make
 
-This produces chat server and client tools called `bin/chatserver` and
+This produces chat server and client tools called `bin/hotserver` and
 `bin/client-ftxui` respectively. The library for single threaded clients and
 servers is built in `lib/`.
 
@@ -53,7 +53,7 @@ First run the chat server on an unused port of the server machine. The server
 also takes an HTML file that it will server to standard http requests for
 `index.html`.
 
-    bin/chatserver 8000 ../web-socket-networking/webchat.html
+    bin/hotserver 8000 ../social-gaming/webchat.html
 
 
 This will connect to the given port (8000 in this case) of the local machine.
