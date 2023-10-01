@@ -29,6 +29,7 @@ target_link_libraries(client-ftxui
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
+  PRIVATE components
 )
 
 install(TARGETS client-ftxui

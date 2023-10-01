@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "Client.h"
+#include "LandingPage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -64,9 +65,9 @@ int main(int argc, char* argv[]) {
 
   bool gameList = false;
   bool createNew = false;
-  bool serverList = false;
+  bool showLanding = true;
 
-  auto serverBrowser = Renderer([]{ return text("this will be a server browser"); });
+  auto landingPage = Render::renderLandingPage(showLanding, client);
   auto gameBrowser = Renderer([]{ return text("this will be a game browser"); });
   auto newGame = Renderer([]{ return text("this will be a new game screen"); });
   
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
         "Create new game", [&] { 
           gameList = false;
           createNew = true;
-          serverList = false;
+          showLanding = false;
           client.send(std::move("createGame"));
         }, ButtonStyle()
       ),
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
         "Start new existing Game", [&] { 
           gameList = true;
           createNew = false;
-          serverList = false;
+          showLanding = false;
           client.send(std::move("getGamesList"));
           
         }, ButtonStyle()
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
         "Join Game", [&] { 
           gameList = false;
           createNew = false;
-          serverList = true;
+          showLanding = true;
           client.send(std::move("getActiveGames"));
           
         }, ButtonStyle()
@@ -107,7 +108,7 @@ int main(int argc, char* argv[]) {
   // the first argument is the component the second is the boolean 
   auto pageContent = Container::Vertical({
     Container::Horizontal({
-      Maybe(serverBrowser, &serverList),
+      Maybe(landingPage, &showLanding),
       Maybe(gameBrowser, &gameList),
       Maybe(newGame, &createNew),
       }) | size(HEIGHT, EQUAL, 5),
