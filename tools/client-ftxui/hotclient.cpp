@@ -67,7 +67,9 @@ int main(int argc, char* argv[]) {
   bool createNew = false;
   bool showLanding = true;
 
-  auto landingPage = Render::renderLandingPage(showLanding, client);
+  auto landingPageElements = Pages::Landing(showLanding, createNew, gameList, client);
+
+  auto landingPageRender = Renderer(landingPageElements,[&landingPageElements,&showLanding, &createNew, &gameList] { return landingPageElements -> Render();} );
   auto gameBrowser = Renderer([]{ return text("this will be a game browser"); });
   auto newGame = Renderer([]{ return text("this will be a new game screen"); });
   
@@ -108,26 +110,29 @@ int main(int argc, char* argv[]) {
   // the first argument is the component the second is the boolean 
   auto pageContent = Container::Vertical({
     Container::Horizontal({
-      Maybe(landingPage, &showLanding),
+      Maybe(landingPageElements, &showLanding),
       Maybe(gameBrowser, &gameList),
       Maybe(newGame, &createNew),
       }) | size(HEIGHT, EQUAL, 5),
       
     });
 
-
+  auto main_container = Container::Vertical({
+      buttonSection,
+      pageContent,
+  });
 
   //the actual rendering of the screen is done here 
   //the initial component that gets passed into the Renderer seems to be the only one that is interactive
   //multiple components can be grouped into containers so that multiple can be interactive 
 
-  auto renderer = Renderer(buttonSection, [&buttonSection, &pageContent, &history] {
+  auto renderer = Renderer(main_container, [&] {
     auto buttonsWin = window(text("options"),buttonSection->Render());
     auto contentWin = window(text("page content"), pageContent->Render()); 
     return vbox({
       text("Hot Root Soup"),
-      buttonsWin,
-      contentWin,
+      buttonSection->Render(),
+      pageContent->Render(),
       window(text("Server responses "),yframe(
         vbox(history)
       ))| yflex,
@@ -149,6 +154,10 @@ int main(int argc, char* argv[]) {
       return true;
     }
     return false;
+  });
+  auto subMenuhandler = CatchEvent(landingPageRender, [&showLanding,&createNew, &gameList](const Event& event) {
+    return true;
+
   });
 
 

@@ -13,11 +13,55 @@
 
 using namespace ftxui;
 
-namespace Render{
+namespace Pages{
+ButtonOption ButtonStyle() {
+  auto option = ButtonOption::Animated();
+  option.transform = [](const EntryState& s) {
+    auto element = text(s.label);
+    if (s.focused) {
+      element |= bold;
+    }
+    return element | center | borderEmpty | flex;
+  };
+  return option;
+}
 
-Component renderLandingPage(bool &renderLanding, networking::Client &client){
-    return Renderer([]{ return text("this is the landing page"); });
-} 
+
+Component Landing(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client){
+    auto buttonSection = Container::Vertical({
+    Container::Horizontal({
+      Button(
+        "Create new game", [&] { 
+          showGame = false;
+          showCreate = true;
+          showLanding = false;
+          client.send(std::move("createGame"));
+        }, ButtonStyle()
+      ),
+      Button(
+        "Start new existing Game", [&] { 
+          showGame = true;
+          showCreate = false;
+          showLanding = false;
+          client.send(std::move("getGamesList"));
+          
+        }, ButtonStyle()
+      ),
+      Button(
+        "Join Game", [&] { 
+          showGame = false;
+          showCreate = false;
+          showLanding = true;
+          client.send(std::move("getActiveGames"));
+          
+        }, ButtonStyle()
+      ),   
+    }) | flex,
+  });
+    return buttonSection;
+
+ 
+}
 }
 
 

@@ -36,3 +36,16 @@ set_target_properties(components
                       LINKER_LANGUAGE CXX
                       CXX_STANDARD 17
 )
+target_compile_options(components
+    PRIVATE
+      -s USE_PTHREADS
+      
+  )
+  # NOTE: emscripten intercepts linker arguments, so passing custom
+  #  arguments means that we need to remove the compiler specific flags
+  #  that CMake would otherwise add in.
+  set (CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
+  target_link_options(components
+    PRIVATE
+      "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
+  )

@@ -13,7 +13,7 @@
 
 
 using namespace ftxui;
-namespace Render{
-    Component renderLandingPage(bool &renderLanding, networking::Client &client);
+namespace Pages{
+    Component Landing(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client);
 }
 
