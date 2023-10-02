@@ -14,6 +14,6 @@
 
 using namespace ftxui;
 namespace Pages{
-    Component Landing(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client);
+    Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client);
 }
 

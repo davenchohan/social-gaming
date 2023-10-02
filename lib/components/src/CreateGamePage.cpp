@@ -13,8 +13,8 @@
 
 using namespace ftxui;
 namespace Pages{
-Component CreateGame(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client){
-     auto page = Window({.title = "Create Game"});
+Component CreateGame(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client){
+     auto page = Window({.title = "Create Game",.width = 80, .height = 60,});
      return page;
 }
 }

@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   std::vector<Element> history;
 
 
-
+  // leftover from web-chat but might be useful 
   Component entryField = Input(&entry, "Enter server code here.");
   auto onTextEntry = [&done, &client] (std::string text) {
     if ("exit" == text || "quit" == text) {
@@ -64,16 +64,20 @@ int main(int argc, char* argv[]) {
 
     
 
-
+  //booleans for triggering different pages 
   bool showJoin = false;
   bool showCreate = false;
   bool showLanding = true;
+
+
 
   //this is how pages will be passed back to the main page 
   auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
   auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
   auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   
+
+
 //components can be grouped together so that they can be passed into the render together 
  auto homeButton = Container::Vertical({
     Container::Horizontal({
@@ -92,7 +96,7 @@ int main(int argc, char* argv[]) {
   // maybes allow for components to be shown conditionally  
   // the first argument is the component the second is the boolean
   // we will use this to render the different pages requrired for the desktop
-  // by passing the components into this as a component and then ha 
+  // by passing the components into this as a component and then having the renderer call render on page content 
   auto pageContent = Container::Vertical({
     Container::Horizontal({
       Maybe(landingPageElements, &showLanding),
@@ -101,12 +105,15 @@ int main(int argc, char* argv[]) {
       }) | size(HEIGHT, EQUAL, 10),
       
     });
+
+
+
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
   // the component passed into here will need to be called with -> Render() again in the actual renderer 
   auto main_container = Container::Vertical({
-      homeButton,
-      pageContent,
+    homeButton,
+    pageContent,
   });
 
   //the actual rendering of the screen is done here 
@@ -118,17 +125,13 @@ int main(int argc, char* argv[]) {
   auto renderer = Renderer(main_container, [&] {
     return vbox({
       hbox({homeButton->Render(),filler(),text("Hot Root Soup")}),
+        filler(),
+        hbox({
           filler(),
-          hbox({
-            filler(),
-            pageContent->Render(),
-            filler(),
-          }),
+          pageContent->Render(),
           filler(),
-      //window(text("Server responses "),yframe(
-        //vbox(history)
-      //))| yflex,
-      
+        }),
+        filler(),
     }) |
     flex | border | color(Color::GreenLight);
   });

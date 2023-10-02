@@ -14,8 +14,8 @@
 using namespace ftxui;
 
 namespace Pages{
-Component JoinGame(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client){
-    auto page = Window({.title = "Join Game"});
+Component JoinGame(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client){
+    auto page = Window({.title = "Join Game",.width = 80, .height = 60,});
     return page;
 }
 }

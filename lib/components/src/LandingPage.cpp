@@ -49,7 +49,7 @@ Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networkin
       ),   
     }) | flex,
   });
-  auto landingWindow = Window({.title = "landing page", .inner = buttonSection, .width = 40});
+  auto landingWindow = Window({.title = "landing page", .inner = buttonSection, .width = 80, .height = 60,});
   return landingWindow;
 
  
