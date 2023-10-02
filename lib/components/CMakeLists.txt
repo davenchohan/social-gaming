@@ -5,6 +5,8 @@ add_library(components
     src/LandingPage.cpp
     src/JoinGamePage.cpp
     src/CreateGamePage.cpp
+    src/CreateNewGamePage.cpp
+    src/CreateFromExistingPage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
@@ -38,10 +40,10 @@ set_target_properties(components
                       LINKER_LANGUAGE CXX
                       CXX_STANDARD 17
 )
+if (NETWORKING_EMSCRIPTEN_BUILD)
 target_compile_options(components
     PRIVATE
-      -s USE_PTHREADS
-      
+      -s USE_PTHREADS   
   )
   # NOTE: emscripten intercepts linker arguments, so passing custom
   #  arguments means that we need to remove the compiler specific flags
@@ -51,3 +53,4 @@ target_compile_options(components
     PRIVATE
       "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
   )
+  endif()
