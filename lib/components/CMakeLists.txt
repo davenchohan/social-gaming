@@ -38,6 +38,7 @@ set_target_properties(components
                       LINKER_LANGUAGE CXX
                       CXX_STANDARD 17
 )
+if (NETWORKING_EMSCRIPTEN_BUILD)
 target_compile_options(components
     PRIVATE
       -s USE_PTHREADS
@@ -51,3 +52,4 @@ target_compile_options(components
     PRIVATE
       "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
   )
+  endif()
