@@ -6,7 +6,7 @@ add_library(components
     src/JoinGamePage.cpp
     src/CreateGamePage.cpp
     src/CreateNewGamePage.cpp
-    src/CreateFromExisting.cpp
+    src/CreateFromExistingPage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
