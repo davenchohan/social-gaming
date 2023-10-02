@@ -4,6 +4,8 @@
 #include <vector>
 #include "Client.h"
 #include "LandingPage.h"
+#include "CreateGamePage.h"
+#include "JoinGamePage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -63,45 +65,26 @@ int main(int argc, char* argv[]) {
     
 
 
-  bool gameList = false;
-  bool createNew = false;
+  bool showJoin = false;
+  bool showCreate = false;
   bool showLanding = true;
 
   //this is how pages will be passed back to the main page 
-  auto landingPageElements = Pages::Landing(showLanding, createNew, gameList, client);
-
-  auto gameBrowser = Renderer([]{ return text("this will be a game browser"); });
-  auto newGame = Renderer([]{ return text("this will be a new game screen"); });
+  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
+  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
+  auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   
 //components can be grouped together so that they can be passed into the render together 
- auto buttonSection = Container::Vertical({
+ auto homeButton = Container::Vertical({
     Container::Horizontal({
       Button(
-        "Create new game", [&] { 
-          gameList = false;
-          createNew = true;
-          showLanding = false;
-          client.send(std::move("createGame"));
-        }, ButtonStyle()
-      ),
-      Button(
-        "Start new existing Game", [&] { 
-          gameList = true;
-          createNew = false;
-          showLanding = false;
-          client.send(std::move("getGamesList"));
-          
-        }, ButtonStyle()
-      ),
-      Button(
-        "Join Game", [&] { 
-          gameList = false;
-          createNew = false;
+        "Home", [&] { 
+          showJoin = false;
+          showCreate = false;
           showLanding = true;
-          client.send(std::move("getActiveGames"));
-          
+          client.send(std::move("home"));
         }, ButtonStyle()
-      ),   
+      ), 
     }) | flex,
   });
 
@@ -113,16 +96,16 @@ int main(int argc, char* argv[]) {
   auto pageContent = Container::Vertical({
     Container::Horizontal({
       Maybe(landingPageElements, &showLanding),
-      Maybe(gameBrowser, &gameList),
-      Maybe(newGame, &createNew),
-      }) | size(HEIGHT, EQUAL, 5),
+      Maybe(joinGameElements, &showJoin),
+      Maybe(createGameElements, &showCreate),
+      }) | size(HEIGHT, EQUAL, 10),
       
     });
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
   // the component passed into here will need to be called with -> Render() again in the actual renderer 
   auto main_container = Container::Vertical({
-      buttonSection,
+      homeButton,
       pageContent,
   });
 
@@ -134,12 +117,17 @@ int main(int argc, char* argv[]) {
 
   auto renderer = Renderer(main_container, [&] {
     return vbox({
-      text("Hot Root Soup"),
-      buttonSection->Render(),
-      pageContent->Render(),
-      window(text("Server responses "),yframe(
-        vbox(history)
-      ))| yflex,
+      hbox({homeButton->Render(),filler(),text("Hot Root Soup")}),
+          filler(),
+          hbox({
+            filler(),
+            pageContent->Render(),
+            filler(),
+          }),
+          filler(),
+      //window(text("Server responses "),yframe(
+        //vbox(history)
+      //))| yflex,
       
     }) |
     flex | border | color(Color::GreenLight);

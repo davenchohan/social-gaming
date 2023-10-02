@@ -27,38 +27,30 @@ ButtonOption ButtonStyle() {
 }
 
 
-Component Landing(bool &showLanding, bool &showGame, bool &showCreate, networking::Client &client){
+Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client){
     auto buttonSection = Container::Vertical({
     Container::Horizontal({
       Button(
         "Create new game", [&] { 
-          showGame = false;
+          showJoin = false;
           showCreate = true;
           showLanding = false;
           client.send(std::move("createGame"));
         }, ButtonStyle()
       ),
       Button(
-        "Start new existing Game", [&] { 
-          showGame = true;
+        "Join Game", [&] { 
+          showJoin = true;
           showCreate = false;
           showLanding = false;
-          client.send(std::move("getGamesList"));
-          
-        }, ButtonStyle()
-      ),
-      Button(
-        "Join Game", [&] { 
-          showGame = false;
-          showCreate = false;
-          showLanding = true;
           client.send(std::move("getActiveGames"));
           
         }, ButtonStyle()
       ),   
     }) | flex,
   });
-    return buttonSection;
+  auto landingWindow = Window({.title = "landing page", .inner = buttonSection, .width = 40});
+  return landingWindow;
 
  
 }

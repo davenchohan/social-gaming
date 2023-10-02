@@ -2,7 +2,9 @@
 include(FetchContent)
 
 add_library(components
-    src/landingpage.cpp
+    src/LandingPage.cpp
+    src/JoinGamePage.cpp
+    src/CreateGamePage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
