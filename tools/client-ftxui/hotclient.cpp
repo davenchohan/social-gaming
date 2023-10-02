@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
   bool createNew = false;
   bool showLanding = true;
 
+  //this is how pages will be passed back to the main page 
   auto landingPageElements = Pages::Landing(showLanding, createNew, gameList, client);
 
-  auto landingPageRender = Renderer(landingPageElements,[&landingPageElements,&showLanding, &createNew, &gameList] { return landingPageElements -> Render();} );
   auto gameBrowser = Renderer([]{ return text("this will be a game browser"); });
   auto newGame = Renderer([]{ return text("this will be a new game screen"); });
   
@@ -107,7 +107,9 @@ int main(int argc, char* argv[]) {
 
 
   // maybes allow for components to be shown conditionally  
-  // the first argument is the component the second is the boolean 
+  // the first argument is the component the second is the boolean
+  // we will use this to render the different pages requrired for the desktop
+  // by passing the components into this as a component and then ha 
   auto pageContent = Container::Vertical({
     Container::Horizontal({
       Maybe(landingPageElements, &showLanding),
@@ -116,7 +118,9 @@ int main(int argc, char* argv[]) {
       }) | size(HEIGHT, EQUAL, 5),
       
     });
-
+  // all components that need to be interactive will be added to the main container.
+  // this allows them to be tracked by the renderer
+  // the component passed into here will need to be called with -> Render() again in the actual renderer 
   auto main_container = Container::Vertical({
       buttonSection,
       pageContent,
@@ -126,9 +130,9 @@ int main(int argc, char* argv[]) {
   //the initial component that gets passed into the Renderer seems to be the only one that is interactive
   //multiple components can be grouped into containers so that multiple can be interactive 
 
+  //this is the main renderer 
+
   auto renderer = Renderer(main_container, [&] {
-    auto buttonsWin = window(text("options"),buttonSection->Render());
-    auto contentWin = window(text("page content"), pageContent->Render()); 
     return vbox({
       text("Hot Root Soup"),
       buttonSection->Render(),
@@ -154,10 +158,6 @@ int main(int argc, char* argv[]) {
       return true;
     }
     return false;
-  });
-  auto subMenuhandler = CatchEvent(landingPageRender, [&showLanding,&createNew, &gameList](const Event& event) {
-    return true;
-
   });
 
 
