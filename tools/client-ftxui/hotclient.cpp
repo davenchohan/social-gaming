@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include "Client.h"
+#include "LandingPage.h"
+#include "CreateGamePage.h"
+#include "JoinGamePage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -49,7 +52,7 @@ int main(int argc, char* argv[]) {
   std::vector<Element> history;
 
 
-
+  // leftover from web-chat but might be useful 
   Component entryField = Input(&entry, "Enter server code here.");
   auto onTextEntry = [&done, &client] (std::string text) {
     if ("exit" == text || "quit" == text) {
@@ -61,76 +64,74 @@ int main(int argc, char* argv[]) {
 
     
 
+  //booleans for triggering different pages 
+  bool showJoin = false;
+  bool showCreate = false;
+  bool showLanding = true;
 
-  bool gameList = false;
-  bool createNew = false;
-  bool serverList = false;
 
-  auto serverBrowser = Renderer([]{ return text("this will be a server browser"); });
-  auto gameBrowser = Renderer([]{ return text("this will be a game browser"); });
-  auto newGame = Renderer([]{ return text("this will be a new game screen"); });
+
+  //this is how pages will be passed back to the main page 
+  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
+  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
+  auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   
+
+
 //components can be grouped together so that they can be passed into the render together 
- auto buttonSection = Container::Vertical({
+ auto homeButton = Container::Vertical({
     Container::Horizontal({
       Button(
-        "Create new game", [&] { 
-          gameList = false;
-          createNew = true;
-          serverList = false;
-          client.send(std::move("createGame"));
+        "Home", [&] { 
+          showJoin = false;
+          showCreate = false;
+          showLanding = true;
+          client.send(std::move("home"));
         }, ButtonStyle()
-      ),
-      Button(
-        "Start new existing Game", [&] { 
-          gameList = true;
-          createNew = false;
-          serverList = false;
-          client.send(std::move("getGamesList"));
-          
-        }, ButtonStyle()
-      ),
-      Button(
-        "Join Game", [&] { 
-          gameList = false;
-          createNew = false;
-          serverList = true;
-          client.send(std::move("getActiveGames"));
-          
-        }, ButtonStyle()
-      ),   
+      ), 
     }) | flex,
   });
 
 
   // maybes allow for components to be shown conditionally  
-  // the first argument is the component the second is the boolean 
+  // the first argument is the component the second is the boolean
+  // we will use this to render the different pages requrired for the desktop
+  // by passing the components into this as a component and then having the renderer call render on page content 
   auto pageContent = Container::Vertical({
     Container::Horizontal({
-      Maybe(serverBrowser, &serverList),
-      Maybe(gameBrowser, &gameList),
-      Maybe(newGame, &createNew),
-      }) | size(HEIGHT, EQUAL, 5),
+      Maybe(landingPageElements, &showLanding),
+      Maybe(joinGameElements, &showJoin),
+      Maybe(createGameElements, &showCreate),
+      }) | size(HEIGHT, EQUAL, 10),
       
     });
 
 
 
+  // all components that need to be interactive will be added to the main container.
+  // this allows them to be tracked by the renderer
+  // the component passed into here will need to be called with -> Render() again in the actual renderer 
+  auto main_container = Container::Vertical({
+    homeButton,
+    pageContent,
+  });
+
   //the actual rendering of the screen is done here 
   //the initial component that gets passed into the Renderer seems to be the only one that is interactive
   //multiple components can be grouped into containers so that multiple can be interactive 
 
-  auto renderer = Renderer(buttonSection, [&buttonSection, &pageContent, &history] {
-    auto buttonsWin = window(text("options"),buttonSection->Render());
-    auto contentWin = window(text("page content"), pageContent->Render()); 
+  //this is the main renderer 
+
+  auto renderer = Renderer(main_container, [&] {
     return vbox({
-      text("Hot Root Soup"),
-      buttonsWin,
-      contentWin,
-      window(text("Server responses "),yframe(
-        vbox(history)
-      ))| yflex,
-      
+      hbox({homeButton->Render(),filler(),text("Hot Root Soup")}),
+        filler(),
+        hbox({
+          filler(),
+          pageContent->Render(),
+          filler(),
+        }),
+        filler(),
     }) |
     flex | border | color(Color::GreenLight);
   });

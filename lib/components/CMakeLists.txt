@@ -1,11 +1,17 @@
 
 include(FetchContent)
 
+add_library(components
+    src/LandingPage.cpp
+    src/JoinGamePage.cpp
+    src/CreateGamePage.cpp
+)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
   GIT_TAG v5.0.0
 )
+
 
 FetchContent_GetProperties(ftxui)
 if(NOT ftxui_POPULATED)
@@ -13,44 +19,35 @@ if(NOT ftxui_POPULATED)
   add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-
-add_executable(client-ftxui
-  hotclient.cpp
-)
-
-set_target_properties(client-ftxui PROPERTIES
-  LINKER_LANGUAGE CXX
-  CXX_STANDARD 17
-  PREFIX ""
-)
-
-target_link_libraries(client-ftxui
+target_link_libraries(components
   PRIVATE networking
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
-  PRIVATE components
+)
+target_include_directories(components
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-install(TARGETS client-ftxui
-  RUNTIME DESTINATION bin
+set_target_properties(components
+                      PROPERTIES
+                      LINKER_LANGUAGE CXX
+                      CXX_STANDARD 17
 )
-
-if (NETWORKING_EMSCRIPTEN_BUILD)
-  target_compile_options(client-ftxui
+target_compile_options(components
     PRIVATE
       -s USE_PTHREADS
+      
   )
   # NOTE: emscripten intercepts linker arguments, so passing custom
   #  arguments means that we need to remove the compiler specific flags
   #  that CMake would otherwise add in.
   set (CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
-  target_link_options(client-ftxui
+  target_link_options(components
     PRIVATE
       "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
   )
-
-  foreach(file "index.html" "run_webassembly.py")
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${file}" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${file})
-  endforeach(file)
-endif()
