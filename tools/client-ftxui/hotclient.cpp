@@ -48,12 +48,12 @@ int main(int argc, char* argv[]) {
 
   bool done = false;
   
-  std::string entry;
+  std::string entry; //using this to store inputs
   std::vector<Element> history;
 
 
   // leftover from web-chat but might be useful 
-  Component entryField = Input(&entry, "Enter server code here.");
+  // Component entryField = Input(&entry, "Enter server code here."); // do this in the individual pages?
   auto onTextEntry = [&done, &client] (std::string text) {
     if ("exit" == text || "quit" == text) {
       done = true;
@@ -73,7 +73,8 @@ int main(int argc, char* argv[]) {
 
   //this is how pages will be passed back to the main page 
   auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
-  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
+  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client, entry);
+  // auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
   auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   
 

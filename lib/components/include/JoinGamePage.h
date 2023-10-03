@@ -14,6 +14,7 @@
 
 using namespace ftxui;
 namespace Pages{
-    Component JoinGame(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client);
+    Component JoinGame(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client, std::string &entry);
+    // Component JoinGame(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client);
 }
 
