@@ -11,6 +11,11 @@ add_grammar_from_repo(tree-sitter-json
     0.19.0
 )
 
+add_grammar_from_repo(tree-sitter-socialgaming
+    https://github.com/nsumner/tree-sitter-socialgaming.git
+    0.0.1
+)
+
 add_executable(parser_test)
 target_sources(parser_test
     PRIVATE
@@ -18,6 +23,7 @@ target_sources(parser_test
 )
 target_link_libraries(parser_test
     tree-sitter-json
+    tree-sitter-socialgaming
     cpp-tree-sitter
 )
 
