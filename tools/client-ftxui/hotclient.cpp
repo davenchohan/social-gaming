@@ -69,10 +69,18 @@ int main(int argc, char* argv[]) {
   bool showCreate = false;
   bool showLanding = true;
 
+  // variables for landing page
+  std::vector<std::string> tab_values {
+    "tab_1",
+    "tab_2",
+    "tab_3",
+  };
+  int tab_selected = 1;
+
 
 
   //this is how pages will be passed back to the main page 
-  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
+  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client, tab_values, tab_selected, entry);
   auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
   auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   

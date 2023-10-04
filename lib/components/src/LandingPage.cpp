@@ -27,32 +27,32 @@ ButtonOption ButtonStyle() {
 }
 
 
-Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client){
-    auto buttonSection = Container::Vertical({
-    Container::Horizontal({
-      Button(
-        "Create new game", [&] { 
-          showJoin = false;
-          showCreate = true;
-          showLanding = false;
-          client.send(std::move("createGame"));
-        }, ButtonStyle()
-      ),
-      Button(
-        "Join Game", [&] { 
-          showJoin = true;
-          showCreate = false;
-          showLanding = false;
-          client.send(std::move("getActiveGames"));
-          
-        }, ButtonStyle()
-      ),   
-    }) | flex,
-  });
-  auto landingWindow = Window({.inner = buttonSection, .title = "landing page",  .width = 80, .height = 60,});
-  return landingWindow;
+Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client, std::vector<std::string> &tab_values, int &tab_selected, std::string &entry){
+  // tab view
+    auto tab_toggle = Toggle(&tab_values, &tab_selected);
+    auto tab_container = Container::Tab({
+      Button("A Button that clears the input in tab3", [&]{
+        entry.clear();
+      }),
+      Renderer([] {
+        return text("A Text");
+      }),
+      Container::Vertical({
+        Renderer([] {
+          return text("Enter an invite code to join a game!");
+        }),
+        Input(&entry, "invite code:"),
+      }),
+    }, &tab_selected);
 
- 
+    auto tab_view = Container::Vertical({
+      tab_toggle,
+      tab_container,
+    });
+
+  auto landingWindow = Window({.inner = tab_view, .title = "landing page",  .width = 80, .height = 60,});
+  return tab_view;
+  // return landingWindow;
 }
 }
 
