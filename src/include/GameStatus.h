@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "Player.h" // Include the Player class if needed
+#include "Player.h"
 
 class GameStatus {
 public:
@@ -32,22 +32,12 @@ public:
     int GetNumRounds() const;
     void SetNumRounds(int numRounds);
 
-    // Add, and retrieve players
-    void AddPlayer(const Player& player);
-    std::vector<Player> GetPlayers() const;
-
-    // Add, and retrieve audience members
-    void AddAudienceMember(const std::string& audienceMemberName);
-    std::vector<std::string> GetAudienceMembers() const;
-
 private:
     std::string gameName;
     int minPlayers;
     int maxPlayers;
     bool audienceEnabled;
     int numRounds;
-    std::vector<Player> players;
-    std::vector<std::string> audienceMembers;
     GameProgress gameProgress;
 
 };

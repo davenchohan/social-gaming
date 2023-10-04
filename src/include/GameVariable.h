@@ -5,14 +5,15 @@
 
 class GameVariable {
 public:
-    // Constructors
-    GameVariable();
-    GameVariable(const std::string& stringValue);
-    // Getter
-    std::string GetVariable() const;
+    // Constructor
+    GameVariable(const std::string& name, const std::string& value);
+
+    // Get the value of the variable
+    std::string GetVariableValue() const;
 
 private:
-    std::string data;
+    std::string variableName;
+    std::string variableValue;
 };
 
 #endif

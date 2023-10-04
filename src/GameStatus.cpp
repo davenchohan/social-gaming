@@ -2,7 +2,7 @@
 
 // Default constructor
 GameStatus::GameStatus() {
-    gameName = "";
+    gameName = "Game";
     minPlayers = 2; // Default minimum players
     maxPlayers = 4; // Default maximum players
     audienceEnabled = true; // Default audience enabled
@@ -49,22 +49,4 @@ int GameStatus::GetNumRounds() const {
 
 void GameStatus::SetNumRounds(int rounds) {
     numRounds = rounds;
-}
-
-// Player management methods
-void GameStatus::AddPlayer(const Player& player) {
-    players.push_back(player);
-}
-
-std::vector<Player> GameStatus::GetPlayers() const {
-    return players;
-}
-
-// Audience member management methods
-void GameStatus::AddAudienceMember(const std::string& audienceMemberName) {
-    audienceMembers.push_back(audienceMemberName);
-}
-
-std::vector<std::string> GameStatus::GetAudienceMembers() const {
-    return audienceMembers;
 }

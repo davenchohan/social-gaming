@@ -1,16 +1,12 @@
 #include "GameVariable.h"
 
-// Default constructor
-GameVariable::GameVariable() {
-    data = std::string(""); // Default to an empty string
+// Constructor
+GameVariable::GameVariable(const std::string& name, const std::string& value) {
+    variableName = name;
+    variableValue = value;
 }
 
-// Constructor for string data type
-GameVariable::GameVariable(const std::string& stringValue) {
-    data = stringValue;
-}
-
-// Get data
-std::string GameVariable::GetVariable() const {
-    return data;
+// Get the value of the Variable
+std::string GameVariable::GetVariableValue() const {
+    return variableValue;
 }

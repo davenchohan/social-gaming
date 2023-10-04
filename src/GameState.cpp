@@ -6,33 +6,33 @@ GameState::GameState() {
     gameStatus = GameStatus();
 }
 
-// Add a player state
+// Add a player
 void GameState::AddPlayer(const std::string& playerName, const Player& player) {
     players[playerName] = player;
 }
 
-// Add an audience member state
+// Add an audience member
 void GameState::AddAudienceMember(const std::string& audienceMemberName, const AudienceMember& audienceMember) {
     audienceMembers[audienceMemberName] = audienceMember;
 }
 
-// Get a player's state
+// Get a player
 Player GameState::GetPlayer(const std::string& playerName) const {
     auto it = players.find(playerName);
     if (it != players.end()) {
         return it->second;
     }
-    // Handle error or return a default state
+    // Error
     return Player(" ");
 }
 
-// Get an audience member's state
+// Get an audience member
 AudienceMember GameState::GetAudienceMember(const std::string& audienceMemberName) const {
     auto it = audienceMembers.find(audienceMemberName);
     if (it != audienceMembers.end()) {
         return it->second;
     }
-    // Handle error or return a default state
+    // Error
     return AudienceMember(" ");
 }
 
@@ -48,7 +48,7 @@ GameVariable GameState::GetVariable(const std::string& variableName) const {
         return it->second;
     }
     // Error
-    return GameVariable();
+    return GameVariable(" ", " ");
 }
 
 // Set a game constant
