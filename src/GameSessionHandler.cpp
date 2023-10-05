@@ -36,13 +36,11 @@ AudienceMember GameSessionHandler::GetAudienceMember(const std::string& audience
 
 // Remove a player
 void GameSessionHandler::RemovePlayer(const std::string& playerName) {
-    // Find and remove the player with the specified name
     players.erase(playerName);
 }
 
 // Remove an audience member
 void GameSessionHandler::RemoveAudienceMember(const std::string& audienceMemberName) {
-    // Find and remove the player with the specified name
     audienceMembers.erase(audienceMemberName);
 }
 
