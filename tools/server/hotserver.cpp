@@ -7,6 +7,7 @@
 
 
 #include "Server.h"
+#include "CustomExceptions.h"
 
 #include <fstream>
 #include <iostream>
