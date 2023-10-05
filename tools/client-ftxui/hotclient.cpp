@@ -68,7 +68,8 @@ int main(int argc, char* argv[]) {
   bool showJoin = false;
   bool showCreate = false;
   bool showLanding = true;
-
+  bool showGameOptions = false;
+  bool showGamesList = true;
 
 
   //variables for join game page 
@@ -81,10 +82,10 @@ int main(int argc, char* argv[]) {
 
 
   //this is how pages will be passed back to the main page 
-  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client);
-  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate,tab_values, tab_selected, client);
-  auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   
+  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate,tab_values, tab_selected, client);
+  auto createGameElements = Pages::CreateGame(showGameOptions, showGamesList, client);
+  auto landingPageElements = Pages::Landing( showJoin, showCreate, joinGameElements,createGameElements, client);
 
 
 //components can be grouped together so that they can be passed into the render together 
@@ -109,8 +110,7 @@ int main(int argc, char* argv[]) {
   auto pageContent = Container::Vertical({
     Container::Horizontal({
       Maybe(landingPageElements, &showLanding),
-      Maybe(joinGameElements, &showJoin),
-      Maybe(createGameElements, &showCreate),
+      
       }) | size(HEIGHT, EQUAL, 10),
       
     });

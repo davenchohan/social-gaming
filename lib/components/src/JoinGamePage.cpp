@@ -25,11 +25,15 @@ Component JoinGame(bool &showLanding, bool &showJoin, bool &showCreate,  std::ve
         Button("test3",[&]{}),
       },
       &tab_selected);
- 
-  auto Tabs_container = Container::Vertical({
-      tab_toggle,
-      tab_container,
-  });
+   std::string entry;
+  auto Tabs_container = Input(&entry, "Enter server code here.");
+  auto onTextEntry = [&showCreate, &client] (std::string text) {
+    if ("exit" == text || "quit" == text) {
+      showCreate = true;
+    } else {
+      client.send(std::move(text));
+    }
+  };
     auto page = Window({.inner = Tabs_container, .title = "Join Game",.width = 80, .height = 60,});
     return Tabs_container;
 }
