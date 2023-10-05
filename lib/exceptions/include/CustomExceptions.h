@@ -3,40 +3,40 @@
 
 class UnknownGameException : public std::exception{
     private:
-        char *gameName;
+        std::string gameName;
     public: 
-    UnknownGameException(char *name) : gameName(name) {}
+    UnknownGameException(std::string name) : gameName(name) {}
     const std::string what();
 };
 
 class IncompleteGameException : public std::exception{
     private:
-        char *gameName;
+        std::string gameName;
     public:
-    IncompleteGameException(char *name) : gameName(name) {}
+    IncompleteGameException(std::string name) : gameName(name) {}
     const std::string what();
 };
 
 class UnknownGameSpecException : public std::exception{
     private:
-        char *gameSpec;
+        std::string gameSpec;
     public:
-    UnknownGameSpecException(char *spec) : gameSpec(spec) {}
+    UnknownGameSpecException(std::string spec) : gameSpec(spec) {}
     const std::string what();
 };
 
 class UnknownPlayerException : public std::exception{
     private:
-        char *playerName;
+        std::string playerName;
     public:
-    UnknownPlayerException(char *name) : playerName(name) {}
+    UnknownPlayerException(std::string name) : playerName(name) {}
     const std::string what();
 };
 
 class UnknownRequestException : public std::exception{
     private:
-        char *requestStr;
+        std::string requestStr;
     public:
-    UnknownRequestException(char *request) : requestStr(request) {}
+    UnknownRequestException(std::string request) : requestStr(request) {}
     const std::string what();
 };

@@ -1,18 +1,20 @@
 add_subdirectory(gtest)
 
-add_executable(runAllTests
+add_executable(unitTests
 # Add tests here
     dummy.cpp
+    CustomExceptionsTests.cpp
 )
 
-target_link_libraries(runAllTests
+target_link_libraries(unitTests
   PRIVATE
     GTest::gmock GTest::gtest GTest::gtest_main
     networking
+    exceptions
 )
 
 add_test(NAME AllTests
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/runAllTests
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/unitTests
 )
 
 
