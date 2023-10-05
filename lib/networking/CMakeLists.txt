@@ -18,7 +18,7 @@ if (NETWORKING_EMSCRIPTEN_BUILD)
       websocket.js
   )
 else()
-  find_package(Boost 1.72 COMPONENTS system REQUIRED)
+  find_package(Boost 1.71 COMPONENTS system REQUIRED)
   target_link_libraries(networking
     PRIVATE
       ${Boost_LIBRARIES}
