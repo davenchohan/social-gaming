@@ -21,7 +21,7 @@ Player GameSessionHandler::GetPlayer(const std::string& playerName) const {
         return it->second;
     }
     // Error
-    return Player(" ");
+    return Player("ERROR", -1);
 }
 
 // Get an audience member
@@ -31,7 +31,7 @@ AudienceMember GameSessionHandler::GetAudienceMember(const std::string& audience
         return it->second;
     }
     // Error
-    return AudienceMember(" ");
+    return AudienceMember("ERROR", -1);
 }
 
 // Remove a player

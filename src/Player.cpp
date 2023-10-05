@@ -1,16 +1,15 @@
 #include "Player.h"
 
 // Constructor
-Player::Player(const std::string& name) : playerName(name) {
-    
+Player::Player(const std::string& name, int userId) : User(name, userId), playerState(WaitingTurn) {
 }
 
-// Set a state value
-void Player::SetStateValue(const std::string& value) {
-    playerState = value;
+// Set player-specific state
+void Player::SetPlayerState(const PlayerState& state) {
+    playerState = state;
 }
 
-// Get the value of a state
-std::string Player::GetStateValue() const {
+// Get the player's state
+Player::PlayerState Player::GetPlayerState() const {
     return playerState;
 }

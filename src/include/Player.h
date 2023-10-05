@@ -1,22 +1,28 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <string>
+#include "User.h"
 
-class Player {
+class Player : public User {
 public:
+    // Enumeration to represent player states
+    enum PlayerState {
+        Active,        //  It's their turn
+        Eliminated,    // They have been eliminated
+        WaitingTurn    // They waiting for their turn
+    };
+
     // Constructor
-    Player(const std::string& name);
+    Player(const std::string& name, int userId);
 
-    // Set a state value
-    void SetStateValue(const std::string& value);
+    // Set the player's state
+    void SetPlayerState(const PlayerState& state);
 
-    // Get the value of a state
-    std::string GetStateValue() const;
+    // Get the player's state
+    PlayerState GetPlayerState() const;
 
 private:
-    std::string playerState;
-    std::string playerName;
+    PlayerState playerState;
 };
 
 #endif

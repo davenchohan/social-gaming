@@ -71,7 +71,7 @@ GameVariable Game::GetVariable(const std::string& variableName) const {
         return it->second;
     }
     // Error
-    return GameVariable(" ", " ");
+    return GameVariable("ERROR", "ERROR");
 }
 
 // Set a game constant
@@ -86,7 +86,7 @@ GameConstant Game::GetConstant(const std::string& constantName) const {
         return it->second;
     }
     // Error
-    return GameConstant(" ", " ");
+    return GameConstant("ERROR", "ERROR");
 }
 
 // Get the game ID

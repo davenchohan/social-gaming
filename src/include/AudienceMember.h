@@ -1,22 +1,13 @@
 #ifndef AUDIENCEMEMBER_H
 #define AUDIENCEMEMBER_H
 
-#include <string>
+#include "User.h"
 
-class AudienceMember {
+class AudienceMember : public User {
 public:
     // Constructor
-    AudienceMember(const std::string& name);
+    AudienceMember(const std::string& name, int userId);
 
-    // Set a state value
-    void SetStateValue(const std::string& value);
-
-    // Get the value of a state
-    std::string GetStateValue() const;
-
-private:
-    std::string audienceState;
-    std::string audienceName;
 };
 
 #endif
