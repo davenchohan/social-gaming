@@ -6,6 +6,7 @@
 #include "LandingPage.h"
 #include "CreateGamePage.h"
 #include "JoinGamePage.h"
+#include "CreateGameSessionPage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -71,18 +72,31 @@ int main(int argc, char* argv[]) {
 
   // variables for landing page
   std::vector<std::string> tab_values {
-    "tab_1",
-    "tab_2",
-    "tab_3",
+    "CREATE GAME SESSION",
+    "TEXT",
+    "JOIN GAME SESSION",
   };
-  int tab_selected = 1;
+  int tab_selected = 0;
+
+  //  game session data
+  std::vector<std::string> radiobox_list = {
+      "Game 1",
+      "Game 2",
+      "Game 3",
+      "Game 4",
+  };
+  int radiobox_selected = 0;
 
 
+
+  // content inside tabs
+  auto createGameSessionPage = Pages::CreateGameSession(radiobox_list, radiobox_selected, client);
 
   //this is how pages will be passed back to the main page 
-  auto landingPageElements = Pages::Landing(showLanding, showJoin, showCreate, client, tab_values, tab_selected, entry);
+  auto landingPageElements = Pages::Landing(createGameSessionPage, showLanding, showJoin, showCreate, client, tab_values, tab_selected, entry);
   auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
   auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
+
   
 
 
@@ -106,13 +120,15 @@ int main(int argc, char* argv[]) {
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
   auto pageContent = Container::Vertical({
-    Container::Horizontal({
-      Maybe(landingPageElements, &showLanding),
-      Maybe(joinGameElements, &showJoin),
-      Maybe(createGameElements, &showCreate),
-      }) | size(HEIGHT, EQUAL, 10),
+    landingPageElements,
+    // Container::Horizontal({
+    //   Maybe(landingPageElements, &showLanding),
+    //   Maybe(joinGameElements, &showJoin),
+    //   Maybe(createGameElements, &showCreate),
+    //   }),
+      // }) | size(HEIGHT, EQUAL, 10),
       
-    });
+  }) | flex;
 
 
 
@@ -133,15 +149,16 @@ int main(int argc, char* argv[]) {
   auto renderer = Renderer(main_container, [&] {
     return vbox({
       hbox({homeButton->Render(),filler(),text("Hot Root Soup")}),
-        filler(),
+        // filler(),
         hbox({
-          filler(),
+          // filler(),
           pageContent->Render(),
-          filler(),
-        }),
-        filler(),
+          // filler(),
+        }) | flex | borderStyled(ROUNDED),
+        // filler(),
     }) |
-    flex | border | color(Color::GreenLight);
+    flex;
+    // flex | border | color(Color::GreenLight);
   });
 
 
