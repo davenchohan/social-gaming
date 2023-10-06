@@ -47,10 +47,16 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      auto page = Container::Vertical({
           page1 | Maybe([&] {return create_pagenum == 0;}),
           page2 | Maybe([&] {return create_pagenum == 1;}),
+          Renderer([] {
+               return filler();
+            }),
           Container::Horizontal({
             Button("Back", [&]{
                create_pagenum--;
             }) | Maybe([&] {return create_pagenum > 0;}),
+            Renderer([] {
+               return filler();
+            }),
             Button("Next", [&]{
                create_pagenum++;
             }) | Maybe([&] {return create_pagenum < max_pagenum;}),
@@ -59,7 +65,6 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      });
 
      // auto page = Window({.inner = game_selector, .title = "Create Game session",.width = 80, .height = 60});
-     // return page;
      return page;
 }
 }
