@@ -73,29 +73,39 @@ int main(int argc, char* argv[]) {
   // variables for landing page
   std::vector<std::string> tab_values {
     "CREATE GAME SESSION",
-    "TEXT",
+    // "TEXT",
     "JOIN GAME SESSION",
   };
   int tab_selected = 0;
 
   //  game session data
   std::vector<std::string> radiobox_list = {
-      "Game 1",
-      "Game 2",
-      "Game 3",
-      "Game 4",
+      "Class Quiz",
+      "Rock, Paper, Scissors",
+      "Tic Tac Toe",
+      "Tetris",
   };
   int radiobox_selected = 0;
+
+  // page number in tab
+  int pagenum = 0;
+  std::string invite_code;
+  std::string display_name;
+  // create game session data
+  int create_pagenum = 0;
+  std::string game_session_name;
+
 
 
 
   // content inside tabs
-  auto createGameSessionPage = Pages::CreateGameSession(radiobox_list, radiobox_selected, client);
+  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, client);
+  auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, showLanding, showJoin, showCreate, client);
 
   //this is how pages will be passed back to the main page 
-  auto landingPageElements = Pages::Landing(createGameSessionPage, showLanding, showJoin, showCreate, client, tab_values, tab_selected, entry);
-  auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
-  auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
+  auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, showLanding, showJoin, showCreate, client, tab_values, tab_selected, entry);
+  // auto joinGameElements = Pages::JoinGame(showLanding, showJoin, showCreate, client);
+  // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
   
 

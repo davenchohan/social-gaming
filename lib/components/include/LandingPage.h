@@ -14,6 +14,6 @@
 
 using namespace ftxui;
 namespace Pages{
-    Component Landing(Component createGameSession, bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client, std::vector<std::string> &tab_values, int &tab_selected, std::string &entry);
+    Component Landing(Component createGameSession, Component joinGameSession, bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client, std::vector<std::string> &tab_values, int &tab_selected, std::string &entry);
 }
 
