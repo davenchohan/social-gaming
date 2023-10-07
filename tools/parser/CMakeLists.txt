@@ -30,3 +30,7 @@ target_link_libraries(parser_test
 set_target_properties(parser_test
     PROPERTIES CXX_STANDARD 17
 )
+
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gameSpecs")
+set(DESTINATION_DIR "${CMAKE_BINARY_DIR}/lib")
+file(COPY ${SOURCE_DIR} DESTINATION ${DESTINATION_DIR})
