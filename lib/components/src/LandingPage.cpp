@@ -14,45 +14,34 @@
 using namespace ftxui;
 
 namespace Pages{
-ButtonOption ButtonStyle() {
-  auto option = ButtonOption::Animated();
-  option.transform = [](const EntryState& s) {
-    auto element = text(s.label);
-    if (s.focused) {
-      element |= bold;
-    }
-    return element | center | borderEmpty | flex;
-  };
-  return option;
-}
+// ButtonOption ButtonStyle() {
+//   auto option = ButtonOption::Animated();
+//   option.transform = [](const EntryState& s) {
+//     auto element = text(s.label);
+//     if (s.focused) {
+//       element |= bold;
+//     }
+//     return element | center | borderEmpty | flex;
+//   };
+//   return option;
+// }
 
 
-Component Landing(bool &showLanding, bool &showJoin, bool &showCreate, networking::Client &client){
-    auto buttonSection = Container::Vertical({
-    Container::Horizontal({
-      Button(
-        "Create new game", [&] { 
-          showJoin = false;
-          showCreate = true;
-          showLanding = false;
-          client.send(std::move("createGame"));
-        }, ButtonStyle()
-      ),
-      Button(
-        "Join Game", [&] { 
-          showJoin = true;
-          showCreate = false;
-          showLanding = false;
-          client.send(std::move("getActiveGames"));
-          
-        }, ButtonStyle()
-      ),   
-    }) | flex,
+Component Landing(Component createGameSession, Component joinGameSession, networking::Client &client, std::vector<std::string> &tab_values, int &tab_selected, std::string &entry){
+
+  // tab view
+  auto tab_toggle = Toggle(&tab_values, &tab_selected);
+  auto tab_container = Container::Tab({
+    createGameSession,
+    joinGameSession,
+  }, &tab_selected);
+
+  auto tab_view = Container::Vertical({
+    tab_toggle,
+    tab_container,
   });
-  auto landingWindow = Window({.inner = buttonSection, .title = "landing page",  .width = 80, .height = 60,});
-  return landingWindow;
 
- 
+  return tab_view;
 }
 }
 
