@@ -10,3 +10,5 @@ endif()
 if (ENABLE_FTXUI_CLIENT)
   add_subdirectory(client-ftxui)
 endif()
+
+add_subdirectory(parser)
