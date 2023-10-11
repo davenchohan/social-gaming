@@ -27,15 +27,23 @@ using networking::Message;
 
 std::vector<Connection> clients;
 
+struct FakePlayer{
+  std::string name;
+  FakePlayer(std::string name): name{name}
+    {}
+};
+
 struct FakeGame{
   std::string gameName;
+  FakePlayer host;
   int minPlayers;
   int maxPlayers;
   bool audienceEnabled;
   int numRounds;
   int gameProgress;
   int gameId;
-  FakeGame(){
+  FakeGame(int newGameId, FakePlayer &gameHost): gameId(newGameId), host(gameHost)
+  {
     gameName = "fake";
     minPlayers = 0;
     maxPlayers = 0;
@@ -46,6 +54,23 @@ struct FakeGame{
   void setID(int id){
     gameId = id;
   }
+};
+
+struct FakeAudienceMember{
+  std::string name;
+  FakeAudienceMember(std::string name) : name{name}
+    {}
+};
+
+struct FakeGameSessionHandler{
+    std::map<std::string, FakePlayer> players;
+    std::map<std::string, FakeAudienceMember> audienceMembers;
+    int currentRound;
+    int sessionId;
+    FakeGame game;
+    FakeGameSessionHandler(int id, FakeGame&gameObj)
+      : sessionId{id}, game{gameObj}
+        {}
 };
 
 // Empty struct for hold server request items
@@ -169,10 +194,12 @@ main(int argc, char* argv[]) {
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
+  // Instantiate host
+  FakePlayer host("dummy");
+
   // Instantiate game list
   std::vector<std::string> fakeGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
-  std::vector<FakeGame> fakeGameSessionHander;
 
   while (true) {
     bool errorWhileUpdating = false;
@@ -213,13 +240,12 @@ main(int argc, char* argv[]) {
         std::map<std::string, std::string> fakeGameSpec = {{"players","3-10"}, {"Rounds","3"}};
         evaluateFilledGame(fakeGameSpec, request.gameInfo);
         // Instantiate Game class
-        FakeGame fakeGame;
-        fakeGameSessionHander.push_back(fakeGame);
-        // Generate id;
-        auto fakeGenerate = [&fakeGame](){
+        auto fakeGenerate = [](){
           return 404;
         };
-        fakeGame.setID(fakeGenerate());
+
+        FakeGame fakeGame(fakeGenerate(), host);
+        FakeGameSessionHandler sessionHandler(fakeGame.gameId, fakeGame);
         std::string server_status = fakeGame.gameName + " created, ID: " + std::to_string(fakeGame.gameId);
         server_response = server_status;
       }else if(request.request == "RequestJoinGame"){
