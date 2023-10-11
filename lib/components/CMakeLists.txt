@@ -8,6 +8,7 @@ add_library(components
     src/CreateNewGamePage.cpp
     src/CreateFromExistingPage.cpp
     src/CreateGameSessionPage.cpp
+    src/GamePlayPage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui

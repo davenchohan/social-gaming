@@ -7,6 +7,7 @@
 #include "CreateGamePage.h"
 #include "JoinGamePage.h"
 #include "CreateGameSessionPage.h"
+#include "GamePlayPage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -102,6 +103,7 @@ int main(int argc, char* argv[]) {
 
   // MAIN PAGE 
   auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
+  auto gamePlayPageElements = Pages::GamePlay(client);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -123,7 +125,8 @@ int main(int argc, char* argv[]) {
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
   auto pageContent = Container::Vertical({
-    landingPageElements,
+    // landingPageElements, // desktop
+    gamePlayPageElements, // mobile
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
