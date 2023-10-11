@@ -7,6 +7,8 @@
 
 
 #include "Server.h"
+#include "CustomExceptions.h"
+
 
 #include <fstream>
 #include <iostream>
@@ -14,6 +16,8 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
+#include <map>
 
 
 using networking::Server;
@@ -23,6 +27,65 @@ using networking::Message;
 
 std::vector<Connection> clients;
 
+struct FakeGame{
+  std::string gameName;
+  int minPlayers;
+  int maxPlayers;
+  bool audienceEnabled;
+  int numRounds;
+  int gameProgress;
+  int gameId;
+  FakeGame(){
+    gameName = "fake";
+    minPlayers = 0;
+    maxPlayers = 0;
+    audienceEnabled = false;
+    numRounds = 0;
+    gameProgress = 0;
+  }
+  void setID(int id){
+    gameId = id;
+  }
+};
+
+// Empty struct for hold server request items
+// This is a bad fake, to be used temporarily
+// TODO: Replace this struct with a better one
+struct serverRequest{
+  std::string request;
+  std::string gameName;
+  std::string data;
+  std::map<std::string, std::string> gameInfo;
+};
+
+
+//TODO: Replace this function with an actual request parser
+// Can be implemented here or in server.cpp
+serverRequest parseRequest(const std::string &log){
+  serverRequest temp;
+  temp.request = "";
+  temp.data = "";
+  temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
+  temp.gameName = "";
+  return temp;
+}
+
+// TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
+// Possible inputs: Game game, serverRequest request
+void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
+  if (gameSpec.size() != receivedItems.size()){
+    throw IncompleteGameException("Error, incomplete game");
+  }else{
+    // Checking for missing game spec items from client
+    for (auto item : gameSpec){
+      if(receivedItems.find(item.first) == receivedItems.end()){
+        throw IncompleteGameException("Error, recived game spec does not have: " + item.first);
+      }
+    }
+    return;
+  }
+  return;
+}
 
 void
 onConnect(Connection c) {
@@ -106,6 +169,11 @@ main(int argc, char* argv[]) {
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
+  // Instantiate game list
+  std::vector<std::string> fakeGameList = {"Rock,Paper,Scissors"};
+  std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
+  std::vector<FakeGame> fakeGameSessionHander;
+
   while (true) {
     bool errorWhileUpdating = false;
     try {
@@ -119,6 +187,7 @@ main(int argc, char* argv[]) {
 
     const auto incoming = server.receive();
     const auto [log, shouldQuit, returnAll] = processMessages(server, incoming);
+    std::string server_response;
     allMessages.push_back(log+"\n");
     if(returnAll){
       for(std::string str : allMessages){
@@ -126,6 +195,38 @@ main(int argc, char* argv[]) {
         server.send(outgoing);
       }
     }else {
+      // Space to parse log file into specific sections: request, gameInfo, data, etc
+      serverRequest request = parseRequest(log);
+      // Begin logic implementation
+      if (request.request == " " || request.request == ""){
+        std::cout << "No message from client" << std::endl;
+      }else if (request.request == "RequestCreateGame"){
+        // TODO: Replace find games list with GameList.GetGameSpec(gameName)
+        if (std::find(fakeGameList.begin(), fakeGameList.end(), request.gameName) != fakeGameList.end()){
+          auto iterator = fakeGameRules.find(request.gameName);
+          const std::string rules_template = iterator->second;
+          server_response = rules_template;
+        }else{
+          throw UnknownGameException("Game not found: " + request.gameName);
+        }
+      }else if (request.request == "RequestCreateGameFilled"){
+        std::map<std::string, std::string> fakeGameSpec = {{"players","3-10"}, {"Rounds","3"}};
+        evaluateFilledGame(fakeGameSpec, request.gameInfo);
+        // Instantiate Game class
+        FakeGame fakeGame;
+        fakeGameSessionHander.push_back(fakeGame);
+        // Generate id;
+        auto fakeGenerate = [&fakeGame](){
+          return 404;
+        };
+        fakeGame.setID(fakeGenerate());
+        std::string server_status = fakeGame.gameName + " created, ID: " + std::to_string(fakeGame.gameId);
+        server_response = server_status;
+      }else if(request.request == "RequestJoinGame"){
+        std::cout << "ReqJoinGame" << std::endl;
+      }else{
+        throw UnknownRequestException("Unknown Request: " + log);
+      }
       auto outgoing = buildOutgoing(log);
       server.send(outgoing);
       
