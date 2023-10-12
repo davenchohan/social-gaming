@@ -98,7 +98,7 @@ struct FakeGameSessionHandler{
 
 // Empty struct for hold server request items
 // This is a bad fake, to be used temporarily
-// TODO: Replace this struct with a better one
+// TODO: Replace this struct with a better one that will be created by parseRequest() function
 struct serverRequest{
   std::string request;
   std::string gameName;
@@ -109,7 +109,7 @@ struct serverRequest{
 };
 
 
-//TODO: Replace this function with an actual request parser
+//TODO: Implement this function
 // Can be implemented here or in server.cpp
 serverRequest parseRequest(const std::string &log){
   serverRequest temp;
@@ -223,7 +223,6 @@ main(int argc, char* argv[]) {
 
   // Instantiate host
   FakePlayer host("dummy");
-
   // Instantiate game list
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
@@ -278,7 +277,7 @@ main(int argc, char* argv[]) {
         // Instantiate Game
         FakeGame fakeGame(fakeGenerate(), host);
         // Set Game variables
-        // TODO: Implement a way to parsegame variables from server request
+        // TODO: Implement a way to parse game variables from server request
         // May need loop to add all variables into the game, for now just a single statement
         // TODO: replace "Rock" with game variable
         // Game variables should be defined in serverGameList
