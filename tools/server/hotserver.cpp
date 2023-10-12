@@ -122,6 +122,29 @@ serverRequest parseRequest(const std::string &log){
   return temp;
 }
 
+
+// Demo function to "fake" parsing a request
+// Note: This function uses strtok, which should be changed for the real implementation of parseRequest
+serverRequest demoParseRequest(std::string log){
+  serverRequest temp;
+  int pos = log.find(',');
+  if(pos != log.npos){
+    string req = log.substr(0, pos);
+    temp.request = req;
+    temp.data = "";
+    temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
+    temp.gameName = "";
+    temp.gameId = "1234556";
+    temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
+    return temp;
+  }else if(log == " " || log == " "){
+    temp.request = "blank request";
+    return temp;
+  }else{
+    throw UnknownRequestException("Bad Request, could not parse");
+  }
+}
+
 // TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
 // Possible inputs: Game game, serverRequest request
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
@@ -251,6 +274,7 @@ main(int argc, char* argv[]) {
     }else {
       // Space to parse log file into specific sections: request, gameInfo, data, etc
       serverRequest request = parseRequest(log);
+      serverRequest demoRequest = demoParseRequest(log);
       // Begin logic implementation
       if (request.request == " " || request.request == ""){
         std::cout << "No message from client" << std::endl;
@@ -352,6 +376,7 @@ main(int argc, char* argv[]) {
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
+      }else if(request.request == "DemoReqGetGamesList"){
       }else{
         throw UnknownRequestException("Unknown Request: " + log);
       }
