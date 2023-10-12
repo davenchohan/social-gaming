@@ -31,6 +31,13 @@ struct FakePlayer{
   std::string name;
   FakePlayer(std::string name): name{name}
     {}
+
+  bool operator==(const FakePlayer &player) const{
+    return name == player.name;
+  }
+  bool operator<(const FakePlayer &player) const {
+    return name < player.name;
+  }
 };
 
 struct FakeGame{
@@ -42,7 +49,7 @@ struct FakeGame{
   int numRounds;
   int gameProgress;
   int gameId;
-  FakeGame(int newGameId, FakePlayer &gameHost): gameId(newGameId), host(gameHost)
+  FakeGame(int newGameId, FakePlayer &gameHost): gameId{newGameId}, host{gameHost}
   {
     gameName = "fake";
     minPlayers = 0;
@@ -71,6 +78,9 @@ struct FakeGameSessionHandler{
     FakeGameSessionHandler(int id, FakeGame&gameObj)
       : sessionId{id}, game{gameObj}
         {}
+    void addPlayer(std::string name, FakePlayer &player){
+
+    }
 };
 
 // Empty struct for hold server request items
@@ -81,6 +91,7 @@ struct serverRequest{
   std::string gameName;
   std::string data;
   std::map<std::string, std::string> gameInfo;
+  std::string gameId;
 };
 
 
@@ -92,6 +103,7 @@ serverRequest parseRequest(const std::string &log){
   temp.data = "";
   temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
   temp.gameName = "";
+  temp.gameId = "1234556";
   return temp;
 }
 
@@ -200,6 +212,7 @@ main(int argc, char* argv[]) {
   // Instantiate game list
   std::vector<std::string> fakeGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
+  std::map<std::string, FakeGameSessionHandler> sessionHandlerDB;
 
   while (true) {
     bool errorWhileUpdating = false;
@@ -227,7 +240,7 @@ main(int argc, char* argv[]) {
       // Begin logic implementation
       if (request.request == " " || request.request == ""){
         std::cout << "No message from client" << std::endl;
-      }else if (request.request == "RequestCreateGame"){
+      }else if (request.request == "ReqCreateGame"){
         // TODO: Replace find games list with GameList.GetGameSpec(gameName)
         if (std::find(fakeGameList.begin(), fakeGameList.end(), request.gameName) != fakeGameList.end()){
           auto iterator = fakeGameRules.find(request.gameName);
@@ -236,20 +249,46 @@ main(int argc, char* argv[]) {
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
-      }else if (request.request == "RequestCreateGameFilled"){
+      }else if (request.request == "ReqCreateGameFilled"){
+        
         std::map<std::string, std::string> fakeGameSpec = {{"players","3-10"}, {"Rounds","3"}};
         evaluateFilledGame(fakeGameSpec, request.gameInfo);
         // Instantiate Game class
         auto fakeGenerate = [](){
           return 404;
         };
-
+        // Instantiate Game
         FakeGame fakeGame(fakeGenerate(), host);
+        // Add Game to session handler
         FakeGameSessionHandler sessionHandler(fakeGame.gameId, fakeGame);
-        std::string server_status = fakeGame.gameName + " created, ID: " + std::to_string(fakeGame.gameId);
+        // Add session handler to DB
+        sessionHandlerDB.insert(sessionHandlerDB.end(), std::pair<std::string, FakeGameSessionHandler> {std::to_string(fakeGame.gameId), sessionHandler} );
+        // Construct response
+        std::string server_status = "ReqCreateGameFilled Successful" + '\n' + fakeGame.gameName + " created, GameID: " + std::to_string(fakeGame.gameId);
         server_response = server_status;
+        
+
       }else if(request.request == "RequestJoinGame"){
         std::cout << "ReqJoinGame" << std::endl;
+        
+        // TODO: Replace find 
+        // Search gameSessionDB for the gameId given by request
+        std::string id = request.gameId;
+        
+        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+          FakePlayer player("dummy_player");
+          FakeGameSessionHandler handler = sessionIt->second;
+          handler.addPlayer(player.name, player);
+          //Construct response
+          std::string server_status = "ReqJoinGame Successful" + '\n' + player.name + " added into " + std::to_string(handler.game.gameId);
+          server_response = server_status;
+          
+        }else{
+          throw UnknownGameException("Game not found: " + request.gameName);
+        }
+        
+        
+        
       }else{
         throw UnknownRequestException("Unknown Request: " + log);
       }
