@@ -40,6 +40,19 @@ struct FakePlayer{
   }
 };
 
+struct FakeGameVariable{
+  std::string variableName;
+  std::string variableValue;
+
+  FakeGameVariable(std::string &name, std::string &value)
+    : variableName{name}, variableValue{value}
+      {}
+  std::string GetVariableValue() const {
+    return variableValue;
+  }
+
+};
+
 struct FakeGame{
   std::string gameName;
   FakePlayer host;
@@ -49,6 +62,7 @@ struct FakeGame{
   int numRounds;
   int gameProgress;
   int gameId;
+  std::vector<FakeGameVariable> variables;
   FakeGame(int newGameId, FakePlayer &gameHost): gameId{newGameId}, host{gameHost}
   {
     gameName = "fake";
@@ -60,6 +74,9 @@ struct FakeGame{
   }
   void setID(int id){
     gameId = id;
+  }
+  void SetVariable(const std::string &variableName, const FakeGameVariable &variable){
+    variables.push_back(variable);
   }
 };
 
@@ -81,6 +98,9 @@ struct FakeGameSessionHandler{
     void addPlayer(std::string name, FakePlayer &player){
 
     }
+    void addAudienceMember(std::string name, FakeAudienceMember &member){
+
+    }
 };
 
 // Empty struct for hold server request items
@@ -92,6 +112,7 @@ struct serverRequest{
   std::string data;
   std::map<std::string, std::string> gameInfo;
   std::string gameId;
+  std::map<std::string, std::string> gameVariables;
 };
 
 
@@ -104,6 +125,7 @@ serverRequest parseRequest(const std::string &log){
   temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
   temp.gameName = "";
   temp.gameId = "1234556";
+  temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
   return temp;
 }
 
@@ -210,7 +232,7 @@ main(int argc, char* argv[]) {
   FakePlayer host("dummy");
 
   // Instantiate game list
-  std::vector<std::string> fakeGameList = {"Rock,Paper,Scissors"};
+  std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   std::map<std::string, FakeGameSessionHandler> sessionHandlerDB;
 
@@ -240,17 +262,20 @@ main(int argc, char* argv[]) {
       // Begin logic implementation
       if (request.request == " " || request.request == ""){
         std::cout << "No message from client" << std::endl;
+        server_response = log;
       }else if (request.request == "ReqCreateGame"){
+        std::cout << "ReqCreateGame" << std::endl;
         // TODO: Replace find games list with GameList.GetGameSpec(gameName)
-        if (std::find(fakeGameList.begin(), fakeGameList.end(), request.gameName) != fakeGameList.end()){
+        if (std::find(fakeServerGameList.begin(), fakeServerGameList.end(), request.gameName) != fakeServerGameList.end()){
           auto iterator = fakeGameRules.find(request.gameName);
           const std::string rules_template = iterator->second;
+          // TODO: Parse game rules + game variables into a format for client
           server_response = rules_template;
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqCreateGameFilled"){
-        
+        std::cout << "ReqCreateGameFilled" << std::endl;
         std::map<std::string, std::string> fakeGameSpec = {{"players","3-10"}, {"Rounds","3"}};
         evaluateFilledGame(fakeGameSpec, request.gameInfo);
         // Instantiate Game class
@@ -259,6 +284,17 @@ main(int argc, char* argv[]) {
         };
         // Instantiate Game
         FakeGame fakeGame(fakeGenerate(), host);
+        // Set Game variables
+        // TODO: Implement a way to parsegame variables from server request
+        // May need loop to add all variables into the game, for now just a single statement
+        // TODO: replace "Rock" with game variable
+        // Game variables should be defined in serverGameList
+        auto variable = request.gameVariables.find("Rock");
+        std::string varName = variable->first;
+        std::string varVal = variable->second;
+        FakeGameVariable someVar(varName, varVal);
+        fakeGame.SetVariable(varName, someVar);
+
         // Add Game to session handler
         FakeGameSessionHandler sessionHandler(fakeGame.gameId, fakeGame);
         // Add session handler to DB
@@ -268,33 +304,61 @@ main(int argc, char* argv[]) {
         server_response = server_status;
         
 
-      }else if(request.request == "RequestJoinGame"){
+      }else if(request.request == "ReqJoinGame"){
         std::cout << "ReqJoinGame" << std::endl;
-        
         // TODO: Replace find 
         // Search gameSessionDB for the gameId given by request
         std::string id = request.gameId;
-        
         if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
           FakePlayer player("dummy_player");
-          FakeGameSessionHandler handler = sessionIt->second;
+          auto handler = sessionIt->second;
           handler.addPlayer(player.name, player);
           //Construct response
           std::string server_status = "ReqJoinGame Successful" + '\n' + player.name + " added into " + std::to_string(handler.game.gameId);
-          server_response = server_status;
-          
+          server_response = server_status; 
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
-        
-        
-        
+      }else if(request.request == "ReqViewGame"){
+        std::string id = request.gameId;
+        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+          FakeAudienceMember member("dummy_viewer");
+          auto  handler = sessionIt->second;
+          handler.addAudienceMember(member.name, member);
+
+          auto status = "ReqViewGame Successful" + '\n' + member.name + " added as an audience member for " + std::to_string(handler.game.gameId);
+          // TODO: Implement support for sending over list of audience members
+          server_response = status;
+        }else{
+          throw UnknownGameException("Game not found: " + request.gameName);
+        }
+      }else if(request.request == "ReqUpdateGame"){
+        std::cout<< "ReqUpdateGame" << std::endl;
+        std::string id = request.gameId;
+        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+          // TODO: Implement a cleaner way to update a game variable
+          // Get variable from request
+          auto variableName = request.gameVariables.find("Paper");
+          auto variable = request.gameVariables.find("Paper");
+          std::string varName = variable->first;
+          std::string varVal = variable->second;
+          // Create new variable
+          FakeGameVariable someVar(varName, varVal);
+          // Set updated variable
+          sessionIt->second.game.SetVariable(varName, someVar);
+
+          // Construct Response
+          server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + sessionIt->second.game.gameName;
+        }else{
+          throw UnknownGameException("Game not found: " + request.gameName);
+        }
+      }else if (request.request == "ReqUpdatePlayer"){
+        std::cout << "ReqUpdatePlayer" << std::endl;
       }else{
         throw UnknownRequestException("Unknown Request: " + log);
       }
-      auto outgoing = buildOutgoing(log);
+      auto outgoing = buildOutgoing(server_response);
       server.send(outgoing);
-      
     }
     
 
