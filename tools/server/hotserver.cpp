@@ -31,13 +31,6 @@ struct FakePlayer{
   std::string name;
   FakePlayer(std::string name): name{name}
     {}
-
-  bool operator==(const FakePlayer &player) const{
-    return name == player.name;
-  }
-  bool operator<(const FakePlayer &player) const {
-    return name < player.name;
-  }
 };
 
 struct FakeGameVariable{
@@ -354,6 +347,12 @@ main(int argc, char* argv[]) {
         }
       }else if (request.request == "ReqUpdatePlayer"){
         std::cout << "ReqUpdatePlayer" << std::endl;
+        auto id = request.gameId;
+        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+          // TODO: Evaluate if we need to update the player state
+        }else{
+          throw UnknownGameException("Game not found: " + request.gameName);
+        }
       }else{
         throw UnknownRequestException("Unknown Request: " + log);
       }
