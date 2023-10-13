@@ -9,7 +9,7 @@ GameList::GameList() {
 // Add a game to the list
 void GameList::AddGame(const Game& game) {
     // Add the game to the map using its name as the key
-    games[game.GetGameName()] = game;
+    games.insert(std::make_pair(game.GetGameName(), game));
 }
 
 // Get the list of games as a vector
