@@ -184,7 +184,7 @@ main(int argc, char* argv[]) {
   // Instantiate game list
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
-  std::map<std::string, GameSessionHandler> sessionHandlerDB;
+  std::map<std::string, FakeGameSessionHandler> sessionHandlerDB;
 
   while (true) {
     bool errorWhileUpdating = false;
