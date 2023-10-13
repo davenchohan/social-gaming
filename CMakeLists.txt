@@ -30,4 +30,6 @@ option(ENABLE_FTXUI_CLIENT   "Build the FTXUI client" ON)
 
 add_subdirectory(lib)
 add_subdirectory(tools)
+add_subdirectory(test)
+
 

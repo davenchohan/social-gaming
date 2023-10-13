@@ -13,7 +13,7 @@
 
 std::string name;
 std::string player_range;
-std::audience;
+std::string audience;
 
 Component input_name = Input(&name, "Game Name");
 Component input_player_range = Input(&player_range, "Range of Players: input as (minimum players, maximum players)");
@@ -22,7 +22,7 @@ Component input_audience = Input(&audience, "Audience: input as (true or false)"
 using namespace ftxui;
 namespace Pages{
 Component CreateNewGame(bool &create_new_game, networking::Client &client){
-     auto page = Container::Vertical({inputer_name, input_player_range, input_audience})
+     auto page = Container::Vertical({input_name, input_player_range, input_audience});
      return page;
 }
 }

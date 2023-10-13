@@ -14,6 +14,9 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(hotserver
   networking
+  components
+  exceptions
+  backendClasses
   ${CMAKE_THREAD_LIBS_INIT}
 )
 
