@@ -17,6 +17,7 @@
 
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -318,21 +319,26 @@ main(int argc, char* argv[]) {
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if(request.request == "DemoReqGetGamesList"){
+        // TODO: Remove once communication format is implemented
         std::cout << "Got: DemoReqGetGamesList" << std::endl;
-        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&server_response](std::string &item){
+        std::string list_str = "";
+        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&list_str](std::string &item){
           std::string builder = item + ',';
-          server_response = server_response + builder;
+          list_str = list_str + builder;
         });
         std::string final_response = "DemoReqGetGamesList Success=";
-        server_response = final_response + "[" + server_response + "]";
-        std::cout << "Complete" << std::endl;
-      }else if(request.request == "DemoReqGetGam"){
+        server_response = final_response + "[" + list_str + "]";
+        std::cout << "Server Response: " + server_response << std::endl;
+      }else if(request.request == "DemoReqGetGame"){
         std::cout << "Got: DemoReqGetGame" << std::endl;
+        std::cout << request.gameId << std::endl;
         auto it = demoSessionHandlerDB.find(request.gameId);
         if( it!= demoSessionHandlerDB.end()){
           server_response = "DemoReqGetGame Success=" + it->second;
+        }else{
+          server_response = "DemoReqGetGame Failure: No such game\n";
         }
-
+        std::cout << server_response << std::endl;
       }else{
         std::cout << "Bad Request: " + request.request << std::endl;
         throw UnknownRequestException("Unknown Request: " + request.request);
