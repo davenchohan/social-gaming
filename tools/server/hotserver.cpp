@@ -322,19 +322,24 @@ main(int argc, char* argv[]) {
         // TODO: Remove once communication format is implemented
         std::cout << "Got: DemoReqGetGamesList" << std::endl;
         std::string list_str = "";
-        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&list_str](std::string &item){
-          std::string builder = item + ',';
+        // Stringify vector, bad implementation
+        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&list_str, &fakeServerGameList](std::string &item){
+          std::string builder = "'" + item + "'";
           list_str = list_str + builder;
+          if (item == fakeServerGameList.back()){
+            return;
+          }
+          list_str = list_str + ",";
         });
-        std::string final_response = "DemoReqGetGamesList Success=";
-        server_response = final_response + "[" + list_str + "]";
+        std::string final_response = "Req DemoReqGetGamesList Successful\n";
+        server_response = final_response + "jsonObject={'gamesList':'[" + list_str + "]'}";
         std::cout << "Server Response: " + server_response << std::endl;
       }else if(request.request == "DemoReqGetGame"){
         std::cout << "Got: DemoReqGetGame" << std::endl;
-        std::cout << request.gameId << std::endl;
         auto it = demoSessionHandlerDB.find(request.gameId);
         if( it!= demoSessionHandlerDB.end()){
-          server_response = "DemoReqGetGame Success=" + it->second;
+          std::string final_response = "DemoReqGetGame Success\n";
+          server_response = final_response + "jsonObject={'game':" + "'" + it->second + "'" + "}";
         }else{
           server_response = "DemoReqGetGame Failure: No such game\n";
         }
