@@ -8,6 +8,12 @@
 
 #include "Server.h"
 #include "CustomExceptions.h"
+#include "Player.h"
+#include "Game.h"
+#include "GameSessionHandler.h"
+#include "GameVariable.h"
+#include "AudienceMember.h"
+#include "GameList.h"
 
 
 #include <fstream>
@@ -26,75 +32,6 @@ using networking::Message;
 
 
 std::vector<Connection> clients;
-
-struct FakePlayer{
-  std::string name;
-  FakePlayer(std::string name): name{name}
-    {}
-};
-
-struct FakeGameVariable{
-  std::string variableName;
-  std::string variableValue;
-
-  FakeGameVariable(std::string &name, std::string &value)
-    : variableName{name}, variableValue{value}
-      {}
-  std::string GetVariableValue() const {
-    return variableValue;
-  }
-
-};
-
-struct FakeGame{
-  std::string gameName;
-  FakePlayer host;
-  int minPlayers;
-  int maxPlayers;
-  bool audienceEnabled;
-  int numRounds;
-  int gameProgress;
-  int gameId;
-  std::vector<FakeGameVariable> variables;
-  FakeGame(int newGameId, FakePlayer &gameHost): gameId{newGameId}, host{gameHost}
-  {
-    gameName = "fake";
-    minPlayers = 0;
-    maxPlayers = 0;
-    audienceEnabled = false;
-    numRounds = 0;
-    gameProgress = 0;
-  }
-  void setID(int id){
-    gameId = id;
-  }
-  void SetVariable(const std::string &variableName, const FakeGameVariable &variable){
-    variables.push_back(variable);
-  }
-};
-
-struct FakeAudienceMember{
-  std::string name;
-  FakeAudienceMember(std::string name) : name{name}
-    {}
-};
-
-struct FakeGameSessionHandler{
-    std::map<std::string, FakePlayer> players;
-    std::map<std::string, FakeAudienceMember> audienceMembers;
-    int currentRound;
-    int sessionId;
-    FakeGame game;
-    FakeGameSessionHandler(int id, FakeGame&gameObj)
-      : sessionId{id}, game{gameObj}
-        {}
-    void addPlayer(std::string name, FakePlayer &player){
-
-    }
-    void addAudienceMember(std::string name, FakeAudienceMember &member){
-
-    }
-};
 
 // Empty struct for hold server request items
 // This is a bad fake, to be used temporarily
@@ -221,12 +158,10 @@ main(int argc, char* argv[]) {
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
-  // Instantiate host
-  FakePlayer host("dummy");
   // Instantiate game list
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
-  std::map<std::string, FakeGameSessionHandler> sessionHandlerDB;
+  std::map<std::string, GameSessionHandler> sessionHandlerDB;
 
   while (true) {
     bool errorWhileUpdating = false;
@@ -274,8 +209,10 @@ main(int argc, char* argv[]) {
         auto fakeGenerate = [](){
           return 404;
         };
+        // Instantiate host
+        Player host("dummy_host", 0);
         // Instantiate Game
-        FakeGame fakeGame(fakeGenerate(), host);
+        Game newGame(fakeGenerate(), host);
         // Set Game variables
         // TODO: Implement a way to parse game variables from server request
         // May need loop to add all variables into the game, for now just a single statement
@@ -284,15 +221,15 @@ main(int argc, char* argv[]) {
         auto variable = request.gameVariables.find("Rock");
         std::string varName = variable->first;
         std::string varVal = variable->second;
-        FakeGameVariable someVar(varName, varVal);
-        fakeGame.SetVariable(varName, someVar);
+        GameVariable someVar(varName, varVal);
+        newGame.AddVariable(varName, someVar);
 
         // Add Game to session handler
-        FakeGameSessionHandler sessionHandler(fakeGame.gameId, fakeGame);
+        GameSessionHandler sessionHandler(newGame.GetGameId(), newGame);
         // Add session handler to DB
-        sessionHandlerDB.insert(sessionHandlerDB.end(), std::pair<std::string, FakeGameSessionHandler> {std::to_string(fakeGame.gameId), sessionHandler} );
+        sessionHandlerDB.insert(std::pair<std::string, GameSessionHandler> {std::to_string(newGame.GetGameId()), sessionHandler} );
         // Construct response
-        std::string server_status = "ReqCreateGameFilled Successful" + '\n' + fakeGame.gameName + " created, GameID: " + std::to_string(fakeGame.gameId);
+        std::string server_status = "ReqCreateGameFilled Successful" + '\n' + newGame.GetGameName() + " created, GameID: " + std::to_string(newGame.GetGameId());
         server_response = server_status;
         
 
@@ -302,11 +239,11 @@ main(int argc, char* argv[]) {
         // Search gameSessionDB for the gameId given by request
         std::string id = request.gameId;
         if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
-          FakePlayer player("dummy_player");
+          Player player("dummy_player", 1);
           auto handler = sessionIt->second;
-          handler.addPlayer(player.name, player);
+          handler.AddPlayer(player.GetName(), player);
           //Construct response
-          std::string server_status = "ReqJoinGame Successful" + '\n' + player.name + " added into " + std::to_string(handler.game.gameId);
+          std::string server_status = "ReqJoinGame Successful" + '\n' + player.GetName() + " added into " + std::to_string(handler.GetGame().GetGameId());
           server_response = server_status; 
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
@@ -314,11 +251,11 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
         if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
-          FakeAudienceMember member("dummy_viewer");
+          AudienceMember member("dummy_viewer", 0);
           auto  handler = sessionIt->second;
-          handler.addAudienceMember(member.name, member);
+          handler.AddAudienceMember(member.GetName(), member);
 
-          auto status = "ReqViewGame Successful" + '\n' + member.name + " added as an audience member for " + std::to_string(handler.game.gameId);
+          auto status = "ReqViewGame Successful" + '\n' + member.GetName() + " added as an audience member for " + std::to_string(handler.GetGame().GetGameId());
           // TODO: Implement support for sending over list of audience members
           server_response = status;
         }else{
@@ -335,12 +272,12 @@ main(int argc, char* argv[]) {
           std::string varName = variable->first;
           std::string varVal = variable->second;
           // Create new variable
-          FakeGameVariable someVar(varName, varVal);
+          GameVariable someVar(varName, varVal);
           // Set updated variable
-          sessionIt->second.game.SetVariable(varName, someVar);
+          sessionIt->second.GetGame().AddVariable(varName, someVar);
 
           // Construct Response
-          server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + sessionIt->second.game.gameName;
+          server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + sessionIt->second.GetGame().GetGameName();
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
