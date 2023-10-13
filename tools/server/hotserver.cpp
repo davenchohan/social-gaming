@@ -59,6 +59,33 @@ serverRequest parseRequest(const std::string &log){
   return temp;
 }
 
+serverRequest demoParseReq(const std::string log){
+  serverRequest temp;
+  auto log_cp = log;
+  int pos = log_cp.find(',');
+  if(log_cp == " " || log_cp == ""){
+    temp.request = "";
+    temp.data ="";
+    temp.gameInfo = {{"",""}};
+    temp.gameName ="";
+    temp.gameId = "";
+    temp.gameVariables = {{"",""}};
+    return temp;
+  }
+  if (pos != log_cp.npos){
+    std::string req = log_cp.substr(0, pos);
+    temp.request = req;
+    temp.data = "";
+    temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
+    temp.gameName = "";
+    temp.gameId = log_cp.substr(pos + 1);
+    temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
+    return temp;
+  }else{
+    throw UnknownRequestException("Bad Request, could not parse");
+  }
+}
+
 // TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
 // Possible inputs: Game game, serverRequest request
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
@@ -115,7 +142,7 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
       returnAll = true;
 
     } else {
-      result << message.connection.id << "> " << message.text << "\n";
+      result << message.text;
     }
   }
   return MessageResult{result.str(), quit, returnAll};
@@ -162,6 +189,7 @@ main(int argc, char* argv[]) {
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   std::map<std::string, GameSessionHandler> sessionHandlerDB;
+  std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
   while (true) {
     bool errorWhileUpdating = false;
@@ -185,7 +213,7 @@ main(int argc, char* argv[]) {
       }
     }else {
       // Space to parse log file into specific sections: request, gameInfo, data, etc
-      serverRequest request = parseRequest(log);
+      serverRequest request = demoParseReq(log);
       // Begin logic implementation
       if (request.request == " " || request.request == ""){
         std::cout << "No message from client" << std::endl;
@@ -289,8 +317,25 @@ main(int argc, char* argv[]) {
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
+      }else if(request.request == "DemoReqGetGamesList"){
+        std::cout << "Got: DemoReqGetGamesList" << std::endl;
+        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&server_response](std::string &item){
+          std::string builder = item + ',';
+          server_response = server_response + builder;
+        });
+        std::string final_response = "DemoReqGetGamesList Success=";
+        server_response = final_response + "[" + server_response + "]";
+        std::cout << "Complete" << std::endl;
+      }else if(request.request == "DemoReqGetGam"){
+        std::cout << "Got: DemoReqGetGame" << std::endl;
+        auto it = demoSessionHandlerDB.find(request.gameId);
+        if( it!= demoSessionHandlerDB.end()){
+          server_response = "DemoReqGetGame Success=" + it->second;
+        }
+
       }else{
-        throw UnknownRequestException("Unknown Request: " + log);
+        std::cout << "Bad Request: " + request.request << std::endl;
+        throw UnknownRequestException("Unknown Request: " + request.request);
       }
       auto outgoing = buildOutgoing(server_response);
       server.send(outgoing);
