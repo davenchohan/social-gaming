@@ -127,18 +127,18 @@ serverRequest parseRequest(const std::string &log){
 // Note: This function uses strtok, which should be changed for the real implementation of parseRequest
 serverRequest demoParseRequest(std::string log){
   serverRequest temp;
-  int pos = log.find(',');
-  if(pos != log.npos){
-    string req = log.substr(0, pos);
+  std::string log_cp = log;
+  int pos = log_cp.find(',');
+  if(pos != log_cp.npos){
+    std::string req = log_cp.substr(0, pos);
     temp.request = req;
     temp.data = "";
     temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
     temp.gameName = "";
-    temp.gameId = "1234556";
+    temp.gameId = log_cp.substr(pos + 1);
     temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
     return temp;
-  }else if(log == " " || log == " "){
-    temp.request = "blank request";
+  }else if(log == " " || log == ""){
     return temp;
   }else{
     throw UnknownRequestException("Bad Request, could not parse");
@@ -199,9 +199,9 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
       quit = true;
     }else if(message.text =="getall"){
       returnAll = true;
-
     } else {
-      result << message.connection.id << "> " << message.text << "\n";
+      result << message.text;
+      //result << message.connection.id << "> " << message.text << "\n";
     }
   }
   return MessageResult{result.str(), quit, returnAll};
@@ -250,6 +250,7 @@ main(int argc, char* argv[]) {
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   std::map<std::string, FakeGameSessionHandler> sessionHandlerDB;
+  std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
   while (true) {
     bool errorWhileUpdating = false;
@@ -264,6 +265,7 @@ main(int argc, char* argv[]) {
 
     const auto incoming = server.receive();
     const auto [log, shouldQuit, returnAll] = processMessages(server, incoming);
+
     std::string server_response;
     allMessages.push_back(log+"\n");
     if(returnAll){
@@ -275,9 +277,11 @@ main(int argc, char* argv[]) {
       // Space to parse log file into specific sections: request, gameInfo, data, etc
       serverRequest request = parseRequest(log);
       serverRequest demoRequest = demoParseRequest(log);
+      std::cout << "Found request: " + demoRequest.request << std::endl;
+      std::cout << "Request ID: " + demoRequest.gameId << std::endl;
       // Begin logic implementation
       if (request.request == " " || request.request == ""){
-        std::cout << "No message from client" << std::endl;
+        //std::cout << "No message from client" << std::endl;
         server_response = log;
       }else if (request.request == "ReqCreateGame"){
         std::cout << "ReqCreateGame" << std::endl;
@@ -376,7 +380,21 @@ main(int argc, char* argv[]) {
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
-      }else if(request.request == "DemoReqGetGamesList"){
+      }else if(demoRequest.request == "DemoReqGetGamesList"){
+        std::cout << "DemoReqGetGamesList" << std::endl;
+        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&server_response](std::string &item){
+          std::string builder = item + ',';
+          server_response = server_response + builder;
+        });
+        std::string final_response = "DemoReqGetGamesList Success=";
+        server_response = final_response + "[" + server_response + "]";
+        std::cout << "Complete" << std::endl;
+      }else if(demoRequest.request == "DemoReqGetGame "){
+        std::cout << "DemoReqGetGame" << std::endl;
+        auto it = demoSessionHandlerDB.find(demoRequest.gameId);
+        if( it!= demoSessionHandlerDB.end()){
+          server_response = "DemoReqGetGame Success=" + it->second;
+        }
       }else{
         throw UnknownRequestException("Unknown Request: " + log);
       }
