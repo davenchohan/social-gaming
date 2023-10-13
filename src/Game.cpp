@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <stdexcept>
 
 // Default constructor
 Game::Game(int newGameId, Player& gameHost) : gameId(newGameId), host(gameHost) {
@@ -71,7 +72,7 @@ GameVariable Game::GetVariable(const std::string& variableName) const {
         return it->second;
     }
     // Error
-    return GameVariable("ERROR", "ERROR");
+    throw std::runtime_error("Variable not found");
 }
 
 // Set a game constant
@@ -86,7 +87,7 @@ GameConstant Game::GetConstant(const std::string& constantName) const {
         return it->second;
     }
     // Error
-    return GameConstant("ERROR", "ERROR");
+    throw std::runtime_error("Constant not found");
 }
 
 // Get the game ID

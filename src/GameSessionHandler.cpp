@@ -1,4 +1,5 @@
 #include "GameSessionHandler.h"
+#include <stdexcept>
 
 // Constructor
 GameSessionHandler::GameSessionHandler(int id, Game& gameObj) : sessionId(id), game(gameObj) {
@@ -21,7 +22,7 @@ Player GameSessionHandler::GetPlayer(const std::string& playerName) const {
         return it->second;
     }
     // Error
-    return Player("ERROR", -1);
+    throw std::runtime_error("Player not found");
 }
 
 // Get an audience member
@@ -31,7 +32,7 @@ AudienceMember GameSessionHandler::GetAudienceMember(const std::string& audience
         return it->second;
     }
     // Error
-    return AudienceMember("ERROR", -1);
+    throw std::runtime_error("Audience Member not found");
 }
 
 // Remove a player
