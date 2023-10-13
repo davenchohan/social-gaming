@@ -317,7 +317,7 @@ main(int argc, char* argv[]) {
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if(demoRequest.request == "DemoReqGetGamesList"){
-        std::cout << "DemoReqGetGamesList" << std::endl;
+        std::cout << "Got: DemoReqGetGamesList" << std::endl;
         std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&server_response](std::string &item){
           std::string builder = item + ',';
           server_response = server_response + builder;
@@ -325,8 +325,8 @@ main(int argc, char* argv[]) {
         std::string final_response = "DemoReqGetGamesList Success=";
         server_response = final_response + "[" + server_response + "]";
         std::cout << "Complete" << std::endl;
-      }else if(demoRequest.request == "DemoReqGetGame "){
-        std::cout << "DemoReqGetGame" << std::endl;
+      }else if(demoRequest.request == "DemoReqGetGame"){
+        std::cout << "Got: DemoReqGetGame" << std::endl;
         auto it = demoSessionHandlerDB.find(demoRequest.gameId);
         if( it!= demoSessionHandlerDB.end()){
           server_response = "DemoReqGetGame Success=" + it->second;
