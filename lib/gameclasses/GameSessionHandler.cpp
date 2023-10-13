@@ -1,17 +1,18 @@
 #include "GameSessionHandler.h"
+#include <stdexcept>
 
 // Constructor
-GameSessionHandler::GameSessionHandler(int id, Game& gameObj) : game(gameObj), sessionId(sessionId) {
+GameSessionHandler::GameSessionHandler(int id, Game& gameObj) : sessionId(id), game(gameObj) {
 }
 
 // Add a player
 void GameSessionHandler::AddPlayer(const std::string& playerName, const Player& player) {
-    players[playerName] = player;
+    players.insert(std::make_pair(playerName, player));
 }
 
 // Add an audience member
 void GameSessionHandler::AddAudienceMember(const std::string& audienceMemberName, const AudienceMember& audienceMember) {
-    audienceMembers[audienceMemberName] = audienceMember;
+    audienceMembers.insert(std::make_pair(audienceMemberName, audienceMember));
 }
 
 // Get a player
@@ -21,7 +22,7 @@ Player GameSessionHandler::GetPlayer(const std::string& playerName) const {
         return it->second;
     }
     // Error
-    return Player("ERROR", -1);
+    throw std::runtime_error("Player not found");
 }
 
 // Get an audience member
@@ -31,7 +32,7 @@ AudienceMember GameSessionHandler::GetAudienceMember(const std::string& audience
         return it->second;
     }
     // Error
-    return AudienceMember("ERROR", -1);
+    throw std::runtime_error("Audience Member not found");
 }
 
 // Remove a player

@@ -1,7 +1,8 @@
 #include "Game.h"
+#include <stdexcept>
 
 // Default constructor
-Game::Game(int newGameId, Player& gameHost) : host(gameHost), gameId(newGameId) {
+Game::Game(int newGameId, Player& gameHost) : gameId(newGameId), host(gameHost) {
     gameName = "Game";
     minPlayers = 2; // Default minimum players
     maxPlayers = 4; // Default maximum players
@@ -60,8 +61,8 @@ void Game::SetHost(Player& gameHost) {
 }
 
 // Set a game variable
-void Game::SetVariable(const std::string& variableName, const GameVariable& variable) {
-    variables[variableName] = variable;
+void Game::AddVariable(const std::string& variableName, const GameVariable& variable) {
+    variables.insert(std::make_pair(variableName, variable));
 }
 
 // Get a game variable
@@ -71,12 +72,12 @@ GameVariable Game::GetVariable(const std::string& variableName) const {
         return it->second;
     }
     // Error
-    return GameVariable("ERROR", "ERROR");
+    throw std::runtime_error("Variable not found");
 }
 
 // Set a game constant
-void Game::SetConstant(const std::string& constantName, const GameConstant& constant) {
-    constants[constantName] = constant;
+void Game::AddConstant(const std::string& constantName, const GameConstant& constant) {
+    constants.insert(std::make_pair(constantName, constant));
 }
 
 // Get a game constant
@@ -86,7 +87,7 @@ GameConstant Game::GetConstant(const std::string& constantName) const {
         return it->second;
     }
     // Error
-    return GameConstant("ERROR", "ERROR");
+    throw std::runtime_error("Constant not found");
 }
 
 // Get the game ID

@@ -42,13 +42,13 @@ public:
     int GetGameId() const;
 
     // Set a global game variable
-    void SetVariable(const std::string& variableName, const GameVariable& variable);
+    void AddVariable(const std::string& variableName, const GameVariable& variable);
 
     // Get a global game variable
     GameVariable GetVariable(const std::string& variableName) const;
 
     // Set a global game constant
-    void SetConstant(const std::string& constantName, const GameConstant& constant);
+    void AddConstant(const std::string& constantName, const GameConstant& constant);
 
     // Get a global game constant
     GameConstant GetConstant(const std::string& constantName) const;
