@@ -335,6 +335,7 @@ main(int argc, char* argv[]) {
         server_response = final_response + "jsonObject={'gamesList':'[" + list_str + "]'}";
         std::cout << "Server Response: " + server_response << std::endl;
       }else if(request.request == "DemoReqGetGame"){
+        // TODO: Remove once communication format is implemented
         std::cout << "Got: DemoReqGetGame" << std::endl;
         auto it = demoSessionHandlerDB.find(request.gameId);
         if( it!= demoSessionHandlerDB.end()){
