@@ -27,6 +27,7 @@ target_link_libraries(components
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
+  PRIVATE constants
 )
 target_include_directories(components
   PUBLIC
