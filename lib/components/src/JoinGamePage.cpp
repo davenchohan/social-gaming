@@ -67,23 +67,6 @@ Component JoinGame(int &pagenum, std::string &code, std::string &name, networkin
     auto content = Container::Vertical({
         page1 | Maybe([&] {return pagenum == 0;}),
         page2 | Maybe([&] {return pagenum == 1;}),
-        // Renderer([] {
-        //        return filler();
-        //     }),
-        // Container::Horizontal({
-        //     Button("Back", [&]{
-        //     pagenum--;
-        //     }) | Maybe([&] {return pagenum > 0;}),
-        //     Renderer([] {
-        //        return filler();
-        //     }),
-        //     Button("Next", [&]{
-        //     pagenum++; // todo: need to check if invite code entered/valid before proceeding
-        //     }) | Maybe([&] {return pagenum < max_pagenum;}),
-        //     Button("Join", [&]{
-        //         // transfer page to game play page
-        //     }) | Maybe([&] {return pagenum == max_pagenum;}),
-        // }) | flex,
     });
     // auto page = Window({.title = "Join Game",.width = 80, .height = 60,});
     return content;
