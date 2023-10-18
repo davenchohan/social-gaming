@@ -10,14 +10,15 @@
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp" 
 #include "CreateGameSessionPage.h"
-// #include "ClientWrapper.h"
-// #include "Constants.h"
+#include "ClientWrapper.h"
+#include "Constants.h"
 
 using namespace ftxui;
 namespace Pages{
 Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, networking::Client &client){
 
-     // networking::ClientWrapper wrapper;
+     networking::ClientWrapper wrapper;
+     wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
 
      const int max_pagenum = 1;// starting 0
      auto game_selector = Radiobox(&radiobox_list, &radiobox_selected);
@@ -44,18 +45,21 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                return filler();
             }),
           Container::Horizontal({
-            Button("Back", [&]{
-               create_pagenum--;
-            }) | Maybe([&] {return create_pagenum > 0;}),
             Renderer([] {
                return filler();
             }),
             Button("Next", [&]{
-               // TODO: send selected game ID
-               // wrapper.sendReq(constants::ReqType::GETGAMESPEC)
+               // TODO: get list of fields to be configured
+               // std::string req_game_config_list = radiobox_list[radiobox_selected];
+               // wrapper.sendReq(constants::ReqType::, )
+
+               // testing sending request from component
+               GetGame getGame = GetGame("252434");
+               wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame, client);
+
+
                create_pagenum++;
-            }) | Maybe([&] {return create_pagenum < max_pagenum;}),
-            Button("Create", [&]{}) | Maybe([&] {return create_pagenum == max_pagenum;}),// transfer page to game play page
+            }),
         }) | flex,
      });
      auto page2 = Container::Vertical({
@@ -68,15 +72,13 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             }),
           Container::Horizontal({
             Button("Back", [&]{
+               wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
                create_pagenum--;
             }) | Maybe([&] {return create_pagenum > 0;}),
             Renderer([] {
                return filler();
             }),
-            Button("Next", [&]{
-               create_pagenum++;
-            }),
-            Button("Create", [&]{}) | Maybe([&] {return create_pagenum == max_pagenum;}),// transfer page to game play page
+            Button("Create", [&]{}),// transfer page to game play page
         }) | flex,
      });
 
