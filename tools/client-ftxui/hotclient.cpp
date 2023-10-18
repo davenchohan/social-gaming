@@ -13,9 +13,63 @@
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
+#include "Constants.h"
 
 using namespace ftxui;
 
+
+
+// FUNCTIONS #####################################################
+// ###########################################################
+// placeholder (until parser library is implemented)
+std::vector<std::string> parseServerResponseGameList(const std::string &response) {
+
+    // find the start of json
+    size_t start = response.find('[');
+    size_t end = response.find(']');
+    if(start != std::string::npos && end != std::string::npos) {
+        if(start <= end) {
+            std::vector<std::string> result_list;
+            std::string_view response_view{response};
+            std::string_view list_view = response_view.substr(start+1, end - start-1);
+            // std::cout << list_view << std::endl;
+
+            // find pair of '
+            bool start = false;
+            std::string_view games = list_view;
+            size_t position = games.find("'");
+
+            while(position != std::string_view::npos) {
+                if(start) {
+                    // found the end
+                    std::string game{games.substr(0, position)};
+                    // std::cout << "found: " << game << std::endl;
+                    result_list.push_back(game);
+                    start = false;
+                }else {
+                    // found teh start
+                    start = true;
+                }
+                games = games.substr(position+1, games.size()-position);
+                // std::cout << "[" << games << "]" << std::endl;
+                position = games.find("'");
+            }
+
+            return result_list;
+        }
+    }
+
+    return {};
+}
+std::string parseServerResponseType(const std::string &response) {
+    std::string_view response_view{response};
+  // find req type (response type)
+    size_t first_space = response_view.find(' ');
+    response_view = response_view.substr(first_space+1, response_view.size()-first_space);
+    size_t second_space = response_view.find(' ');
+    std::string reqType{response_view.substr(0, second_space)};
+    return reqType;
+}
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -39,6 +93,8 @@ ButtonOption ButtonStyle() {
   return option;
 }
 
+
+
 int main(int argc, char* argv[]) {
   if (argc < 3) {
     std::cerr << "Usage: \n  " << argv[0] << " <ip address> <port>\n"
@@ -46,10 +102,15 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+
+
 // DATA ######################################################
 // data (varaibles) for interactive components to be
 // passed to pages 
 // ###########################################################
+  // TEST VARIABLE FOR STORING JSON RESPONSE FROM BACKEND
+  std::string test_json_response = "default";
+
   // global variable
   networking::Client client{argv[1], argv[2]};
   bool done = false;
@@ -63,6 +124,7 @@ int main(int argc, char* argv[]) {
       client.send(std::move(text));
     }
   };
+  
 
   // DATA - landing page
   std::vector<std::string> tab_values {
@@ -157,8 +219,12 @@ int main(int argc, char* argv[]) {
         // filler(),
       }) | flex | borderStyled(ROUNDED),
       // filler(),
-    }) |
-    flex;
+      hbox({
+        // history.back(),
+        paragraph(test_json_response) | color(Color::GreenLight),
+      }),
+      // history.back() | flex,
+    }) | flex;
   });
 
   auto screen = ScreenInteractive::Fullscreen();
@@ -193,6 +259,17 @@ int main(int argc, char* argv[]) {
     auto response = client.receive();
     if (!response.empty()) {
       history.push_back(paragraphAlignLeft(response));
+
+      test_json_response = response;
+      // TODO: implement response handler (if response for reqgamelist then parse list of games and store in radiobox_list etc.)
+      // TODO: determine type of response (reuse ReqType?)
+      std::string reqType = parseServerResponseType(response);
+
+      // handle based on reponse type
+      if(reqType == "DemoReqGetGamesList") {
+          radiobox_list = parseServerResponseGameList(response);
+      }
+
       screen.RequestAnimationFrame();
     }
 

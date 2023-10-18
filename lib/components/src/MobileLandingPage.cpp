@@ -54,6 +54,7 @@ Component MobileLandingPage(int &pagenum, std::string &code, std::string &name, 
             }) | Maybe([&] {return pagenum < max_pagenum;}),
             Button("Join", [&]{
                 GetGame getGame = GetGame(code);
+                // TODO: replace endpoint with JOINGAME once implemented at backend
                 wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame,client);
                 // transfer page to game play page
             }) | Maybe([&] {return pagenum == max_pagenum;}),

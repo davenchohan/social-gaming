@@ -14,6 +14,7 @@ std::string CreateGame::toJSON() {
     return "{\"UserID\":\"" + userID + "\",\"GameID\":\"" + gameID + "\",\"Config\":\"" + config + "\"}";
 }
 
+// CONSIDER: potentially chagne data type of gameID that makes more sense rather than just using string (but we can still use it if we want to use ID that has characters etc)
 GetGame::GetGame(const std::string& gameID) : gameID(gameID) {}
 
 std::string GetGame::toJSON() {

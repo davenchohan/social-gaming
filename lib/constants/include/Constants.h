@@ -11,6 +11,8 @@ enum class ReqType : char {
   GETGAMES, JOINGAME, CREATEGAME, VIEWGAME, UPDATEGAME, DEMOGETGAMES, DEMOGETGAME,CREATEGAMEFILLED, UPDATEPLAYER
 };
 
+// CONSIDER: having reqtype when handling response from server
+
 constexpr inline std::string_view
 to_string(const constants::ReqType request) noexcept {
   switch (request) {
