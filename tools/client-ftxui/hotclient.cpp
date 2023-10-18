@@ -13,7 +13,6 @@
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
-#include "ClientWrapper.h"
 #include "Constants.h"
 
 using namespace ftxui;
@@ -33,7 +32,7 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
             std::vector<std::string> result_list;
             std::string_view response_view{response};
             std::string_view list_view = response_view.substr(start+1, end - start-1);
-            std::cout << list_view << std::endl;
+            // std::cout << list_view << std::endl;
 
             // find pair of '
             bool start = false;
@@ -44,7 +43,7 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
                 if(start) {
                     // found the end
                     std::string game{games.substr(0, position)};
-                    std::cout << "found: " << game << std::endl;
+                    // std::cout << "found: " << game << std::endl;
                     result_list.push_back(game);
                     start = false;
                 }else {
@@ -52,7 +51,7 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
                     start = true;
                 }
                 games = games.substr(position+1, games.size()-position);
-                std::cout << "[" << games << "]" << std::endl;
+                // std::cout << "[" << games << "]" << std::endl;
                 position = games.find("'");
             }
 
@@ -62,7 +61,15 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
 
     return {};
 }
-
+std::string parseServerResponseType(const std::string &response) {
+    std::string_view response_view{response};
+  // find req type (response type)
+    size_t first_space = response_view.find(' ');
+    response_view = response_view.substr(first_space+1, response_view.size()-first_space);
+    size_t second_space = response_view.find(' ');
+    std::string reqType{response_view.substr(0, second_space)};
+    return reqType;
+}
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -106,7 +113,6 @@ int main(int argc, char* argv[]) {
 
   // global variable
   networking::Client client{argv[1], argv[2]};
-  networking::ClientWrapper wrapper;
   bool done = false;
   std::string entry;
   std::vector<Element> history;
@@ -119,7 +125,6 @@ int main(int argc, char* argv[]) {
     }
   };
   
-  wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
 
   // DATA - landing page
   std::vector<std::string> tab_values {
@@ -254,8 +259,17 @@ int main(int argc, char* argv[]) {
     auto response = client.receive();
     if (!response.empty()) {
       history.push_back(paragraphAlignLeft(response));
+
       test_json_response = response;
-      radiobox_list = parseServerResponseGameList(test_json_response);
+      // TODO: implement response handler (if response for reqgamelist then parse list of games and store in radiobox_list etc.)
+      // TODO: determine type of response (reuse ReqType?)
+      std::string reqType = parseServerResponseType(response);
+
+      // handle based on reponse type
+      if(reqType == "DemoReqGetGamesList") {
+          radiobox_list = parseServerResponseGameList(response);
+      }
+
       screen.RequestAnimationFrame();
     }
 
