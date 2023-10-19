@@ -14,6 +14,7 @@
 #include "GameVariable.h"
 #include "AudienceMember.h"
 #include "GameList.h"
+#include "RequestStruct.h"
 
 
 #include <fstream>
@@ -191,6 +192,8 @@ main(int argc, char* argv[]) {
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   std::map<std::string, GameSessionHandler> sessionHandlerDB;
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
+
+  ServerRequest reqStruct;
 
   while (true) {
     bool errorWhileUpdating = false;
