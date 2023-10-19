@@ -5,7 +5,7 @@ add_library(components
     src/LandingPage.cpp
     src/JoinGamePage.cpp
     src/CreateGamePage.cpp
-    src/CreateNewGamePage.cpp
+    src/MobileLandingPage.cpp
     src/CreateFromExistingPage.cpp
     src/CreateGameSessionPage.cpp
 )
@@ -27,6 +27,7 @@ target_link_libraries(components
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
+  PRIVATE constants
 )
 target_include_directories(components
   PUBLIC

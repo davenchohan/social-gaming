@@ -3,73 +3,16 @@
 #include <string>
 #include <vector>
 #include "Client.h"
-#include "LandingPage.h"
-#include "CreateGamePage.h"
-#include "JoinGamePage.h"
-#include "CreateGameSessionPage.h"
+#include "MobileLandingPage.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
-#include "Constants.h"
 
 using namespace ftxui;
 
-
-
-// FUNCTIONS #####################################################
-// ###########################################################
-// placeholder (until parser library is implemented)
-std::vector<std::string> parseServerResponseGameList(const std::string &response) {
-
-    // find the start of json
-    size_t start = response.find('[');
-    size_t end = response.find(']');
-    if(start != std::string::npos && end != std::string::npos) {
-        if(start <= end) {
-            std::vector<std::string> result_list;
-            std::string_view response_view{response};
-            std::string_view list_view = response_view.substr(start+1, end - start-1);
-            // std::cout << list_view << std::endl;
-
-            // find pair of '
-            bool start = false;
-            std::string_view games = list_view;
-            size_t position = games.find("'");
-
-            while(position != std::string_view::npos) {
-                if(start) {
-                    // found the end
-                    std::string game{games.substr(0, position)};
-                    // std::cout << "found: " << game << std::endl;
-                    result_list.push_back(game);
-                    start = false;
-                }else {
-                    // found teh start
-                    start = true;
-                }
-                games = games.substr(position+1, games.size()-position);
-                // std::cout << "[" << games << "]" << std::endl;
-                position = games.find("'");
-            }
-
-            return result_list;
-        }
-    }
-
-    return {};
-}
-std::string parseServerResponseType(const std::string &response) {
-    std::string_view response_view{response};
-  // find req type (response type)
-    size_t first_space = response_view.find(' ');
-    response_view = response_view.substr(first_space+1, response_view.size()-first_space);
-    size_t second_space = response_view.find(' ');
-    std::string reqType{response_view.substr(0, second_space)};
-    return reqType;
-}
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -81,18 +24,6 @@ std::string parseServerResponseType(const std::string &response) {
 // add a border around the button, and finally `flex` to make the button fill
 // the available space.
 // ###########################################################
-ButtonOption ButtonStyle() {
-  auto option = ButtonOption::Animated();
-  option.transform = [](const EntryState& s) {
-    auto element = text(s.label);
-    if (s.focused) {
-      element |= bold;
-    }
-    return element | center | borderEmpty | flex;
-  };
-  return option;
-}
-
 
 
 int main(int argc, char* argv[]) {
@@ -102,15 +33,10 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-
-
 // DATA ######################################################
 // data (varaibles) for interactive components to be
 // passed to pages 
 // ###########################################################
-  // TEST VARIABLE FOR STORING JSON RESPONSE FROM BACKEND
-  std::string test_json_response = "default";
-
   // global variable
   networking::Client client{argv[1], argv[2]};
   bool done = false;
@@ -124,32 +50,12 @@ int main(int argc, char* argv[]) {
       client.send(std::move(text));
     }
   };
-  
 
-  // DATA - landing page
-  std::vector<std::string> tab_values {
-    "CREATE GAME SESSION",
-    "JOIN GAME SESSION",
-  };
-  int tab_selected = 0;
-
-  // data - create game session page
-  std::vector<std::string> radiobox_list = {
-      "Class Quiz",
-      "Rock, Paper, Scissors",
-      "Tic Tac Toe",
-      "Tetris",
-  };
-  int radiobox_selected = 0;
 
   // variables - join game session page
   int pagenum = 0;
   std::string invite_code;
   std::string display_name;
-  // variabels - create game session page
-  int create_pagenum = 0;
-  std::string game_session_name;
-
 
 // COMPONENTS ################################################
 // page components
@@ -159,40 +65,27 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, client);
-  auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
-
-  // MAIN PAGE 
-  auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
-
+   auto mobileLandingPageElements = Pages::MobileLandingPage(pagenum, invite_code, display_name, client);
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
 
 
 //components can be grouped together so that they can be passed into the render together 
- auto homeButton = Container::Vertical({
-    Container::Horizontal({
-      Button(
-        "Home", [&] { 
-          client.send(std::move("home"));
-        }, ButtonStyle()
-      ), 
-    }) | flex,
-  });
+
 
   // maybes allow for components to be shown conditionally  
   // the first argument is the component the second is the boolean
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
   auto pageContent = Container::Vertical({
-    landingPageElements,
+    mobileLandingPageElements,
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
   // the component passed into here will need to be called with -> Render() again in the actual renderer 
   auto main_container = Container::Vertical({
-    homeButton,
+    //homeButton,
     pageContent,
   });
 
@@ -208,9 +101,7 @@ int main(int argc, char* argv[]) {
   auto renderer = Renderer(main_container, [&] {
     return vbox({
       hbox({
-        homeButton->Render(),
-        filler(),
-        text("Hot Root Soup"),
+        text("Hot Root Soup mobile"),
       }),
       // filler(),
       hbox({
@@ -218,13 +109,8 @@ int main(int argc, char* argv[]) {
         pageContent->Render(),
         // filler(),
       }) | flex | borderStyled(ROUNDED),
-      // filler(),
-      hbox({
-        // history.back(),
-        paragraph(test_json_response) | color(Color::GreenLight),
-      }),
-      // history.back() | flex,
-    }) | flex;
+       filler(),
+    }) |flex ;
   });
 
   auto screen = ScreenInteractive::Fullscreen();
@@ -259,17 +145,6 @@ int main(int argc, char* argv[]) {
     auto response = client.receive();
     if (!response.empty()) {
       history.push_back(paragraphAlignLeft(response));
-
-      test_json_response = response;
-      // TODO: implement response handler (if response for reqgamelist then parse list of games and store in radiobox_list etc.)
-      // TODO: determine type of response (reuse ReqType?)
-      std::string reqType = parseServerResponseType(response);
-
-      // handle based on reponse type
-      if(reqType == "DemoReqGetGamesList") {
-          radiobox_list = parseServerResponseGameList(response);
-      }
-
       screen.RequestAnimationFrame();
     }
 

@@ -2,6 +2,8 @@
 add_library(networking
   src/Server.cpp
   src/Client.cpp
+  src/DataClasses.cpp
+  src/ClientWrapper.cpp
 )
 
 target_include_directories(networking
@@ -16,12 +18,14 @@ if (NETWORKING_EMSCRIPTEN_BUILD)
   target_link_libraries(networking
     PRIVATE
       websocket.js
+      constants
   )
 else()
   find_package(Boost 1.72 COMPONENTS system REQUIRED)
   target_link_libraries(networking
     PRIVATE
       ${Boost_LIBRARIES}
+      constants
   )
   target_include_directories(networking
     PRIVATE
