@@ -193,7 +193,7 @@ main(int argc, char* argv[]) {
   std::map<std::string, GameSessionHandler> sessionHandlerDB;
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
-  RequestInfo someInfo;
+  ServerRequest reqStruct;
 
   while (true) {
     bool errorWhileUpdating = false;
