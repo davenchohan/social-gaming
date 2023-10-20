@@ -1,11 +1,17 @@
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+using Json = nlohmann::json;
 #include <string>
+#include <vector>
 
 struct RequestInfo{
     std::string request;
     std::string gameName;
     std::string gameID;
-    json gameConfig;
-    json players;
+    Json gameConfig;
+    Json players;
+};
+
+struct ResponseInfo{
+    std::string request;
+    std::vector<Json> objects;
 };
