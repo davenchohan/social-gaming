@@ -2,12 +2,10 @@
 using json = nlohmann::json;
 #include <string>
 
-struct ServerRequest{
+struct RequestInfo{
     std::string request;
     std::string gameName;
     std::string gameID;
     json gameConfig;
     json players;
 };
-
-void setRequest(ServerRequest, std::string);
