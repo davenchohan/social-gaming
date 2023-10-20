@@ -8,6 +8,7 @@ CPMAddPackage(
 
 add_library(backendcomponents
     src/RequestStruct.cpp
+    src/Parser.cpp
 )
 
 target_include_directories(backendcomponents
