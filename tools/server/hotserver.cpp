@@ -14,7 +14,7 @@
 #include "GameVariable.h"
 #include "AudienceMember.h"
 #include "GameList.h"
-#include "RequestStruct.h"
+#include "Structures.h"
 
 
 #include <fstream>

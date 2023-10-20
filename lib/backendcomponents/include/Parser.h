@@ -2,7 +2,7 @@
 using Json = nlohmann::json;
 #include <string>
 
-#include "RequestStruct.h"
+#include "Structures.h"
 
 namespace ParserLib{
     std::string ConstructRequest(RequestInfo);
