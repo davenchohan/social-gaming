@@ -7,5 +7,6 @@ using Json = nlohmann::json;
 namespace ParserLib{
     std::string ConstructRequest(RequestInfo);
     std::string ConstructResponse(RequestInfo);
-    RequestInfo* parseJsonObjects(Json);
+    Json parseJson(std::string);
+    RequestInfo* parseRequest(std::string);
 }

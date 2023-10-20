@@ -8,6 +8,11 @@ std::string ConstructResponse(RequestInfo someReq){
     return "empty";
 }
 
-RequestInfo* parseJsonObjects(Json someJson){
+
+Json* parseJson(std::string someString){
+    return nullptr;
+}
+
+RequestInfo* parseRequest(std::string someRequest){
     return nullptr;
 }
