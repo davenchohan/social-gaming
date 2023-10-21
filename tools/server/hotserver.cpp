@@ -14,6 +14,7 @@
 #include "GameVariable.h"
 #include "AudienceMember.h"
 #include "GameList.h"
+#include "GameSessionList.h"
 #include "RequestStruct.h"
 
 
@@ -190,7 +191,7 @@ main(int argc, char* argv[]) {
   // Instantiate game list
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
-  std::map<std::string, GameSessionHandler> sessionHandlerDB;
+  GameSessionList sessionHandlerDB = GameSessionList();
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
   RequestInfo someInfo;
@@ -259,7 +260,7 @@ main(int argc, char* argv[]) {
         // Add Game to session handler
         GameSessionHandler sessionHandler(newGame.GetGameId(), newGame);
         // Add session handler to DB
-        sessionHandlerDB.insert(std::pair<std::string, GameSessionHandler> {std::to_string(newGame.GetGameId()), sessionHandler} );
+        sessionHandlerDB.AddGameSessionHandler(std::to_string(newGame.GetGameId()), sessionHandler);
         // Construct response
         std::string server_status = "ReqCreateGameFilled Successful" + '\n' + newGame.GetGameName() + " created, GameID: " + std::to_string(newGame.GetGameId());
         server_response = server_status;
@@ -270,9 +271,9 @@ main(int argc, char* argv[]) {
         // TODO: Replace find 
         // Search gameSessionDB for the gameId given by request
         std::string id = request.gameId;
-        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+        if (sessionHandlerDB.DoesSessionExist(id)){
+          auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           Player player("dummy_player", 1);
-          auto handler = sessionIt->second;
           handler.AddPlayer(player.GetName(), player);
           //Construct response
           std::string server_status = "ReqJoinGame Successful" + '\n' + player.GetName() + " added into " + std::to_string(handler.GetGame().GetGameId());
@@ -282,9 +283,9 @@ main(int argc, char* argv[]) {
         }
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
-        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+        if (sessionHandlerDB.DoesSessionExist(id)){
           AudienceMember member("dummy_viewer", 0);
-          auto  handler = sessionIt->second;
+          auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.AddAudienceMember(member.GetName(), member);
 
           auto status = "ReqViewGame Successful" + '\n' + member.GetName() + " added as an audience member for " + std::to_string(handler.GetGame().GetGameId());
@@ -296,7 +297,7 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqUpdateGame"){
         std::cout<< "ReqUpdateGame" << std::endl;
         std::string id = request.gameId;
-        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+        if (sessionHandlerDB.DoesSessionExist(id)){
           // TODO: Implement a cleaner way to update a game variable
           // Get variable from request
           auto variableName = request.gameVariables.find("Paper");
@@ -306,17 +307,18 @@ main(int argc, char* argv[]) {
           // Create new variable
           GameVariable someVar(varName, varVal);
           // Set updated variable
-          sessionIt->second.GetGame().AddVariable(varName, someVar);
+          auto handler = sessionHandlerDB.GetGameSessionHandler(id);
+          handler.GetGame().AddVariable(varName, someVar);
 
           // Construct Response
-          server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + sessionIt->second.GetGame().GetGameName();
+          server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + handler.GetGame().GetGameName();
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqUpdatePlayer"){
         std::cout << "ReqUpdatePlayer" << std::endl;
         auto id = request.gameId;
-        if (auto sessionIt = sessionHandlerDB.find(id); sessionIt != sessionHandlerDB.end()){
+        if (sessionHandlerDB.DoesSessionExist(id)){
           // TODO: Evaluate if we need to update the player state
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
