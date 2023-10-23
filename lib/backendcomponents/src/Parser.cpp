@@ -7,6 +7,7 @@ General Output Format:
     "body": [ {"Info1":"DATA_VALUES"}, {"Info2" :"DATA_VALUES"} ]
 }
 */
+
 std::string ConstructRequest(RequestInfo someReq){
     return "empty";
 }

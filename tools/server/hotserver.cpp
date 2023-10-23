@@ -14,7 +14,7 @@
 #include "GameVariable.h"
 #include "AudienceMember.h"
 #include "GameList.h"
-#include "Structures.h"
+#include "Parser.h"
 
 
 #include <fstream>
@@ -31,6 +31,7 @@
 using networking::Server;
 using networking::Connection;
 using networking::Message;
+using Json = nlohmann::json;
 
 
 std::vector<Connection> clients;
@@ -194,6 +195,7 @@ main(int argc, char* argv[]) {
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
   RequestInfo someInfo;
+  Json* json_item = parseJson("item");
 
   while (true) {
     bool errorWhileUpdating = false;
