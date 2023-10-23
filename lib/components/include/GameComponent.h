@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -11,21 +14,36 @@
 #include "ftxui/dom/elements.hpp" 
 #include "Constants.h"
 
-namespace gameComponents {
-struct ComponentData {
+
+using namespace ftxui;
+/*
+// namespace ui {
+class ComponentData {
+    public:
+    ComponentData(std::vector<std::string> &values, std::string &text, int selected);
+    const std::vector<std::string>& getValues();
+    std::string& getText();
+    int& getSelected();
+
+    private:
     std::vector<std::string> values;// radiobox or paragraphs
     std::string text; //input
     int selected; //radiobox
 };
+// struct ComponentData {
+//     std::vector<std::string> values;// radiobox or paragraphs
+//     std::string text; //input
+//     int selected; //radiobox
+// };
 
 class GameComponent {
     public:
     class ComponentGenerator {
         public:
-        Component createDisplayComponent(std::vector<std::string> &values);
+        Component createDisplayComponent(const std::vector<std::string> &values);
 
         // returns a component with a radiobox
-        Component createSingleSelector(std::vector<std::string> &values, int &selected);
+        Component createSingleSelector(const std::vector<std::string> &values, int &selected);
 
         // returns a component with a checkbox
         // Component createMultiSelector();
@@ -33,11 +51,19 @@ class GameComponent {
         // returns a component with an input
         Component createInput(std::string &input);
     };
-    GameComponent(constants::GameComponentType type, ComponentData &data): type(type);
+    GameComponent(constants::GameComponentType type, ComponentData &data);
+    Component getGameComponent();
 
     private:
     constants::GameComponentType type;
     Component block;// should this be reference?
     ComponentData data;
-}
-}
+};
+// }
+*/
+
+struct ComponentData {
+    constants::GameComponentType type;
+    std::vector<std::string> values;
+    int selected;
+};

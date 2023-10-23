@@ -15,7 +15,7 @@
 
 using namespace ftxui;
 namespace Pages{
-Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, networking::Client &client){
+Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client){
 
      networking::ClientWrapper wrapper;
      wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
@@ -78,7 +78,9 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             Renderer([] {
                return filler();
             }),
-            Button("Create", [&]{}),// transfer page to game play page
+            Button("Create", [&]{
+               view_state = 1;
+            }),// transfer page to game play page
         }) | flex,
      });
 
