@@ -195,7 +195,6 @@ main(int argc, char* argv[]) {
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
   RequestInfo someInfo;
-  Json* json_item = parseJson("item");
 
   while (true) {
     bool errorWhileUpdating = false;
