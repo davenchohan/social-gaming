@@ -1,34 +1,55 @@
 #include "GameComponent.h"
 
-GameComponent::GameComponent(constants::GameComponentType type, gameComponents::ComponentData &data): type(type) {
-    ComponentGenerator::GameComponent::ComponentGenerator generator;
+using namespace ftxui;
+/*
+ComponentData::ComponentData(std::vector<std::string> &values, std::string &text, int selected): values(values), text(text), selected(selected) {}
+const std::vector<std::string>& ComponentData::getValues() {
+    return values;
+}
+std::string& ComponentData::getText() {
+    return text;
+}
+int& ComponentData::getSelected() {
+    return selected;
+}
+// namespace ui {
+GameComponent::GameComponent(constants::GameComponentType type, ComponentData &data): type(type), data(data) {
+    GameComponent::ComponentGenerator generator;
     switch (type) {
         case constants::GameComponentType::DISPLAY:
-            block = generator.createDisplayComponent(data.values);
+            block = generator.createDisplayComponent(data.getValues());
             break;
         case constants::GameComponentType::SINGLE_SELECT:
-            block = generator.createSingleSelector(data.values, data.selected);
+            block = generator.createSingleSelector(data.getValues(), data.getSelected());
             break;
         // case constants::GameComponentType::MULTI_SELECT:
         //     break;
         case constants::GameComponentType::INPUT:
-            block = generator.createInput(data.text);
+            block = generator.createInput(data.getText());
             break;
         
         default:
             block = Container::Vertical({
-                filler(),
+                Renderer([] {
+                    return filler();
+                }),
             });
             break;
     }
 }
 
-Component GameComponent::ComponentGenerator::createDisplayComponent(std::vector<std::string> &values) {
-    std::vector<Element> paragraphs;
+Component GameComponent::getGameComponent() {
+    return block;
+}
+
+Component GameComponent::ComponentGenerator::createDisplayComponent(const std::vector<std::string> &values) {
+    std::vector<Component> paragraphs;
     paragraphs.reserve(values.size());
     for(auto value: values) {
-        auto paragraph = paragraph(value);
-        paragraphs.push_back(paragraph);
+        auto p = Renderer([&value] {
+            return paragraph(value);
+        });
+        paragraphs.push_back(p);
     }
 
     auto block = Container::Vertical(paragraphs);
@@ -40,7 +61,7 @@ Component GameComponent::ComponentGenerator::createDisplayComponent(std::vector<
 }
 
 
-Component GameComponent::ComponentGenerator::createSingleSelector(std::vector<std::string> &values, int &selected) {
+Component GameComponent::ComponentGenerator::createSingleSelector(const std::vector<std::string> &values, int &selected) {
     auto radiobox = Radiobox(&values, &selected);
     auto block = Container::Vertical({
         radiobox,
@@ -58,3 +79,5 @@ Component GameComponent::ComponentGenerator::createInput(std::string &input) {
     });
     return block; 
 }
+// }
+*/

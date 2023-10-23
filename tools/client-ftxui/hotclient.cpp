@@ -7,6 +7,8 @@
 #include "CreateGamePage.h"
 #include "JoinGamePage.h"
 #include "CreateGameSessionPage.h"
+// #include "GamePlayPage.h"
+#include "TestGameComponent.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -14,8 +16,12 @@
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
 #include "Constants.h"
+#include "GameComponent.h"
+
+// #include "GameComponentsManager.h"
 
 using namespace ftxui;
+// using namespace ui;
 
 
 
@@ -124,6 +130,8 @@ int main(int argc, char* argv[]) {
       client.send(std::move(text));
     }
   };
+  // screen view state 0: landing page 1: game play
+  int view_state = 0;
   
 
   // DATA - landing page
@@ -150,6 +158,20 @@ int main(int argc, char* argv[]) {
   int create_pagenum = 0;
   std::string game_session_name;
 
+  // EXPERIMENTING COMPONENT GENERATION
+  std::vector<ComponentData> data_list;
+  std::vector<std::string> dummy_list {
+    "dummy1:; Lorem Ipsum is simply dummy text of the print.",
+    "dummy2: There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.",
+    "dummy3: Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
+  };
+  std::string dummy_string = "Just testing component generation prototype!";
+  int dummy_selected = 0;
+  // ComponentData dummy_data{dummy_list, dummy_string, dummy_selected};
+  // GameComponent dummy_game_component{constants::GameComponentType::DISPLAY, dummy_data};
+  ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
+  data_list.push_back(test_game_component_data);
+
 
 // COMPONENTS ################################################
 // page components
@@ -159,11 +181,13 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, client);
+  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state, client);
   auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
 
-  // MAIN PAGE 
+  // MAIN PAGES
   auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
+  // auto gamePlayPageElements = Pages::GamePlay(view_state, dummy_game_component, client);
+  auto testGamePageElements = Pages::TestGamePage(data_list, client);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -174,7 +198,8 @@ int main(int argc, char* argv[]) {
     Container::Horizontal({
       Button(
         "Home", [&] { 
-          client.send(std::move("home"));
+          view_state = 0;
+          // client.send(std::move("home"));
         }, ButtonStyle()
       ), 
     }) | flex,
@@ -184,8 +209,11 @@ int main(int argc, char* argv[]) {
   // the first argument is the component the second is the boolean
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
+
   auto pageContent = Container::Vertical({
-    landingPageElements,
+    landingPageElements | Maybe([&] {return view_state == 0;}),
+    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
+    testGamePageElements | Maybe([&] {return view_state == 1;}),
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
