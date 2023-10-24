@@ -4,6 +4,7 @@ add_executable(runAllTests
 # Add tests here
     dummy.cpp
     CustomExceptionsTests.cpp
+    ParserLibraryTests.cpp
 )
 
 target_link_libraries(runAllTests
@@ -11,6 +12,7 @@ target_link_libraries(runAllTests
     GTest::gmock GTest::gtest GTest::gtest_main
     networking
     exceptions
+    backendcomponents
 )
 
 add_test(NAME AllTests

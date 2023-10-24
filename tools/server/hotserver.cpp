@@ -14,7 +14,7 @@
 #include "GameVariable.h"
 #include "AudienceMember.h"
 #include "GameList.h"
-#include "Parser.h"
+#include "ParserLibrary.h"
 
 
 #include <fstream>
