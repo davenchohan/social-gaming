@@ -7,22 +7,22 @@ General Output Format:
     "body": [ {"Info1":"DATA_VALUES"}, {"Info2" :"DATA_VALUES"} ]
 }
 */
-
-std::string ConstructRequest(RequestInfo someReq){
+std::string ParserLibraryInterface::ConstructRequest(RequestInfo& someReq){
     return "empty";
 }
 
 /*
 */
-std::string ConstructResponse(RequestInfo someReq){
+std::string ParserLibraryInterface::ConstructResponse(ResponseInfo& someResp){
     return "empty";
 }
 
 
-Json* parseJson(std::string someString){
-    return nullptr;
+Json ParserLibraryInterface::parseJson(std::string& someString){
+    Json temp = Json::parse(someString);
+    return temp;
 }
 
-RequestInfo* parseRequest(std::string someRequest){
+RequestInfo* ParserLibraryInterface::parseRequest(std::string& someRequest){
     return nullptr;
 }
