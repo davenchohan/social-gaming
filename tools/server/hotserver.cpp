@@ -194,7 +194,6 @@ main(int argc, char* argv[]) {
   std::map<std::string, GameSessionHandler> sessionHandlerDB;
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
-  RequestInfo someInfo;
 
   while (true) {
     bool errorWhileUpdating = false;

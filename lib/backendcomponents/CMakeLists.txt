@@ -7,7 +7,6 @@ CPMAddPackage(
 )
 
 add_library(backendcomponents
-    src/Structures.cpp
     src/ParserLibrary.cpp
 )
 

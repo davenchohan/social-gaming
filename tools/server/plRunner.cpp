@@ -19,13 +19,9 @@
 #include <map>
 
 int main(){
-    ParserLibraryInterface interface;
-    std::string someString = R"({"gameRequest":"reqCreateGame"})";
-    std::string someString2 = "{\"gameRequest\":\"reqCreateGame\"}";
-    Json item = interface.parseJson(someString);
-    std::cout << item["gameRequest"] << std::endl;
-    Json item2 = interface.parseJson(someString2);
-    std::cout << item2["gameRequest"] << std::endl;
-
+    RequestParser reqParser("ReqCreateGame");
+    reqParser.appendRequest("name", "Gabe");
+    reqParser.appendRequest("name", "Peter");
+    std::cout << reqParser.ConstructRequest() << std::endl;
     return 0;
 }

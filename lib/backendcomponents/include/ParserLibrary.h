@@ -1,12 +1,24 @@
+#include <nlohmann/json.hpp>
+using Json = nlohmann::json;
 #include <string>
-#include "Structures.h"
+#include <vector>
 
-class ParserLibraryInterface{
+class Parser{
+private:
+    Json subject;
 public:
-    ParserLibraryInterface() = default;
-    std::string ConstructRequest(RequestInfo&);
-    std::string ConstructResponse(ResponseInfo&);
-    Json parseJson(std::string&);
-    RequestInfo* parseRequest(std::string&);
+    Parser(){}
+    Parser(std::string, std::string);
+    void append(const std::string, const std::string);
+    std::string subjectToString();
 };
 
+
+class RequestParser{
+public:
+    RequestParser(std::string);
+    void appendRequest(const std::string, const std::string);
+    std::string ConstructRequest();
+private:
+    Parser request;
+};

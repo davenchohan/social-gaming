@@ -1,28 +1,28 @@
 #include "ParserLibrary.h"
 
-/*
-This function takes in a RequestInfo struct and constructs a string based on the fields within someReq
-General Output Format:
-{ "reqType" : "REQUEST_NAME",
-    "body": [ {"Info1":"DATA_VALUES"}, {"Info2" :"DATA_VALUES"} ]
-}
-*/
-std::string ParserLibraryInterface::ConstructRequest(RequestInfo& someReq){
-    return "empty";
+Parser::Parser(std::string key, std::string item){
+    subject[key] = item;
 }
 
-/*
-*/
-std::string ParserLibraryInterface::ConstructResponse(ResponseInfo& someResp){
-    return "empty";
+void Parser::append(std::string key, std::string item){
+    subject[key] = item;
+}
+
+std::string Parser::subjectToString(){
+    return subject.dump();
+}
+
+RequestParser::RequestParser(std::string req){
+    request.append("Request", req);
+}
+
+void RequestParser::appendRequest(const std::string key, const std::string val){
+    request.append(key, val);
+}
+
+std::string RequestParser::ConstructRequest(){
+    return request.subjectToString();
 }
 
 
-Json ParserLibraryInterface::parseJson(std::string& someString){
-    Json temp = Json::parse(someString);
-    return temp;
-}
 
-RequestInfo* ParserLibraryInterface::parseRequest(std::string& someRequest){
-    return nullptr;
-}
