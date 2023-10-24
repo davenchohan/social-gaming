@@ -22,6 +22,10 @@ int main(){
     RequestParser reqParser("ReqCreateGame");
     reqParser.appendRequest("name", "Gabe");
     reqParser.appendRequest("name", "Peter");
+    Json item;
+    item["favFoods"] = {"Burgers", "Fries", "Dumplings"};
+    item["favDrinks"] = {"Water", "Apple Juice", "Coke"};
+    reqParser.appendRequest("someStuff", item);
     std::cout << reqParser.ConstructRequest() << std::endl;
     return 0;
 }
