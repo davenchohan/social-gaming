@@ -126,30 +126,55 @@ void treePrinter(const std::string& prefix,ts::Node parent){
 
 
 }
-int getCaseValue(std::string_view type){
-    std::map<std::string, int> stringToValue;
+
+//enum for all possible node types
+//some still need to be added 
+
+enum class DecisionTypes {
+    FOR,
+    WHILE,
+    PARALLEL_FOR,
+    MATCH,
+    INPARALLEL,
+    TEXT,
+    CHOICE,
+    RANGE,
+    VOTE,
+    EXTEND,
+    REVERSE,
+    SHUFFLE,
+    SORT,
+    DISCARD
+
+
+};
+
+//map from type string to decision making value
+
+DecisionTypes getCaseValue(std::string_view type){
+    std::map<std::string, DecisionTypes> stringToValue;
 
 
     //control types 
-    stringToValue["for"] = 1;
-    stringToValue["while"] = 2;
-    stringToValue["parallel_for"] = 3;
-    stringToValue["match"] = 4;
-    stringToValue["inparallel"] = 5;
+    stringToValue["for"] = DecisionTypes::FOR;
+    stringToValue["while"] = DecisionTypes::WHILE;
+    stringToValue["parallel_for"] = DecisionTypes::PARALLEL_FOR;
+    stringToValue["match"] = DecisionTypes::MATCH;
+    stringToValue["inparallel"] = DecisionTypes::INPARALLEL;
 
 
     //input types 
-    stringToValue["text"] = 1;
-    stringToValue["choice"] = 2;
-    stringToValue["range"] = 3;
-    stringToValue["vote"] = 4;
+    stringToValue["text"] = DecisionTypes::TEXT;
+    stringToValue["choice"] = DecisionTypes::CHOICE;
+    stringToValue["range"] = DecisionTypes::RANGE;
+    stringToValue["vote"] = DecisionTypes::VOTE;
     
     //list types 
-    stringToValue["extend"] = 1;
-    stringToValue["reverse"] = 2;
-    stringToValue["shuffle"] = 3;
-    stringToValue["sort"] = 4;
-    stringToValue["reverse"] = 5;
+    stringToValue["extend"] = DecisionTypes::EXTEND;
+    stringToValue["reverse"] = DecisionTypes::REVERSE;
+    stringToValue["shuffle"] = DecisionTypes::SHUFFLE;
+    stringToValue["sort"] = DecisionTypes::SORT;
+    stringToValue["discard"] = DecisionTypes::DISCARD;
     std::string sType = (std::string)type;
     return stringToValue.at(sType);
 
@@ -157,54 +182,59 @@ int getCaseValue(std::string_view type){
 
 
 
-//control types handler 
+//control types handling functions
+ 
 const std::vector<std::string> controlTypes = {
     "for",
     "while",
     "parallel_for",
     "match",
     "inparallel"
-  };
+};
+
 bool isControlType(std::string type){
      return  std::find(controlTypes.begin(),controlTypes.end(),type) != controlTypes.end();
 }
+
 void forLoopHandler(Game &active,ts::Node node){
     std::string identifier = (std::string)node.getFieldNameForChild(1);
     std::cout <<identifier << "\n";
     //todo
 }
+
 void whileLoopHanler(Game &active,ts::Node node){
     //todo
 }
+
 void parallel_forHandler(Game &active,ts::Node node){
     //todo
 }
+
 void matchHandler(Game &active,ts::Node node){
     //todo
 }
+
 void inparallelHandler(Game &active,ts::Node node){
     //todo
 }
 
-
-
 void handleControlType(Game& active, ts::Node node){
     std::cout<<"controlHandle\n";
-    int val = getCaseValue(node.getType());
-    switch(val){
-        case 1 :
+    // val = getCaseValue(node.getType());
+    switch(getCaseValue(node.getType())){
+        case DecisionTypes::FOR :
             forLoopHandler(active,node);
             break;
-        case 2:
+        case DecisionTypes::WHILE:
             whileLoopHanler(active,node);
             break;
-        case 3:
+        case DecisionTypes::PARALLEL_FOR:
             parallel_forHandler(active,node);
             break;
-        case 4:
+        case DecisionTypes::MATCH:
             matchHandler(active,node);
             break;
-        case 5:
+        case DecisionTypes::INPARALLEL:
             inparallelHandler(active,node);
             break;
         default :
@@ -223,17 +253,22 @@ std::vector<std::string> humanInputTypes = {
     "range",
     "vote"
   };
+
 //human input handler 
 void handleText(){
+    //todo
 
 }
 void handleChoice(){
+    //todo
 
 }
 void handleRange(){
+    //todo
 
 }
 void handleVote(){
+    //todo
 
 }
 
@@ -243,16 +278,16 @@ bool isHumanInput(std::string type){
 }
 void handleInput(Game& active, ts::Node node){
     switch(getCaseValue(node.getType())){
-        case 1 : //text
+        case DecisionTypes::TEXT : //text
             handleText();
             break;
-        case 2: //choice
+        case DecisionTypes::CHOICE: //choice
             handleChoice();
             break;
-        case 3: //range
+        case DecisionTypes::RANGE: //range
             handleRange();
             break;
-        case 4: //vote
+        case DecisionTypes::VOTE: //vote
             handleVote();
             break;
     }
@@ -288,19 +323,19 @@ bool isListType(std::string type){
 }
 void handleListOperation(Game& active, ts::Node node){
     switch(getCaseValue(node.getType())){
-        case 1: 
+        case DecisionTypes::EXTEND: 
             handleExtend();//extend
             break;
-        case 2: //reverse 
+        case DecisionTypes::REVERSE: //reverse 
             handleReverse();
             break;
-        case 3: //shuffle
+        case DecisionTypes::SHUFFLE: //shuffle
             handleShuffle();
             break;
-        case 4: //sort 
+        case DecisionTypes::SORT: //sort 
             handleSort();
             break;
-        case 5: //discard
+        case DecisionTypes::DISCARD: //discard
             handleDiscard(); 
             break;
     }
