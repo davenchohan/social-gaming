@@ -14,6 +14,13 @@ class SGParser {
     SGParser(const std::string filepath);
     json setupToJson();
     json configToJson();
+    ts::Node getRoot(); 
+    ts::Node getConfig();
+    ts::Node getConstants();
+    ts::Node getVar();
+    ts::Node getPerPlayer();
+    ts::Node getPerAudience();
+    ts::Node getRules();
 
    private:
     static const std::string rootFields[6];
@@ -23,12 +30,7 @@ class SGParser {
 
     ts::Tree *tree;
 
-    ts::Node getRoot(); 
-    ts::Node getConfig();
-    ts::Node getVar();
-    ts::Node getPerPlayer();
-    ts::Node getPerAudience();
-    ts::Node getRules();
+   
 
     std::string getChildStrByField(ts::Node parent, const std::string field);
 };

@@ -26,17 +26,19 @@ add_executable(parser_test)
 target_sources(parser_test
     PRIVATE
         parser_test.cpp
+
 )
 
 target_link_libraries(parser_test
     tree-sitter-json
     tree-sitter-socialgaming
     cpp-tree-sitter
+    backendClasses
     nlohmann_json::nlohmann_json
 )
 
 set_target_properties(parser_test
-    PROPERTIES CXX_STANDARD 17
+    PROPERTIES CXX_STANDARD 20
 )
 
 
