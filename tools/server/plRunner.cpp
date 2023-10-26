@@ -26,6 +26,13 @@ int main(){
     item["favFoods"] = {"Burgers", "Fries", "Dumplings"};
     item["favDrinks"] = {"Water", "Apple Juice", "Coke"};
     reqParser.appendRequest("someStuff", item);
-    std::cout << reqParser.ConstructRequest() << std::endl;
+    std::string str = reqParser.ConstructRequest();
+    std::cout << str << std::endl;
+    Json item2 = getJsonItem(str);
+    if(item2.find("name") != item2.end()){
+        std::cout << "Found: " + item2["name"].dump() << std::endl;
+    }
+
+    RequestInfo item3 = reqParser.returnReqInfo();
     return 0;
 }
