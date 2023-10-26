@@ -12,16 +12,17 @@ Parser::returnReqInfoFromSubject(){
     return temp;
 }
 
+// Sets json item to blank classes, as returnReqInfoFromSubject can be called anytime
+// get_to throws an error if item is null
 Parser::Parser(std::string key, std::string item){
-    Json blankConfig;
-    std::vector<std::string> blankPlayers;
-    Json blankMisc;
+    Json blankJson;
+    std::map<std::string, int> blankPlayers;
     subject[key] = item;
     subject["GameName"] = "";
     subject["GameID"] = "";
-    subject["GameConfig"] = blankConfig;
+    subject["GameConfig"] = blankJson;
     subject["Players"] = blankPlayers;
-    subject["misc"] = blankMisc;
+    subject["misc"] = blankJson;
 }
 
 std::string Parser::subjectToString(){
