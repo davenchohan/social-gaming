@@ -303,7 +303,8 @@ main(int argc, char* argv[]) {
           // TODO: Implement support for sending over list of audience members
           server_response = status;
         }else{
-          throw UnknownGameException("Game not found: " + request.gameName);
+          auto status = std::string("ReqViewGame Unsuccessful") + "\nGame with ID \"" + id + "\" does not exist!";
+          server_response = status;
         }
       }else if(request.request == "ReqUpdateGame"){
         std::cout<< "ReqUpdateGame" << std::endl;
