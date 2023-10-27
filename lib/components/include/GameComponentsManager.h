@@ -9,10 +9,16 @@
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp" 
+#include "Constants.h"
+#include "GameComponent.h"
+
+using namespace gameComponent;
 
 
+class GameComponentsManager {
+    void addGameComponent();
+    void clearAllGameComponents();
 
-using namespace ftxui;
-namespace Pages{
-    Component CreateGameSession(int &pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client);
+    private:
+    std::vector<GameComponent> collection;
 }
