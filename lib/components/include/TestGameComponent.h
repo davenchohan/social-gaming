@@ -17,7 +17,8 @@
 
 using namespace ftxui;
 namespace Pages{
-Component TestGamePage(std::vector<ComponentData> &data, networking::Client &client);
+// Component TestGamePage(std::vector<ComponentData> &data, networking::Client &client);
+Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list); 
 }
 /*
 class ComponentGenerator {

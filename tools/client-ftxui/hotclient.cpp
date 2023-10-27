@@ -28,7 +28,7 @@ using namespace ftxui;
 // FUNCTIONS #####################################################
 // ###########################################################
 // placeholder (until parser library is implemented)
-std::vector<std::string> parseServerResponseGameList(const std::string &response) {
+std::vector<std::string> parseServerResponseGameList(const std::string &response, std::vector<Element> &text_list) {
 
     // find the start of json
     size_t start = response.find('[');
@@ -51,6 +51,7 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
                     std::string game{games.substr(0, position)};
                     // std::cout << "found: " << game << std::endl;
                     result_list.push_back(game);
+                    text_list.push_back(paragraph(game));
                     start = false;
                 }else {
                     // found teh start
@@ -76,6 +77,9 @@ std::string parseServerResponseType(const std::string &response) {
     std::string reqType{response_view.substr(0, second_space)};
     return reqType;
 }
+
+// (still testing out design) function that manages dynamiclly generated components for the game play page
+// void addParagraphComponent()
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -171,6 +175,36 @@ int main(int argc, char* argv[]) {
   // GameComponent dummy_game_component{constants::GameComponentType::DISPLAY, dummy_data};
   ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
   data_list.push_back(test_game_component_data);
+  std::vector<std::string> item1;
+  item1.push_back("item1: Option 1");
+  item1.push_back("item1: Option 2");
+  item1.push_back("item1: Option 3");
+  std::vector<std::string> item2;
+  item1.push_back("item2: Option 1");
+  item1.push_back("item2: Option 2");
+  item1.push_back("item2: Option 3");
+  std::vector<std::vector<std::string>> block_data;
+  block_data.push_back(item1);
+  block_data.push_back(item2);
+  int selected_item1 = 0;
+  int selected_item2 = 0;
+  std::vector<int> selected_items;
+  selected_items.push_back(selected_item1);
+  selected_items.push_back(selected_item2);
+
+  std::vector<Element> text_list;
+  text_list.push_back(paragraph("Randome text1"));
+  text_list.push_back(paragraph("Randome text2"));
+  text_list.push_back(paragraph("Randome text3"));
+  text_list.push_back(paragraph("Randome text4"));
+  std::vector<Element> text_list2;
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text1"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text2"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text3"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text4"));
+
+  std::vector<Component> game_page_components;
+
 
 
 // COMPONENTS ################################################
@@ -187,7 +221,13 @@ int main(int argc, char* argv[]) {
   // MAIN PAGES
   auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
   // auto gamePlayPageElements = Pages::GamePlay(view_state, dummy_game_component, client);
-  auto testGamePageElements = Pages::TestGamePage(data_list, client);
+
+  // testing page with dynamic components
+  // auto testGamePageElements = Pages::TestGamePage(data_list, client);
+  auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list);
+  auto testGamePageElements2 = Pages::TestGamePage(block_data, selected_items, text_list2);
+  game_page_components.push_back(testGamePageElements);
+  game_page_components.push_back(testGamePageElements2);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -210,11 +250,12 @@ int main(int argc, char* argv[]) {
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
 
-  auto pageContent = Container::Vertical({
-    landingPageElements | Maybe([&] {return view_state == 0;}),
-    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-    testGamePageElements | Maybe([&] {return view_state == 1;}),
-  }) | flex;
+  auto pageContent = Container::Vertical(game_page_components) | flex;
+  // auto pageContent = Container::Vertical({
+  //   landingPageElements | Maybe([&] {return view_state == 0;}),
+  //   // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
+  //   testGamePageElements | Maybe([&] {return view_state == 1;}),
+  // }) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
@@ -295,7 +336,7 @@ int main(int argc, char* argv[]) {
 
       // handle based on reponse type
       if(reqType == "DemoReqGetGamesList") {
-          radiobox_list = parseServerResponseGameList(response);
+          radiobox_list = parseServerResponseGameList(response, text_list);
       }
 
       screen.RequestAnimationFrame();

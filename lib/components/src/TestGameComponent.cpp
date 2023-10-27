@@ -3,6 +3,7 @@
 using namespace ftxui;
 
 namespace Pages{
+    /*
 Component TestGamePage(std::vector<ComponentData> &data, networking::Client &client) {
     // std::vector<Component> paragraphs;
     // auto p = Renderer([&]() {
@@ -59,6 +60,30 @@ Component TestGamePage(std::vector<ComponentData> &data, networking::Client &cli
     //     p | color(Color::GreenLight),
     // });
     return content;
+};
+*/
+
+Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list) {
+    auto game_selector = Radiobox(&values[0], &selected_items[0]);
+    auto block = Container::Vertical({
+        game_selector,
+        Renderer([&] {
+            return paragraph("First selected item: ");
+        }),
+        Renderer([&] {
+            return paragraph(std::to_string(selected_items[0]));
+        }),
+        Renderer([&] {
+            return paragraph("Second selected item: ");
+        }),
+        Renderer([&] {
+            return paragraph(std::to_string(selected_items[1]));
+        }),
+        Renderer([&] {
+            return vbox(text_list);
+        }),
+    });
+    return block;
 }
 
 // Component ComponentBlock(constants::GameComponentType type, ::vector<std::string> &values, int &selected) {
