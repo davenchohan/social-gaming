@@ -250,12 +250,15 @@ int main(int argc, char* argv[]) {
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
 
-  auto pageContent = Container::Vertical(game_page_components) | flex;
-  // auto pageContent = Container::Vertical({
-  //   landingPageElements | Maybe([&] {return view_state == 0;}),
-  //   // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-  //   testGamePageElements | Maybe([&] {return view_state == 1;}),
-  // }) | flex;
+  // PASSING LIST OF COMPONENTS
+  // auto pageContent = Container::Vertical(game_page_components) | flex;
+
+
+  auto pageContent = Container::Vertical({
+    landingPageElements | Maybe([&] {return view_state == 0;}),
+    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
+    testGamePageElements | Maybe([&] {return view_state == 1;}),
+  }) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
