@@ -89,6 +89,17 @@ serverRequest demoParseReq(const std::string log){
   }
 }
 
+// Generates a unique ID, may have to move this elsewhere in the future
+int generateUniqueID() {
+    std::time_t result = std::time(nullptr);
+    std::string uniqueID = std::to_string(result);
+    int randomNum = std::rand();
+    uniqueID += std::to_string(randomNum);
+
+    std::hash<std::string> hasher;
+    return static_cast<int>(hasher(uniqueID));
+}
+
 // TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
 // Possible inputs: Game game, serverRequest request
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
@@ -284,15 +295,16 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
         if (sessionHandlerDB.DoesSessionExist(id)){
-          AudienceMember member("dummy_viewer", 0);
+          int newAudienceId = generateUniqueID();
+          AudienceMember member("dummy_viewer", newAudienceId); // TODO: Ask the viewer for their name to pass to the audience constructor
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.AddAudienceMember(member.GetName(), member);
-
           auto status = "ReqViewGame Successful" + '\n' + member.GetName() + " added as an audience member for " + std::to_string(handler.GetGame().GetGameId());
           // TODO: Implement support for sending over list of audience members
           server_response = status;
         }else{
-          throw UnknownGameException("Game not found: " + request.gameName);
+          auto status = std::string("ReqViewGame Unsuccessful") + "\nGame with ID \"" + id + "\" does not exist!";
+          server_response = status;
         }
       }else if(request.request == "ReqUpdateGame"){
         std::cout<< "ReqUpdateGame" << std::endl;
