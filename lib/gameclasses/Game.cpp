@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 // Default constructor
-Game::Game(int newGameId, Player& gameHost) : gameId(newGameId), host(gameHost) {
+Game::Game(int newGameId) : gameId(newGameId) {
     gameName = "Game";
     minPlayers = 2; // Default minimum players
     maxPlayers = 4; // Default maximum players
@@ -50,14 +50,6 @@ int Game::GetNumRounds() const {
 
 void Game::SetNumRounds(int rounds) {
     numRounds = rounds;
-}
-
-Player Game::GetHost() const {
-    return host;
-}
-
-void Game::SetHost(Player& gameHost) {
-    host = gameHost;
 }
 
 // Set a game variable

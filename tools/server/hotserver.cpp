@@ -201,6 +201,11 @@ main(int argc, char* argv[]) {
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
   // Instantiate game list
+  GameList serverGameList = GameList();
+  // Instantiate Rock, Paper, Scissors
+  Game rockPaperScissors = Game(generateUniqueID());
+  rockPaperScissors.SetGameName("Rock,Paper,Scissors");
+  serverGameList.AddGame(rockPaperScissors);
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   GameSessionList sessionHandlerDB = GameSessionList();
@@ -256,7 +261,7 @@ main(int argc, char* argv[]) {
         // Instantiate host
         Player host("dummy_host", 0);
         // Instantiate Game
-        Game newGame(fakeGenerate(), host);
+        Game newGame(fakeGenerate());
         // Set Game variables
         // TODO: Implement a way to parse game variables from server request
         // May need loop to add all variables into the game, for now just a single statement
@@ -269,7 +274,7 @@ main(int argc, char* argv[]) {
         newGame.AddVariable(varName, someVar);
 
         // Add Game to session handler
-        GameSessionHandler sessionHandler(newGame.GetGameId(), newGame);
+        GameSessionHandler sessionHandler(newGame.GetGameId(), newGame, host);
         // Add session handler to DB
         sessionHandlerDB.AddGameSessionHandler(std::to_string(newGame.GetGameId()), sessionHandler);
         // Construct response
@@ -335,21 +340,20 @@ main(int argc, char* argv[]) {
         }else{
           throw UnknownGameException("Game not found: " + request.gameName);
         }
-      }else if(request.request == "DemoReqGetGamesList"){
-        // TODO: Remove once communication format is implemented
-        std::cout << "Got: DemoReqGetGamesList" << std::endl;
-        std::string list_str = "";
-        // Stringify vector, bad implementation
-        std::for_each(fakeServerGameList.begin(), fakeServerGameList.end(), [&list_str, &fakeServerGameList](std::string &item){
-          std::string builder = "'" + item + "'";
-          list_str = list_str + builder;
-          if (item == fakeServerGameList.back()){
-            return;
-          }
-          list_str = list_str + ",";
-        });
-        std::string final_response = "Req DemoReqGetGamesList Successful\n";
-        server_response = final_response + "jsonObject={'gamesList':'[" + list_str + "]'}";
+      }else if(request.request == "ReqGetGamesList"){
+        std::cout << "Got: ReqGetGamesList" << std::endl;
+        auto gamesList = serverGameList.GetGameList();
+
+        std::string concatenatedNames = std::accumulate(gamesList.begin(), gamesList.end(), std::string(),
+                                                          [](std::string& accumulated, const Game& game) {
+                                                              if (!accumulated.empty()) {
+                                                                  accumulated += ", ";
+                                                              }
+                                                              return accumulated += "'" + game.GetGameName() + "'";
+                                                          });
+
+        std::string final_response = "Req ReqGetGamesList Successful\n";
+        server_response = final_response + "jsonObject={'gamesList':'[" + concatenatedNames + "]'}";
         std::cout << "Server Response: " + server_response << std::endl;
       }else if(request.request == "DemoReqGetGame"){
         // TODO: Remove once communication format is implemented
