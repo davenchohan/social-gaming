@@ -12,7 +12,7 @@
 class GameSessionHandler {
 public:
     // Constructor
-    GameSessionHandler(int id, Game& gameObj);
+    GameSessionHandler(int id, Game& gameObj, Player& gameHost);
 
     // Add a player
     void AddPlayer(const std::string& playerName, const Player& Player);
@@ -41,6 +41,9 @@ public:
     // Get the game specification
     Game GetGame() const;
 
+    Player GetHost() const;
+    void SetHost(Player& gameHost);
+
     void startSession();
 
     void endSession();
@@ -55,6 +58,7 @@ private:
     int currentRound;
     int sessionId;
     Game game;
+    Player host;
 };
 
 #endif
