@@ -118,6 +118,16 @@ void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<st
   return;
 }
 
+
+Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
+  evaluateFilledGame(gameRequest);
+  Game newGame(gameRequest.gameId, gameHost);
+  for (auto variable: gameRequest.gameVariables) {
+    newGame.AddVariable(variable)
+  }
+  
+}
+
 void
 onConnect(Connection c) {
   std::cout << "New connection found: " << c.id << "\n";
