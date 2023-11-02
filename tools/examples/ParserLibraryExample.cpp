@@ -24,6 +24,7 @@ int main(){
     reqConstructor.appendItem("name", "Gabe");
     reqConstructor.appendItem("name", "Peter");
     reqConstructor.appendItem("GameName", "Rock, Paper, Scissors");
+    JsonConverter converter;
 
     Json item;
     item["favFoods"] = {"Burgers", "Fries", "Dumplings"};
@@ -37,7 +38,7 @@ int main(){
 
     cout << "-----------------------------" << endl;
     cout << "Example use cases for Request Constructor" << endl;
-    Json item2 = getJsonItem(str);
+    Json item2 = converter.GetJsonItem(str);
     if(item2.find("name") != item2.end()){
         std::cout << "Found: " + item2["name"].dump() << std::endl;
     }
@@ -61,6 +62,18 @@ int main(){
     auto info = parser.getRequestStruct();
     cout << "Parsed from a string: " << endl;
     cout << "Request: " << info.request << endl;
+    cout << "-----------------------------" << endl;
+    cout << "-----------------------------" << endl;
 
+    Json pp;
+    Json state = Player::Active;
+    pp["name"] = "Gabe";
+    pp["id"] = 1234;
+    pp["playerState"] = state;
+
+    Player convertedItem = converter.ConvertToPlayer(pp);
+    cout << convertedItem.GetName() << endl;
+    cout << convertedItem.GetUserId() << endl;
+    cout << convertedItem.GetPlayerState() << endl;
     return 0;
 }

@@ -48,9 +48,63 @@ RequestParser::getRequestStruct(){
     return temp;
 }
 
-Json getJsonItem(const std::string item){
-    Json j = Json::parse(item);
-    return j;
+Json JsonConverter::GetJsonItem(const std::string item){
+    return Json::parse(item);
 }
 
+Json JsonConverter::ConvertFromUser(User& user){
+    Json item;
+    item["name"] = user.GetName();
+    item["id"] = user.GetUserId();
+    return item;
+}
 
+// Single instance of a user class in Json format
+// Example: { "name":"Gabe", "Id":1234}
+User JsonConverter::ConvertToUser(const Json &item){
+    std::string name;
+    int id;
+    item.at("name").get_to(name);
+    item.at("id").get_to(id);
+    return User{name, id};
+}
+
+Json JsonConverter::ConvertFromPlayer(Player &player){
+    Json item;
+    item["name"] = player.GetName();
+    item["id"] = player.GetUserId();
+    item["playerState"] = player.GetPlayerState();
+    return item;
+}
+
+// Input: Single instance of a player class in Json Format
+// Example: { "name":"Gabe", "Id":1234, "playerState":"Active"}
+Player JsonConverter::ConvertToPlayer(const Json &item){
+    std::string name;
+    int id;
+    item.at("name").get_to(name);
+    item.at("id").get_to(id);
+    Player::PlayerState state = item.at("playerState").template get<Player::PlayerState>();
+    Player player(name, id);
+    player.SetPlayerState(state);
+    return player;
+}
+
+Json JsonConverter::ConvertFromAudienceMember(AudienceMember& member){
+    Json item;
+    item["name"] = member.GetName();
+    item["id"] = member.GetUserId();
+    item["audienceMemberState"] = member.GetAudienceState();
+    return item;
+}
+
+AudienceMember JsonConverter::ConvertToAudienceMember(const Json&item){
+    std::string name;
+    int id;
+    item.at("name").get_to(name);
+    item.at("id").get_to(id);
+    AudienceMember::AudienceMemberState state = item.at("audienceMemberState").template get<AudienceMember::AudienceMemberState>();
+    AudienceMember member(name, id);
+    member.SetAudienceState(state);
+    return member;
+}

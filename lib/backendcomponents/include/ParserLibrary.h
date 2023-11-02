@@ -4,6 +4,10 @@ using Json = nlohmann::json;
 #include <vector>
 #include <map>
 
+#include "User.h"
+#include "Player.h"
+#include "AudienceMember.h"
+
 struct RequestInfo{
     std::string request;
     std::string gameName;
@@ -48,4 +52,26 @@ class RequestParser{
         RequestInfo getRequestStruct();
 };
 
-Json getJsonItem(const std::string);
+NLOHMANN_JSON_SERIALIZE_ENUM( Player::PlayerState, {
+    {Player::Active, "Active"},
+    {Player::Eliminated, "Eliminated"},
+    {Player::WaitingTurn, "WaitingTurn"},
+})
+
+NLOHMANN_JSON_SERIALIZE_ENUM( AudienceMember::AudienceMemberState, {
+    {AudienceMember::Active, "Active"},
+    {AudienceMember::Inactive, "Inactive"},
+})
+
+
+class JsonConverter{
+public:
+    JsonConverter()=default;
+    Json GetJsonItem(const std::string);
+    Json ConvertFromUser(User&);
+    User ConvertToUser(const Json &);
+    Json ConvertFromPlayer(Player&);
+    Player ConvertToPlayer(const Json&);
+    Json ConvertFromAudienceMember(AudienceMember &);
+    AudienceMember ConvertToAudienceMember(const Json&);
+};
