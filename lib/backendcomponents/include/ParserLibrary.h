@@ -11,6 +11,8 @@ struct RequestInfo{
     Json gameConfig;
     std::map<std::string, int> players;
     Json misc;
+    // Needs to support holding audience members
+
 
     // Custom < operator definition, allows struct to be used in sets/maps
     bool operator<(const RequestInfo& a)const
@@ -25,27 +27,25 @@ struct RequestInfo{
     }
 };
 
-class Parser{
+class RequestConstructor{
 private:
     Json subject;
 public:
-    Parser(){}
-    Parser(std::string, std::string);
+    RequestConstructor(){}
+    RequestConstructor(std::string);
     // This is dumb, have to implement template function in .h file
-    template <class T1> void append(const std::string key, const T1 val){ subject[key] = val;}
-    std::string subjectToString();
-    RequestInfo returnReqInfoFromSubject();
+    template <class T1> void appendItem(const std::string key, const T1 val){ subject[key] = val;}
+    std::string ConstructRequest();
+    RequestInfo returnReqInfo();
 };
 
 
 class RequestParser{
-public:
-    RequestParser(std::string);
-    template <class T1> void appendRequest(const std::string key, const T1 val){request.append(key, val);}
-    std::string ConstructRequest();
-    RequestInfo returnReqInfo();
-private:
-    Parser request;
+    private:
+        Json subject;
+    public:
+        RequestParser(std::string&);
+        RequestInfo getRequestStruct();
 };
 
 Json getJsonItem(const std::string);

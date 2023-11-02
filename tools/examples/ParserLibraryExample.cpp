@@ -20,24 +20,30 @@
 using namespace std;
 
 int main(){
-    RequestParser reqParser("ReqCreateGame");
-    reqParser.appendRequest("name", "Gabe");
-    reqParser.appendRequest("name", "Peter");
-    reqParser.appendRequest("GameName", "Rock, Paper, Scissors");
+    RequestConstructor reqConstructor("ReqCreateGame");
+    reqConstructor.appendItem("name", "Gabe");
+    reqConstructor.appendItem("name", "Peter");
+    reqConstructor.appendItem("GameName", "Rock, Paper, Scissors");
 
     Json item;
     item["favFoods"] = {"Burgers", "Fries", "Dumplings"};
     item["favDrinks"] = {"Water", "Apple Juice", "Coke"};
-    reqParser.appendRequest("misc", item);
-    std::string str = reqParser.ConstructRequest();
+    reqConstructor.appendItem("misc", item);
+    cout << "-----------------------------" << endl;
+    std::string str = reqConstructor.ConstructRequest();
+    cout << "Printing raw string value of constructed request: " << endl;
     std::cout << str << std::endl;
+    cout << "-----------------------------" << endl;
+
+    cout << "-----------------------------" << endl;
+    cout << "Example use cases for Request Constructor" << endl;
     Json item2 = getJsonItem(str);
     if(item2.find("name") != item2.end()){
         std::cout << "Found: " + item2["name"].dump() << std::endl;
     }
     std::map<std::string, int> ps = {{"Gabe",1234}, {"John",6054}};
-    reqParser.appendRequest("Players", ps);
-    RequestInfo item3 = reqParser.returnReqInfo();
+    reqConstructor.appendItem("Players", ps);
+    RequestInfo item3 = reqConstructor.returnReqInfo();
     cout << "Request: " << item3.request << endl;
     cout << "GameName: " << item3.gameName << endl;
     cout << "GameID: " << item3.gameID << endl;
@@ -47,5 +53,14 @@ int main(){
     }
     cout << endl;
     cout << "misc: " << item3.misc.dump() << endl;
+    cout << "-----------------------------" << endl;
+    cout << "-----------------------------" << endl;
+    
+    cout << "Example use cases for Request Parser" << endl;
+    RequestParser parser(str);
+    auto info = parser.getRequestStruct();
+    cout << "Parsed from a string: " << endl;
+    cout << "Request: " << info.request << endl;
+
     return 0;
 }
