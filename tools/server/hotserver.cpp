@@ -196,6 +196,9 @@ main(int argc, char* argv[]) {
   Game rockPaperScissors = Game(RandomIdGenerator::generateUniqueId());
   rockPaperScissors.SetGameName("Rock,Paper,Scissors");
   serverGameList.AddGame(rockPaperScissors);
+
+  // Contains Fakes
+  // TODO: Remove these fakes when these are implemented and replaced
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
   std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   GameSessionList sessionHandlerDB = GameSessionList();
@@ -356,6 +359,13 @@ main(int argc, char* argv[]) {
           server_response = "DemoReqGetGame Failure: No such game\n";
         }
         std::cout << server_response << std::endl;
+      }else if(request.request == "GetGame"){
+        if(sessionHandlerDB.DoesSessionExist(request.gameId)){
+          auto session = sessionHandlerDB.GetGameSessionHandler(request.gameId);
+          
+        }else{
+
+        }
       }else{
         std::cout << "Bad Request: " + request.request << std::endl;
         throw UnknownRequestException("Unknown Request: " + request.request);
