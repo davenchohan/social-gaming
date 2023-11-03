@@ -35,17 +35,18 @@ RequestParser::RequestParser(std::string& logStr){
     subject = Json::parse(logStr);
 }
 
-
+// Expected formats:
+// 
 RequestInfo
 RequestParser::getRequestStruct(){
-    RequestInfo temp;
-    subject.at("Request").get_to(temp.request);
-    subject.at("GameName").get_to(temp.gameName);
-    subject.at("GameID").get_to(temp.gameID);
-    temp.gameConfig = subject.at("GameConfig");
-    temp.players= subject.at("Players").get_to(temp.players);
-    temp.misc = subject.at("misc");
-    return temp;
+    RequestInfo retStruct;
+    subject.at("Request").get_to(retStruct.request);
+    subject.at("GameName").get_to(retStruct.gameName);
+    subject.at("GameID").get_to(retStruct.gameID);
+    retStruct.gameConfig = subject.at("GameConfig");
+    retStruct.players= subject.at("Players").get_to(retStruct.players);
+    retStruct.misc = subject.at("misc");
+    return retStruct;
 }
 
 Json JsonConverter::GetJsonItem(const std::string item){
@@ -98,6 +99,8 @@ Json JsonConverter::ConvertFromAudienceMember(AudienceMember& member){
     return item;
 }
 
+// Input: Single instance of a audience member class in Json Format
+// Example: { "name":"Gabe", "Id":1234, "audienceMemberState":"Inactive"}
 AudienceMember JsonConverter::ConvertToAudienceMember(const Json&item){
     std::string name;
     int id;
@@ -107,4 +110,12 @@ AudienceMember JsonConverter::ConvertToAudienceMember(const Json&item){
     AudienceMember member(name, id);
     member.SetAudienceState(state);
     return member;
+}
+
+GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
+    std::string varName;
+    std::string varVal;
+    item.at("variableName").get_to(varName);
+    item.at("variableValue").get_to(varVal);
+    return GameVariable{varName, varVal};
 }

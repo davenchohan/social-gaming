@@ -75,5 +75,11 @@ int main(){
     cout << convertedItem.GetName() << endl;
     cout << convertedItem.GetUserId() << endl;
     cout << convertedItem.GetPlayerState() << endl;
+
+    Player player1("Gabe", 1234);
+    Player player2("John", 1233);
+    Player player3("Michael", 4444);
+
+    Json new_json;
     return 0;
 }

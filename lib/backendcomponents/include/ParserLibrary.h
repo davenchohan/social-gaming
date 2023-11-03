@@ -7,6 +7,8 @@ using Json = nlohmann::json;
 #include "User.h"
 #include "Player.h"
 #include "AudienceMember.h"
+#include "GameConstant.h"
+#include "Game.h"
 
 struct RequestInfo{
     std::string request;
@@ -67,11 +69,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM( AudienceMember::AudienceMemberState, {
 class JsonConverter{
 public:
     JsonConverter()=default;
+    Json ConvertFromPlayer(Player&);
     Json GetJsonItem(const std::string);
     Json ConvertFromUser(User&);
-    User ConvertToUser(const Json &);
-    Json ConvertFromPlayer(Player&);
-    Player ConvertToPlayer(const Json&);
     Json ConvertFromAudienceMember(AudienceMember &);
+
+    User ConvertToUser(const Json &);
+    Player ConvertToPlayer(const Json&);
     AudienceMember ConvertToAudienceMember(const Json&);
+    GameVariable ConvertToGameVariable(const Json&);
 };
