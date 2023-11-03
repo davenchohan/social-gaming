@@ -8,6 +8,7 @@
 #include "AudienceMember.h"
 #include "GameVariable.h"
 #include "GameConstant.h"
+#include "../../executionnodes/include/Tree.h"
 
 class Game {
 public:
@@ -58,8 +59,9 @@ public:
 
     // Set the progress of the game
     void SetGameProgress(GameProgress progress);
+    ExecutionTree gameloop;  
 
-private:
+private: 
     std::string gameName;
     int gameId;
     Player host;
@@ -70,6 +72,7 @@ private:
     GameProgress gameProgress;
     std::map<std::string, GameVariable> variables;
     std::map<std::string, GameConstant> constants;
-};
+    
+};   
 
 #endif
