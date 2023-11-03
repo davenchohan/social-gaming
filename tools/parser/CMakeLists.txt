@@ -33,6 +33,8 @@ target_link_libraries(parser_test
     tree-sitter-socialgaming
     cpp-tree-sitter
     nlohmann_json::nlohmann_json
+    executionnodes
+    datatypes
 )
 
 set_target_properties(parser_test
