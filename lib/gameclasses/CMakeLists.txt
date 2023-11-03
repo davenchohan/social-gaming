@@ -10,6 +10,7 @@ target_sources(backendClasses
   GameVariable.cpp
   Player.cpp
   User.cpp
+  GameSessionList.cpp
 )
 
 target_include_directories(backendClasses

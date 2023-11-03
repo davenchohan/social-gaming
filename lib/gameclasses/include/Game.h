@@ -19,7 +19,7 @@ public:
     };
 
     // Constructors
-    Game(int newGameId, Player& gameHost);
+    Game(int newGameId);
 
     // Getters and Setters
     std::string GetGameName() const;
@@ -36,9 +36,6 @@ public:
 
     int GetNumRounds() const;
     void SetNumRounds(int numRounds);
-
-    Player GetHost() const;
-    void SetHost(Player& gameHost);
 
     int GetGameId() const;
 
@@ -64,7 +61,6 @@ public:
 private: 
     std::string gameName;
     int gameId;
-    Player host;
     int minPlayers;
     int maxPlayers;
     bool audienceEnabled;

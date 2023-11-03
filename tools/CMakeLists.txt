@@ -12,3 +12,4 @@ if (ENABLE_FTXUI_CLIENT)
 endif()
 
 add_subdirectory(parser)
+add_subdirectory(examples)
