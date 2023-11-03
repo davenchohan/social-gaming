@@ -9,54 +9,54 @@ using namespace testing;
 
 // Implemented Tests
 TEST(ParserLibraryTests, TestParserClassInitializeEmpty){
-    Parser parser;
+    RequestConstructor parser;
     std::string expected = "null";
-    std::string generated = parser.subjectToString();
+    std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestParserClassInitializeBasic){
-    Parser parser("Request", "ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
-    std::string generated = parser.subjectToString();
+    std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestParserClassAppendBasic){
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
-    Parser parser("Request", "ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     for (auto const&[key, val] : values){
-        parser.append(key, val);
+        parser.appendItem(key, val);
     }
     std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
-    std::string generated = parser.subjectToString();
+    std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestParserClassAppendReplace){
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
-    Parser parser("Request", "ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     for (auto const&[key, val] : values){
-        parser.append(key, val);
+        parser.appendItem(key, val);
     }
-    parser.append("GameName", "Chess");
+    parser.appendItem("GameName", "Chess");
     std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
-    std::string generated = parser.subjectToString();
+    std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserClassInitialize){
-    RequestParser parser("SomeRequest");
+    RequestConstructor parser("SomeRequest");
     auto expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"SomeRequest\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserAppendBasic){
-    RequestParser parser("ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
     for (auto const&[key, val] : values){
-        parser.appendRequest(key, val);
+        parser.appendItem(key, val);
     }
     std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
@@ -64,35 +64,35 @@ TEST(ParserLibraryTests, TestRequestParserAppendBasic){
 }
 
 TEST(ParserLibraryTests, TestRequestParserAppendMultiTypes){
-    RequestParser parser("ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
     for (auto const&[key, val] : values){
-        parser.appendRequest(key, val);
+        parser.appendItem(key, val);
     }
     Json gameConfig;
     std::vector<std::string> rules = {"Move", "Cannot stand still", "Must Jump every 2 turns"};
     gameConfig["Rules"] = rules;
-    parser.appendRequest("GameConfig", gameConfig);
+    parser.appendItem("GameConfig", gameConfig);
     auto expected = "{\"GameConfig\":{\"Rules\":[\"Move\",\"Cannot stand still\",\"Must Jump every 2 turns\"]},\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserReplace){
-    RequestParser parser("ReqCreateGame");
+    RequestConstructor parser("ReqCreateGame");
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
     for (auto const&[key, val] : values){
-        parser.appendRequest(key, val);
+        parser.appendItem(key, val);
     }
-    parser.appendRequest("GameName", "Chess");
+    parser.appendItem("GameName", "Chess");
     std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserReqInfoBasic){
-    RequestParser parser("ReqCreateGame");
-    parser.appendRequest("GameName","Rock,Paper,Scissors");
+    RequestConstructor parser("ReqCreateGame");
+    parser.appendItem("GameName","Rock,Paper,Scissors");
     Json blankJson;
     std::map<std::string, int> blankPlayers;
     RequestInfo expected{"ReqCreateGame", "Rock,Paper,Scissors", "", blankJson, blankPlayers,blankJson};
