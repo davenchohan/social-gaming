@@ -20,6 +20,7 @@ target_include_directories(backendcomponents
 
 target_link_libraries(backendcomponents
     nlohmann_json::nlohmann_json
+    backendClasses
 )
 
 set_target_properties(backendcomponents
