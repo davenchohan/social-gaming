@@ -2,4 +2,6 @@ add_subdirectory(networking)
 add_subdirectory(components)
 add_subdirectory(exceptions)
 add_subdirectory(gameclasses)
+add_subdirectory(constants)
 add_subdirectory(backendcomponents)
+
