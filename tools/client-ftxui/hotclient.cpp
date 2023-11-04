@@ -79,7 +79,38 @@ std::string parseServerResponseType(const std::string &response) {
 }
 
 // (still testing out design) function that manages dynamiclly generated components for the game play page
-// void addParagraphComponent()
+void addParagraphBlock(std::vector<std::vector<Element>> &list) {
+  std::vector<Element> values;
+  int block_num = list.size() + 1;
+  int random = std::rand() % 10;
+  for(int i = 0; i < random; i++) {
+    values.push_back(paragraph("#" + std::to_string(block_num) + "-" + std::to_string(i + 1)));
+  }
+
+  list.push_back(values);
+}
+
+
+void addParagraphBlockPointerVer(std::vector<std::shared_ptr<Component>> &components_list, std::vector<std::vector<std::shared_ptr<Element>>> &paragraphs_list) {
+  std::vector<std::shared_ptr<Element>> values;
+  int block_num = paragraphs_list.size() + 1;
+  int random = 5;
+  for(int i = 0; i < random; i++) {
+    // auto paragraph_element = std::make_shared<Element>(paragraph("Hello"));
+    auto paragraph_element = std::make_shared<Element>(paragraph("#" + std::to_string(block_num) + "-" + std::to_string(i + 1)));
+    values.push_back(paragraph_element);
+  }
+
+  paragraphs_list.push_back(values);
+
+  auto paragraphBlock = std::make_shared<Component>(Pages::ParagraphBlockPointerVer(paragraphs_list.back()));
+  components_list.push_back(paragraphBlock);
+}
+
+
+// (std::vector<Component> &list, const std::string text) {
+//   Component  
+// }
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -202,8 +233,39 @@ int main(int argc, char* argv[]) {
   text_list2.push_back(paragraph("TEXT_LIST2: Randome text2"));
   text_list2.push_back(paragraph("TEXT_LIST2: Randome text3"));
   text_list2.push_back(paragraph("TEXT_LIST2: Randome text4"));
+  std::vector<Element> text_list3;
+  for(auto value: radiobox_list) {
+    text_list3.push_back(paragraph(value));
+  }
+  std::vector<std::vector<Element>> paragraphElements;
+  std::vector<std::vector<std::shared_ptr<Element>>> paragraphElementsPtrs;
+  std::vector<std::shared_ptr<Component>> game_page_components_pointers;
+  // auto addButton = std::make_shared<Component>(Container::Horizontal({
+  //     Button("Add Block", [&]{
+  //       addParagraphBlockPointerVer(game_page_components_pointers, paragraphElementsPtrs);
+  //     }),
+  // }));
+  // game_page_components_pointers.push_back(addButton);
+
+
+  paragraphElements.push_back(text_list3);
+  paragraphElements.push_back(text_list2);
+  addParagraphBlockPointerVer(game_page_components_pointers, paragraphElementsPtrs);
+  addParagraphBlockPointerVer(game_page_components_pointers, paragraphElementsPtrs);
+  addParagraphBlockPointerVer(game_page_components_pointers, paragraphElementsPtrs);
+  // addParagraphBlockPointerVer(paragraphElementsPtrs);
+  // addParagraphBlockPointerVer(paragraphElementsPtrs);
+  // addParagraphBlockPointerVer(paragraphElementsPtrs);
+  addParagraphBlock(paragraphElements);
 
   std::vector<Component> game_page_components;
+  // auto addButton = Container::Horizontal({
+  //     Button("Add Block", [&]{
+  //       addParagraphBlockPointerVer(game_page_components_pointers, paragraphElementsPtrs);
+  //       game_page_components.push_back(Pages::ParagraphBlockPointerVer(paragraphElementsPtrs.back()));
+  //     }),
+  // });
+  // game_page_components.push_back(addButton);
 
 
 
@@ -226,8 +288,18 @@ int main(int argc, char* argv[]) {
   // auto testGamePageElements = Pages::TestGamePage(data_list, client);
   auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list);
   auto testGamePageElements2 = Pages::TestGamePage(block_data, selected_items, text_list2);
-  game_page_components.push_back(testGamePageElements);
-  game_page_components.push_back(testGamePageElements2);
+  auto testParagraphBlok1 = Pages::ParagraphBlock(paragraphElements.back());
+  auto testParagraphBlok2 = Pages::ParagraphBlock(paragraphElements.front());
+  auto testParagraphBlok3_1 = Pages::ParagraphBlockPointerVer(paragraphElementsPtrs.front());
+  auto testParagraphBlok3_2 = Pages::ParagraphBlockPointerVer(paragraphElementsPtrs.back());
+
+  // if(paragraphElementsPtrs.empty()) {
+  //   game_page_components.push_back(testGamePageElements);
+  // }else {
+  //   game_page_components.push_back(testParagraphBlok3_1);
+  //   game_page_components.push_back(testParagraphBlok3_2);
+  // }
+  // game_page_components.push_back(testGamePageElements2);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -251,14 +323,33 @@ int main(int argc, char* argv[]) {
   // by passing the components into this as a component and then having the renderer call render on page content 
 
   // PASSING LIST OF COMPONENTS
+  Components components;
+  // std::vector<Component> components;
+    for (const auto& component_ptr : game_page_components_pointers) {
+        components.push_back(*component_ptr);
+    }
+  auto pageContent = Container::Vertical(components);
+  // auto pageContent = Container::Vertical({
+  //   Renderer([&] {
+  //       return paragraph("No componenets");
+  //   }) | Maybe([&] {return components.empty();}),
+  //   Renderer([&] {
+  //       return paragraph(std::to_string(components.size()));
+  //   }),
+  //   Renderer([&] {
+  //       return paragraph(std::to_string(typeid(components).name()));
+  //   }),
+  //   components.front(),
+  //   components.back(),
+  // }) | flex;
   // auto pageContent = Container::Vertical(game_page_components) | flex;
 
 
-  auto pageContent = Container::Vertical({
-    landingPageElements | Maybe([&] {return view_state == 0;}),
-    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-    testGamePageElements | Maybe([&] {return view_state == 1;}),
-  }) | flex;
+  // auto pageContent = Container::Vertical({
+  //   landingPageElements | Maybe([&] {return view_state == 0;}),
+  //   // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
+  //   testGamePageElements | Maybe([&] {return view_state == 1;}),
+  // }) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer

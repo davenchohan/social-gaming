@@ -17,6 +17,8 @@
 
 using namespace ftxui;
 namespace Pages{
+Component ParagraphBlock(std::vector<Element> &paragraphs);
+Component ParagraphBlockPointerVer(std::vector<std::shared_ptr<Element>> &paragraphs);
 // Component TestGamePage(std::vector<ComponentData> &data, networking::Client &client);
 Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list); 
 }

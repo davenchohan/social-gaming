@@ -62,6 +62,54 @@ Component TestGamePage(std::vector<ComponentData> &data, networking::Client &cli
     return content;
 };
 */
+Component ParagraphBlock(std::vector<Element> &paragraphs) {
+    auto block = Container::Vertical({
+        Renderer([&] {
+            return vbox(paragraphs);
+        }),
+    });
+    return block;
+}
+Component ParagraphBlockPointerVer(std::vector<std::shared_ptr<Element>> &paragraphs) {
+    auto block = Container::Vertical({
+        Renderer([&] {
+            return paragraph("Empty");
+        }) | Maybe([&] {return paragraphs.empty();}),
+        Renderer([&] {
+            std::vector<Element> elements;
+            for (const auto& paragraph_ptr : paragraphs) {
+                elements.push_back(*paragraph_ptr);
+            }
+            return vbox(elements);
+            // return vbox(paragraphs);
+        }),
+        Renderer([&] {
+            return paragraph(std::to_string(paragraphs.size()));
+        }),
+
+    });
+    return block;
+}
+// std::shared_ptr<Component> SharedPtr_ParagraphBlockPointerVer(std::vector<std::shared_ptr<Element>> &paragraphs) {
+//     auto block = Container::Vertical({
+//         Renderer([&] {
+//             return paragraph("Empty");
+//         }) | Maybe([&] {return paragraphs.empty();}),
+//         Renderer([&] {
+//             std::vector<Element> elements;
+//             for (const auto& paragraph_ptr : paragraphs) {
+//                 elements.push_back(*paragraph_ptr);
+//             }
+//             return vbox(elements);
+//             // return vbox(paragraphs);
+//         }),
+//         Renderer([&] {
+//             return paragraph(std::to_string(paragraphs.size()));
+//         }),
+
+//     });
+//     return block;
+// }
 
 Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list) {
     auto game_selector = Radiobox(&values[0], &selected_items[0]);
