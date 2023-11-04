@@ -1,3 +1,4 @@
+#pragma once
 #include <cpp-tree-sitter.h>
 #include "Game.h"
 #include "Player.h"
@@ -10,41 +11,51 @@ using json = nlohmann::json;
 #include <cstdio>
 #include <memory>
 
-
-enum class DecisionTypes {
+enum class ControlTypes {
     FOR,
     WHILE,
     PARALLEL_FOR,
     MATCH,
     INPARALLEL,
-    TEXT,
-    CHOICE,
-    RANGE,
-    VOTE,
+};
+enum class ListTypes {
     EXTEND,
     REVERSE,
     SHUFFLE,
     SORT,
     DISCARD,
+    
+};
+enum class InputTypes {
+    
+    TEXT,
+    CHOICE,
+    RANGE,
+    VOTE,
+    
+};
+enum class TimeTypes {
     TIME
 };
 
-DecisionTypes getCaseValue(std::string_view type);
+ListTypes getListTypeValue(std::string_view type);
+InputTypes getInputTypeValue(std::string_view type);
+ControlTypes getControlTypeValue(std::string_view type);
 
 bool isControlType(std::string type);
-void forLoopHandler(Game& active, ts::Node node);
-void whileLoopHanler(Game& active, ts::Node node);
-void parallel_forHandler(Game& active, ts::Node node);
-void matchHandler(Game& active, ts::Node node);
-void inparallelHandler(Game& active, ts::Node node);
-void handleControlType(Game& active, ts::Node node);
+void forLoopHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void whileLoopHanler(Game& active, ExecutionTree& tree, ts::Node node);
+void parallel_forHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void matchHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void inparallelHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void handleControlType(Game& active, ExecutionTree& tree, ts::Node node);
 
 void handleText();
 void handleChoice();
 void handleRange();
 void handleVote();
 bool isHumanInput(std::string type);
-void handleInput(Game& active, ts::Node node);
+void handleInput(Game& active, ExecutionTree& tree, ts::Node node);
 
 void handleExtend();
 void handleReverse();
@@ -52,11 +63,15 @@ void handleShuffle();
 void handleSort();
 void handleDiscard();
 bool isListType(std::string type);
-void handleListOperation(Game& active, ts::Node node);
+void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node);
 
 bool isTiming(std::string type);
-void handleTiming(Game& active, ts::Node node);
+void handleTiming(Game& active, ExecutionTree& tree, ts::Node node);
 
-void ruleVisitor(Game& active, ts::Node node);
-void bodyHandler(Game& active, ts::Node node);
-void rulesHandler(Game& active, ts::Node node);
+void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node);
+void bodyHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void rulesHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
+
+
+ExpressionNode parseExpression(Game &active, ExecutionTree& tree,ts::Node node);

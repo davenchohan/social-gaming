@@ -36,7 +36,7 @@ ts::Node SGParser::getPerAudience() {
     return tree->getRootNode().getNamedChild(3);
 }
 ts::Node SGParser::getRules() {
-    return tree->getRootNode().getNamedChild(4);
+    return tree->getRootNode().getNamedChild(5);
 }
 
 SGParser::SGParser(const std::string filepath) {
@@ -96,8 +96,9 @@ json SGParser::configToJson() {
     ret[getChildStrByField(getConfig(), "name")] = j;
     return ret;
 }
-
+/**
 int main() {
     SGParser p("./lib/gameSpecs/empty_spec.txt");
     std::cout << p.configToJson().dump();
 }
+*/
