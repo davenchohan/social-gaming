@@ -19,10 +19,12 @@ using json = nlohmann::json;
 #include <algorithm>
 #include "Nodes.h"
 #include "Tree.h"
+#include "parser_test.h"
 
 extern "C" {
 TSLanguage *tree_sitter_socialgaming();
 }
+
 void treePrinter(const std::string& prefix,ts::Node parent){
     if (!parent.isNull()){
         auto numNodes = parent.getNumChildren();
@@ -38,46 +40,64 @@ void treePrinter(const std::string& prefix,ts::Node parent){
                 treePrinter(prefix + (i != numNodes-1 ?  "│   " : "    "), node);
                 i++;
                 
-            }
-           
+            }  
         }
     }
+}
 
+// get the byte value of the feild and return the relevent string 
 
-
+std::string getField(ts::Node node,  const std::string source) {
+    if (!node.isNull()) {
+        ts::Extent<uint32_t> node_extent = node.getByteRange();
+        std::string value  = (std::string)source.substr(node_extent.start, node_extent.end - node_extent.start);
+        return value;
+    } else {
+        return "";
+    }
 }
 
 //enum for all possible node types
 //some still need to be added 
 
+ControlTypes getControlTypeValue(std::string_view type){
+    std::map<std::string, ControlTypes> stringToValue;
+
+
+    //control types 
+    stringToValue["for"] = ControlTypes::FOR;
+    stringToValue["while"] = ControlTypes::WHILE;
+    stringToValue["parallel_for"] = ControlTypes::PARALLEL_FOR;
+    stringToValue["match"] = ControlTypes::MATCH;
+    stringToValue["inparallel"] = ControlTypes::INPARALLEL;
+    std::string sType = (std::string)type;
+    return stringToValue.at(sType);
+}
 
 
 //map from type string to decision making value
 
-DecisionTypes getCaseValue(std::string_view type){
-    std::map<std::string, DecisionTypes> stringToValue;
-
-
-    //control types 
-    stringToValue["for"] = DecisionTypes::FOR;
-    stringToValue["while"] = DecisionTypes::WHILE;
-    stringToValue["parallel_for"] = DecisionTypes::PARALLEL_FOR;
-    stringToValue["match"] = DecisionTypes::MATCH;
-    stringToValue["inparallel"] = DecisionTypes::INPARALLEL;
+InputTypes getInputTypeValue(std::string_view type){
+    std::map<std::string, InputTypes> stringToValue;
 
 
     //input types 
-    stringToValue["text"] = DecisionTypes::TEXT;
-    stringToValue["choice"] = DecisionTypes::CHOICE;
-    stringToValue["range"] = DecisionTypes::RANGE;
-    stringToValue["vote"] = DecisionTypes::VOTE;
-    
+    stringToValue["text"] = InputTypes::TEXT;
+    stringToValue["choice"] = InputTypes::CHOICE;
+    stringToValue["range"] = InputTypes::RANGE;
+    stringToValue["vote"] = InputTypes::VOTE;
+      std::string sType = (std::string)type;
+    return stringToValue.at(sType);
+}
+ListTypes getListTypeValue(std::string_view type){
+    std::map<std::string, ListTypes> stringToValue;
+
     //list types 
-    stringToValue["extend"] = DecisionTypes::EXTEND;
-    stringToValue["reverse"] = DecisionTypes::REVERSE;
-    stringToValue["shuffle"] = DecisionTypes::SHUFFLE;
-    stringToValue["sort"] = DecisionTypes::SORT;
-    stringToValue["discard"] = DecisionTypes::DISCARD;
+    stringToValue["extend"] = ListTypes::EXTEND;
+    stringToValue["reverse"] = ListTypes::REVERSE;
+    stringToValue["shuffle"] = ListTypes::SHUFFLE;
+    stringToValue["sort"] = ListTypes::SORT;
+    stringToValue["discard"] = ListTypes::DISCARD;
     std::string sType = (std::string)type;
     return stringToValue.at(sType);
 
@@ -96,14 +116,43 @@ const std::vector<std::string> controlTypes = {
 bool isControlType(std::string type){
      return  std::find(controlTypes.begin(),controlTypes.end(),type) != controlTypes.end();
 }
-std::string getForLoopVal(){
-    while(true){};
+
+// create an expression node
+ExpressionNode parseExpression(Game &active, ExecutionTree& tree,ts::Node node){
+    std::vector<std::string> identifiers;
+    std::vector<std::string> arguments;
+    if(node.getChild(0).getType() != "!"){
+        recursiveIdent(active,identifiers, node);
+    }
+    ExpressionNode newNode; 
+    return newNode;
+}
+//recursivly traverse nodes and get all identifiers 
+void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node){
+    std::cout<<node.getType()<<"\n";
+    if((std::string)node.getType() == "expression"){
+        for(auto i = 0; i < node.getNumChildren(); i++){
+            recursiveIdent(active, identifiers, node.getChild(i));
+        }        
+    }
+    else if((std::string) node.getType() == "identifier"){
+        identifiers.emplace_back(getField(node,active.getSource()));
+        std::cout<<getField(node,active.getSource())<<"\n";
+    }
+    else {
+        return;
+    }
+   
+   
+
 }
 
 void forLoopHandler(Game &active, ExecutionTree& tree,ts::Node node){
-    std::string identifier = (std::string)node.getFieldNameForChild(1);
-    getForLoopVal();
-    ExpressionNode condition;
+    std::cout<<"forloop"<<"\n";
+    //gets the identifier for the variable in the for loop
+    auto identifier = getField(node.getChild(1),active.getSource());
+    //getForLoopVal();
+    ExpressionNode condition = parseExpression(active,tree, node.getChild(3));
     ExecutionTree loopTree;
     std::cout <<"identifier "<< identifier << "\n";
     
@@ -148,21 +197,21 @@ void inparallelHandler(Game &active, ExecutionTree& tree,ts::Node node){
 void handleControlType(Game& active, ExecutionTree& tree, ts::Node node){
     std::cout<<"controlHandle\n";
     // val = getCaseValue(node.getType());
-    switch(getCaseValue(node.getType())){
-        case DecisionTypes::FOR :
-            forLoopHandler(active,node);
+    switch(getControlTypeValue(node.getType())){
+        case ControlTypes::FOR :
+            forLoopHandler(active,tree,node);
             break;
-        case DecisionTypes::WHILE:
-            whileLoopHanler(active,node);
+        case ControlTypes::WHILE:
+            whileLoopHanler(active,tree,node);
             break;
-        case DecisionTypes::PARALLEL_FOR:
-            parallel_forHandler(active,node);
+        case ControlTypes::PARALLEL_FOR:
+            parallel_forHandler(active,tree,node);
             break;
-        case DecisionTypes::MATCH:
-            matchHandler(active,node);
+        case ControlTypes::MATCH:
+            matchHandler(active,tree,node);
             break;
-        case DecisionTypes::INPARALLEL:
-            inparallelHandler(active,node);
+        case ControlTypes::INPARALLEL:
+            inparallelHandler(active,tree,node);
             break;
         default :
         std::cout <<"error invalid control Type\n";
@@ -204,17 +253,17 @@ bool isHumanInput(std::string type){
      return std::find(humanInputTypes.begin(),humanInputTypes.end(),type) != humanInputTypes.end();
 }
 void handleInput(Game& active, ExecutionTree& tree, ts::Node node){
-    switch(getCaseValue(node.getType())){
-        case DecisionTypes::TEXT : //text
+    switch(getInputTypeValue(node.getType())){
+        case InputTypes::TEXT : //text
             handleText();
             break;
-        case DecisionTypes::CHOICE: //choice
+        case InputTypes::CHOICE: //choice
             handleChoice();
             break;
-        case DecisionTypes::RANGE: //range
+        case InputTypes::RANGE: //range
             handleRange();
             break;
-        case DecisionTypes::VOTE: //vote
+        case InputTypes::VOTE: //vote
             handleVote();
             break;
     }
@@ -254,20 +303,20 @@ bool isListType(std::string type){
      return std::find(listTypes.begin(),listTypes.end(),type) != listTypes.end();
 }
 void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node){
-    switch(getCaseValue(node.getType())){
-        case DecisionTypes::EXTEND: 
+    switch(getListTypeValue(node.getType())){
+        case ListTypes::EXTEND: 
             handleExtend();//extend
             break;
-        case DecisionTypes::REVERSE: //reverse 
+        case ListTypes::REVERSE: //reverse 
             handleReverse();
             break;
-        case DecisionTypes::SHUFFLE: //shuffle
+        case ListTypes::SHUFFLE: //shuffle
             handleShuffle();
             break;
-        case DecisionTypes::SORT: //sort 
+        case ListTypes::SORT: //sort 
             handleSort();
             break;
-        case DecisionTypes::DISCARD: //discard
+        case ListTypes::DISCARD: //discard
             handleDiscard(); 
             break;
     }
@@ -282,7 +331,7 @@ bool isTiming(std::string type){
     return std::find(timingTypes.begin(),timingTypes.end(),type) != timingTypes.end();
 }
 
-void handleTiming(Game& active, ts::Node node){
+void handleTiming(Game& active, ExecutionTree& tree, ts::Node node){
     //handle timing 
   
 }
@@ -298,14 +347,14 @@ void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node){
     std::string type = (std::string)current.getType();
     std::cout << type <<"\n";
     if(isControlType(type)){
-       handleControlType(active,current);
+       handleControlType(active,tree,current);
     }
     else if(isListType(type)){
-        handleListOperation(active,current);
+        handleListOperation(active,tree,current);
     }else if(isTiming(type)){
-        handleTiming(active,current);
+        handleTiming(active,tree,current);
     }else if(isHumanInput(type)){
-        handleInput(active,current);
+        handleInput(active,tree,current);
     }else {
         std::cout<<"not recognized rule node\n";
     }
@@ -314,7 +363,7 @@ void bodyHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
     auto numRules = node.getNumChildren();
     for(int i = 1; i < numRules-1;i++){
         std::cout<< i << " child of "<< numRules<<"" << node.getType()<<"\n";
-        ruleVisitor(active ,node.getChild(i));
+        ruleVisitor(active,tree ,node.getChild(i));
     }
     
 }
@@ -323,22 +372,23 @@ void rulesHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
         std::cout<<"error non rules node in rules handler";
     }
     auto body = node.getChild(1);
-    bodyHandler(active, body);
+    bodyHandler(active,tree, body);
     
 }
 
-/**
+
 int main() {
     Player mockPlayer = {"test",1};
-    Game mockGame = {1,mockPlayer};
+    Game mockGame {1};
+    std::cout << "start"<<"\n";
     SGParser p("./lib/gameSpecs/rock_paper_scissors.txt");
+    mockGame.setSource(p.source);
     auto tree = p.getRoot();
     auto rules = p.getRules();
     std::cout << tree.getType()<<"\n";
-    rulesHandler(mockGame,rules);
+    rulesHandler(mockGame,mockGame.gameloop,rules);
     treePrinter("",rules);
     
 
     //std::cout << p.configToJson().dump();
 }
-*/

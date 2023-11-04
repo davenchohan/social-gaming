@@ -1,3 +1,4 @@
+#pragma once
 #include <cpp-tree-sitter.h>
 
 #include <nlohmann/json.hpp>
@@ -14,21 +15,24 @@ class SGParser {
     SGParser(const std::string filepath);
     json setupToJson();
     json configToJson();
-
+    ts::Node getRules();
+    ts::Node getRoot(); 
+    std::string getChildStrByField(ts::Node parent, const std::string field);
+    std::string source;
    private:
     static const std::string rootFields[6];
     static const std::string configFields[2];
     static const std::string setupFields[5];
-    std::string source;
+    
 
     ts::Tree *tree;
 
-    ts::Node getRoot(); 
+    
     ts::Node getConfig();
     ts::Node getVar();
     ts::Node getPerPlayer();
     ts::Node getPerAudience();
-    ts::Node getRules();
+ 
 
-    std::string getChildStrByField(ts::Node parent, const std::string field);
+   
 };
