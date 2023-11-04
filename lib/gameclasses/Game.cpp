@@ -96,4 +96,12 @@ void Game::SetGameProgress(Game::GameProgress progress) {
 Game::GameProgress Game::GetGameProgress() const {
     return gameProgress;
 }
+void Game::setSource(std::string source_ )
+{
+    source = source_;
+
+}
+std::string Game::getSource(){
+    return source;
+}
 

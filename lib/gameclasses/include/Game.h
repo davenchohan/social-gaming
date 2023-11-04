@@ -56,7 +56,9 @@ public:
 
     // Set the progress of the game
     void SetGameProgress(GameProgress progress);
-    ExecutionTree gameloop;  
+    ExecutionTree gameloop;
+    void setSource(std::string source);
+    std::string getSource();  
 
 private: 
     std::string gameName;
@@ -68,6 +70,7 @@ private:
     GameProgress gameProgress;
     std::map<std::string, GameVariable> variables;
     std::map<std::string, GameConstant> constants;
+    std::string source;
     
 };   
 
