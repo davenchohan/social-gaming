@@ -1,5 +1,5 @@
 add_library(constants
-    src/constants.cpp
+    src/Constants.cpp
 )
 
 target_include_directories(constants
