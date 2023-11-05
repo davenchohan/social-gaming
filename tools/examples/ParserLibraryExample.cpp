@@ -20,6 +20,7 @@
 using namespace std;
 
 int main(){
+    /*
     RequestConstructor reqConstructor("ReqCreateGame");
     reqConstructor.appendItem("name", "Gabe");
     reqConstructor.appendItem("name", "Peter");
@@ -42,20 +43,20 @@ int main(){
     if(item2.find("name") != item2.end()){
         std::cout << "Found: " + item2["name"].dump() << std::endl;
     }
-    std::map<std::string, int> ps = {{"Gabe",1234}, {"John",6054}};
-    reqConstructor.appendItem("Players", ps);
-    RequestInfo item3 = reqConstructor.returnReqInfo();
-    cout << "Request: " << item3.request << endl;
-    cout << "GameName: " << item3.gameName << endl;
-    cout << "GameID: " << item3.gameID << endl;
-    cout << "Players: " << endl;
-    for (const auto &ptr : item3.players){
-        cout << ptr.first << " : " << ptr.second << ", ";
-    }
-    cout << endl;
-    cout << "misc: " << item3.misc.dump() << endl;
+    std::vector<Player*> players;
+    Player player1("Gabe", 1234);
+    Player player2("John", 1233);
+    Player player3("Michael", 4444);
+    players.push_back(&player1);
+    players.push_back(&player2);
+    players.push_back(&player3);
+    std::string pl_str = "Players";
+    reqConstructor.appendItem(pl_str, players);
+    auto json_string = reqConstructor.ConstructRequest();
+    cout << json_string << endl;
     cout << "-----------------------------" << endl;
     cout << "-----------------------------" << endl;
+    
     
     cout << "Example use cases for Request Parser" << endl;
     RequestParser parser(str);
@@ -76,10 +77,35 @@ int main(){
     cout << convertedItem.GetUserId() << endl;
     cout << convertedItem.GetPlayerState() << endl;
 
+    std::vector<Player *> players;
     Player player1("Gabe", 1234);
     Player player2("John", 1233);
     Player player3("Michael", 4444);
+    players.push_back(&player1);
+    players.push_back(&player2);
+    */
+    RequestConstructor reqConstructor("ReqCreateGame");
+    reqConstructor.appendItem("name", "Gabe");
+    reqConstructor.appendItem("name", "Peter");
+    reqConstructor.appendItem("GameName", "Rock, Paper, Scissors");
+    std::vector<Player> players;
+    Player player1("Gabe", 1234);
+    Player player2("John", 1233);
+    Player player3("Michael", 4444);
+    players.push_back(player1);
+    players.push_back(player2);
+    players.push_back(player3);
+    std::string pl_str = "Players";
+    reqConstructor.appendItem(pl_str, players);
+    RequestInfo item = reqConstructor.returnReqInfo();
+    cout << "Printing player:" << endl;
+    cout << item.players.front().GetName() << endl;
+    
 
-    Json new_json;
+    auto json_string = reqConstructor.ConstructRequest();
+    cout << json_string << endl;  
+    RequestParser parser(json_string);
+
+
     return 0;
 }

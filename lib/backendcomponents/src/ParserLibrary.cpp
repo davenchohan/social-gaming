@@ -1,23 +1,21 @@
 #include "ParserLibrary.h"
 
-RequestInfo
-RequestConstructor::returnReqInfo(){
-    RequestInfo temp;
-    subject.at("Request").get_to(temp.request);
-    subject.at("GameName").get_to(temp.gameName);
-    subject.at("GameID").get_to(temp.gameID);
-    temp.gameConfig = subject.at("GameConfig");
-    temp.players= subject.at("Players").get_to(temp.players);
-    temp.misc = subject.at("misc");
-    return temp;
+
+//Appends each item from RequestInfo struct into the json object
+RequestConstructor::RequestConstructor(RequestInfo &info){
+    appendItem("Request", info.request);
+    appendItem("GameName", info.gameName);
+    appendItem("GameID", info.gameID);
+    appendItem("GameConfig", info.gameConfig);
+    appendItem("Players", info.players);
+    appendItem("misc", info.misc);
 }
 
 // Sets json item to blank classes, as returnReqInfoFromSubject can be called anytime
-// get_to throws an error if item is null
-RequestConstructor::RequestConstructor(std::string item){
+RequestConstructor::RequestConstructor(std::string request){
     Json blankJson;
     std::map<std::string, int> blankPlayers;
-    subject["Request"] = item;
+    subject["Request"] = request;
     subject["GameName"] = "";
     subject["GameID"] = "";
     subject["GameConfig"] = blankJson;
@@ -29,6 +27,19 @@ std::string RequestConstructor::ConstructRequest(){
     return subject.dump();
 }
 
+RequestInfo 
+RequestConstructor::returnReqInfo(){
+    RequestInfo temp;
+    subject.at("Request").get_to(temp.request);
+    subject.at("GameName").get_to(temp.gameName);
+    subject.at("GameID").get_to(temp.gameID);
+    temp.gameConfig = subject.at("GameConfig");
+    auto players_arr = subject.at("Players");
+    convertJsonToPlayersArr(players_arr, temp.players, this->converter);
+    temp.misc = subject.at("misc");
+    return temp;
+}
+
 // Takes a message received from server and sets the request subject as the parsed JSon item
 // logStr should be in string format 
 RequestParser::RequestParser(std::string& logStr){
@@ -36,7 +47,6 @@ RequestParser::RequestParser(std::string& logStr){
 }
 
 // Expected formats:
-// 
 RequestInfo
 RequestParser::getRequestStruct(){
     RequestInfo retStruct;
@@ -44,7 +54,7 @@ RequestParser::getRequestStruct(){
     subject.at("GameName").get_to(retStruct.gameName);
     subject.at("GameID").get_to(retStruct.gameID);
     retStruct.gameConfig = subject.at("GameConfig");
-    retStruct.players= subject.at("Players").get_to(retStruct.players);
+    convertJsonToPlayersArr(subject.at("Players"), retStruct.players, this->converter);
     retStruct.misc = subject.at("misc");
     return retStruct;
 }
@@ -70,7 +80,7 @@ User JsonConverter::ConvertToUser(const Json &item){
     return User{name, id};
 }
 
-Json JsonConverter::ConvertFromPlayer(Player &player){
+Json JsonConverter::ConvertFromPlayer(Player player){
     Json item;
     item["name"] = player.GetName();
     item["id"] = player.GetUserId();
@@ -118,4 +128,41 @@ GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
     item.at("variableName").get_to(varName);
     item.at("variableValue").get_to(varVal);
     return GameVariable{varName, varVal};
+}
+
+void
+RequestConstructor::appendItem(const std::string key, std::vector<Player> players){
+    std::cout << "app2 called " << std::endl;
+    /*
+    Input(s):
+    - Key: Used to verify if the key is players
+    - vector of Player pointers to be added as a json array
+    */
+   std::string oracle = "Players";
+    if(key != oracle){
+        std::cout << "Error, supplied a vector of Players but key is: " << key << std::endl;
+        return;
+    }else{
+        JsonConverter converter;
+        std::vector<Json> playersArr;
+        std::for_each(players.begin(), players.end(), [&playersArr, &converter](auto &item){
+            Json jitem = converter.ConvertFromPlayer(item);
+            playersArr.push_back(jitem);
+        });
+        subject["Players"] = playersArr;
+        return;
+    }
+}
+
+void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_vector){
+    if(arr.empty()){
+        std::cout << "Empty array passed" << std::endl;
+        return;
+    }else{
+        std::for_each(arr.begin(), arr.end(), [&p_vector, &converter](auto &item){
+            Player temp = ConvertToPlayer(item);
+            p_vector.push_back(temp);
+        });
+        return;
+    }
 }

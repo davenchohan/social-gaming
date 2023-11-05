@@ -90,13 +90,15 @@ TEST(ParserLibraryTests, TestRequestParserReplace){
     EXPECT_EQ(expected, generated);
 }
 
+
 TEST(ParserLibraryTests, TestRequestParserReqInfoBasic){
     RequestConstructor parser("ReqCreateGame");
     parser.appendItem("GameName","Rock,Paper,Scissors");
     Json blankJson;
-    std::map<std::string, int> blankPlayers;
-    RequestInfo expected{"ReqCreateGame", "Rock,Paper,Scissors", "", blankJson, blankPlayers,blankJson};
+    std::vector<Player>pl2;
+    RequestInfo expected{"ReqCreateGame", "Rock,Paper,Scissors", "", blankJson, pl2, blankJson};
     RequestInfo generated = parser.returnReqInfo();
     EXPECT_EQ(generated, expected);
 }
+
 
