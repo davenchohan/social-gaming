@@ -10,10 +10,10 @@
 class GameVariable {
 public:
     // Constructors
-    GameVariable();
-    GameVariable(const std::string& name, const int& intValue);
-    GameVariable(const std::string& name, const double& doubleValue);
-    GameVariable(const std::string& name, const std::string& stringValue);
+    GameVariable(const int& id);
+    GameVariable(const std::string& name, const int id, const int& intValue);
+    GameVariable(const std::string& name, const int id, const double& doubleValue);
+    GameVariable(const std::string& name, const int id, const std::string& stringValue);
 
     // Type retrieval functions
     bool IsInt() const;
@@ -36,8 +36,11 @@ public:
     bool operator==(const GameVariable& other) const;
     bool operator<(const GameVariable& other) const;
 
+    int GetVariableId() const;
+
 private:
     std::variant<int, double, std::string> data;
+    int id;
     std::string variableName;
 };
 

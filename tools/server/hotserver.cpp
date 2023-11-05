@@ -270,7 +270,7 @@ main(int argc, char* argv[]) {
         auto variable = request.gameVariables.find("Rock");
         std::string varName = variable->first;
         std::string varVal = variable->second;
-        GameVariable someVar(varName, varVal);
+        GameVariable someVar(varName, generateUniqueID(), varVal);
         newGame.AddVariable(varName, someVar);
 
         // Add Game to session handler
@@ -322,7 +322,7 @@ main(int argc, char* argv[]) {
           std::string varName = variable->first;
           std::string varVal = variable->second;
           // Create new variable
-          GameVariable someVar(varName, varVal);
+          GameVariable someVar(varName, generateUniqueID(), varVal);
           // Set updated variable
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.GetGame().AddVariable(varName, someVar);

@@ -1,13 +1,11 @@
 #include "GameVariable.h"
 
 // Constructors
-GameVariable::GameVariable() : data(0), variableName("") {}
+GameVariable::GameVariable(const std::string& name, const int id, const int& intValue) : data(intValue), id(id), variableName(name) {}
 
-GameVariable::GameVariable(const std::string& name, const int& intValue) : data(intValue), variableName(name) {}
+GameVariable::GameVariable(const std::string& name, const int id, const double& doubleValue) : data(doubleValue), id(id), variableName(name) {}
 
-GameVariable::GameVariable(const std::string& name, const double& doubleValue) : data(doubleValue), variableName(name) {}
-
-GameVariable::GameVariable(const std::string& name, const std::string& stringValue) : data(stringValue), variableName(name) {}
+GameVariable::GameVariable(const std::string& name, const int id, const std::string& stringValue) : data(stringValue), id(id), variableName(name) {}
 
 // Type retrieval functions
 bool GameVariable::IsInt() const {
@@ -22,13 +20,17 @@ bool GameVariable::IsString() const {
     return data.index() == 2;
 }
 
+int GameVariable::GetVariableId() const {
+    return id;
+}
+
 // Overloaded comparison operators
 bool GameVariable::operator==(const GameVariable& other) const {
-    return this->data == other.data;
+    return this->GetVariableId() == other.GetVariableId();
 }
 
 bool GameVariable::operator<(const GameVariable& other) const {
-    return this->data < other.data;
+    return this->GetVariableId() < other.GetVariableId();
 }
 
 std::string GameVariable::GetName() const {
