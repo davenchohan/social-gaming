@@ -35,7 +35,7 @@ RequestConstructor::returnReqInfo(){
     subject.at("GameID").get_to(temp.gameID);
     temp.gameConfig = subject.at("GameConfig");
     auto players_arr = subject.at("Players");
-    convertJsonToPlayersArr(players_arr, temp.players, this->converter);
+    converter.convertJsonToPlayersArr(players_arr, temp.players);
     temp.misc = subject.at("misc");
     return temp;
 }
@@ -54,7 +54,7 @@ RequestParser::getRequestStruct(){
     subject.at("GameName").get_to(retStruct.gameName);
     subject.at("GameID").get_to(retStruct.gameID);
     retStruct.gameConfig = subject.at("GameConfig");
-    convertJsonToPlayersArr(subject.at("Players"), retStruct.players, this->converter);
+    converter.convertJsonToPlayersArr(subject.at("Players"), retStruct.players);
     retStruct.misc = subject.at("misc");
     return retStruct;
 }
@@ -159,8 +159,8 @@ void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_ve
         std::cout << "Empty array passed" << std::endl;
         return;
     }else{
-        std::for_each(arr.begin(), arr.end(), [&p_vector, &converter](auto &item){
-            Player temp = ConvertToPlayer(item);
+        std::for_each(arr.begin(), arr.end(), [&p_vector, this](auto &item){
+            Player temp = this->ConvertToPlayer(item);
             p_vector.push_back(temp);
         });
         return;

@@ -58,7 +58,7 @@ public:
     Player ConvertToPlayer(const Json&);
     AudienceMember ConvertToAudienceMember(const Json&);
     GameVariable ConvertToGameVariable(const Json&);
-    virtual void convertJsonToPlayersArr(Json&, std::vector<Player>&, JsonConverter&)
+    virtual void convertJsonToPlayersArr(Json&, std::vector<Player>&);
 };
 
 class RequestConstructor{
