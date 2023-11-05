@@ -369,13 +369,14 @@ main(int argc, char* argv[]) {
           server_response = "DemoReqGetGame Failure: No such game\n";
         }
         std::cout << server_response << std::endl;
-      }else if(request.request == "GetGame"){
-        if(sessionHandlerDB.DoesSessionExist(request.gameId)){
-          auto session = sessionHandlerDB.GetGameSessionHandler(request.gameId);
-          
-        }else{
+      }else if(request.request == "ReqGetGame"){
+        auto game = serverGameList.GetGameSpec(request.gameName);
+        // append game config into RequestConstructor object
 
-        }
+        // call constructor.ConstructRequest();
+
+        // initialize server response as constructed request
+
       }else{
         std::cout << "Bad Request: " + request.request << std::endl;
         throw UnknownRequestException("Unknown Request: " + request.request);
