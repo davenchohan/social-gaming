@@ -60,6 +60,10 @@ public:
     void setSource(std::string source);
     std::string getSource();  
 
+    bool operator==(const Game& other) const;
+
+    bool operator<(const Game& other) const;
+
 private: 
     std::string gameName;
     int gameId;
