@@ -105,3 +105,10 @@ std::string Game::getSource(){
     return source;
 }
 
+bool Game::operator==(const Game& other) const {
+    return this->GetGameId() == other.GetGameId();
+}
+
+bool Game::operator<(const Game& other) const {
+    return this->GetGameId() < other.GetGameId();
+}

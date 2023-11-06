@@ -14,3 +14,11 @@ std::string User::GetName() const {
 int User::GetUserId() const {
     return uniqueUserId;
 }
+
+bool User::operator==(const User& other) const {
+    return this->GetUserId() == other.GetUserId();
+}
+
+bool User::operator<(const User& other) const {
+    return this->GetUserId() < other.GetUserId();
+}
