@@ -29,7 +29,7 @@ void treePrinter(const std::string& prefix,ts::Node parent){
     if (!parent.isNull()){
         auto numNodes = parent.getNumChildren();
         //std::cout <<"num children" << numNodes << "\n";
-        int i = 0;
+        size_t i = 0;
         if(numNodes != 0){
             while( i < numNodes  ){
                 std::cout<< prefix;
@@ -131,7 +131,7 @@ ExpressionNode parseExpression(Game &active, ExecutionTree& tree,ts::Node node){
 void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node){
     std::cout<<node.getType()<<"\n";
     if((std::string)node.getType() == "expression"){
-        for(auto i = 0; i < node.getNumChildren(); i++){
+        for(size_t i = 0; i < node.getNumChildren(); i++){
             recursiveIdent(active, identifiers, node.getChild(i));
         }        
     }
@@ -361,7 +361,7 @@ void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node){
 }
 void bodyHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
     auto numRules = node.getNumChildren();
-    for(int i = 1; i < numRules-1;i++){
+    for(size_t i = 1; i < numRules-1;i++){
         std::cout<< i << " child of "<< numRules<<"" << node.getType()<<"\n";
         ruleVisitor(active,tree ,node.getChild(i));
     }

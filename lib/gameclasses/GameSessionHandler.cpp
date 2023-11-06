@@ -82,3 +82,11 @@ Player GameSessionHandler::GetHost() const {
 void GameSessionHandler::SetHost(Player& gameHost) {
     host = gameHost;
 }
+
+bool GameSessionHandler::operator==(const GameSessionHandler& other) const {
+    return this->GetSessionId() == other.GetSessionId();
+}
+
+bool GameSessionHandler::operator<(const GameSessionHandler& other) const {
+    return this->GetSessionId() < other.GetSessionId();
+}

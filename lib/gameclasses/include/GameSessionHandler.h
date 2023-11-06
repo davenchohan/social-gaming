@@ -4,8 +4,6 @@
 #include <map>
 #include "Player.h"
 #include "AudienceMember.h"
-#include "GameVariable.h"
-#include "GameConstant.h"
 #include "Game.h"
 
 // TODO: HANDLE USER INPUT, SENDING GAMESTATE TO FRONT END, END THE SESSION
@@ -51,6 +49,9 @@ public:
     void getUserInput();
 
     int GetSessionId() const;
+
+    bool operator==(const GameSessionHandler& other) const;
+    bool operator<(const GameSessionHandler& other) const;
 
 private:
     std::map<std::string, Player> players;

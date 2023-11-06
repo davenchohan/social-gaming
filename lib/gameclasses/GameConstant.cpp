@@ -10,3 +10,13 @@ GameConstant::GameConstant(const std::string& name, const std::string& value) {
 std::string GameConstant::GetConstantValue() const {
     return constantValue;
 }
+
+// Overloaded comparison operators
+bool GameConstant::operator==(const GameConstant& other) const {
+    return this->GetConstantValue() == other.GetConstantValue();
+}
+
+bool GameConstant::operator<(const GameConstant& other) const {
+    return this->GetConstantValue() < other.GetConstantValue();
+}
+
