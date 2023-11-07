@@ -89,6 +89,18 @@ void addParagraphBlock(std::vector<std::vector<Element>> &list) {
 
   list.push_back(values);
 }
+// void addElements(ComponentData &cd) {
+//   std::vector<Element> values;
+//   int block_num = list.size() + 1;
+//   int random = std::rand() % 10;
+//   for(int i = 0; i < random; i++) {
+//     values.push_back(paragraph("#" + std::to_string(block_num) + "-" + std::to_string(i + 1)));
+//   }
+
+//   cd.elms.push_back(values);
+// }
+
+
 
 
 void addParagraphBlockPointerVer(std::vector<std::shared_ptr<Component>> &components_list, std::vector<std::vector<std::shared_ptr<Element>>> &paragraphs_list) {
@@ -194,7 +206,7 @@ int main(int argc, char* argv[]) {
   std::string game_session_name;
 
   // EXPERIMENTING COMPONENT GENERATION
-  std::vector<ComponentData> data_list;
+  // std::vector<ComponentData> data_list;
   std::vector<std::string> dummy_list {
     "dummy1:; Lorem Ipsum is simply dummy text of the print.",
     "dummy2: There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.",
@@ -204,8 +216,8 @@ int main(int argc, char* argv[]) {
   int dummy_selected = 0;
   // ComponentData dummy_data{dummy_list, dummy_string, dummy_selected};
   // GameComponent dummy_game_component{constants::GameComponentType::DISPLAY, dummy_data};
-  ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
-  data_list.push_back(test_game_component_data);
+  // ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
+  // data_list.push_back(test_game_component_data);
   std::vector<std::string> item1;
   item1.push_back("item1: Option 1");
   item1.push_back("item1: Option 2");
@@ -328,7 +340,7 @@ int main(int argc, char* argv[]) {
     for (const auto& component_ptr : game_page_components_pointers) {
         components.push_back(*component_ptr);
     }
-  auto pageContent = Container::Vertical(components);
+  // auto pageContent = Container::Vertical(components);
   // auto pageContent = Container::Vertical({
   //   Renderer([&] {
   //       return paragraph("No componenets");
@@ -353,9 +365,51 @@ int main(int argc, char* argv[]) {
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
-  // the component passed into here will need to be called with -> Render() again in the actual renderer 
+  // the component passed into here will need to be called with -> Render() again in the actual renderer
+
+  std::vector<std::string> dataset1;
+  dataset1.push_back("dataset1 #1");
+  dataset1.push_back("dataset1 #2");
+  dataset1.push_back("dataset1 #3");
+
+  std::vector<std::string> dataset2;
+  dataset2.push_back("dataset2 #1");
+  dataset2.push_back("dataset2 #2");
+  dataset2.push_back("dataset2 #3");
+
+  std::vector<std::string> dataset3;
+  dataset3.push_back("dataset3 #1");
+  dataset3.push_back("dataset3 #2");
+  dataset3.push_back("dataset3 #3");
+
+  ComponentData cd{};
+  cd.addComponent(dataset1);
+  cd.addComponent(dataset2);
+  cd.addComponent(dataset3);
+
+
+
+  // parts
+  std::vector<std::string> radio1;
+  radio1.push_back("radio1 - option1");
+  radio1.push_back("radio1 - option2");
+  radio1.push_back("radio1 - option3");
+  std::vector<std::string> radio2;
+  radio1.push_back("radio2 - option1");
+  radio1.push_back("radio2 - option2");
+  radio1.push_back("radio2 - option3");
+  cd.addComponent(radio1);
+  cd.addComponent(radio2);
+
+  auto pageContent = Container::Vertical(cd.getComponents());
+
+  // works
+  // auto pageContent = Container::Vertical({
+  //   Pages::ParagraphBlock(cd.elms),
+  // });
+
   auto main_container = Container::Vertical({
-    homeButton,
+    // homeButton,
     pageContent,
   });
 
@@ -368,27 +422,32 @@ int main(int argc, char* argv[]) {
   // the initial component that gets passed into the Renderer seems to be the only one that is interactive
   // multiple components can be grouped into containers so that multiple can be interactive 
   // ###########################################################
-  auto renderer = Renderer(main_container, [&] {
-    return vbox({
-      hbox({
-        homeButton->Render(),
-        filler(),
-        text("Hot Root Soup"),
-      }),
-      // filler(),
-      hbox({
-        // filler(),
-        pageContent->Render(),
-        // filler(),
-      }) | flex | borderStyled(ROUNDED),
-      // filler(),
-      hbox({
-        // history.back(),
-        paragraph(test_json_response) | color(Color::GreenLight),
-      }),
-      // history.back() | flex,
-    }) | flex;
+
+  auto renderer = Renderer(pageContent, [&] {
+    return hbox({
+      pageContent->Render(),
+    });
   });
+
+  // auto renderer = Renderer(main_container, [&] {
+  //   return vbox({
+  //     // hbox({
+  //     //   homeButton->Render(),
+  //     //   filler(),
+  //     //   text("Hot Root Soup"),
+  //     // }),
+
+  //     // hbox({
+  //     //   pageContent->Render(),
+  //     // }) | flex | borderStyled(ROUNDED),
+  //     hbox({
+  //       paragraph(cd.numberOfComponents()),
+  //     }),
+  //     hbox({
+  //       paragraph(test_json_response) | color(Color::GreenLight),
+  //     }),
+  //   }) | flex;
+  // });
 
   auto screen = ScreenInteractive::Fullscreen();
 
