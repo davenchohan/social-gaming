@@ -166,7 +166,6 @@ Json JsonConverter::ConvertFromGameVariable(GameVariable &var){
 }
 void
 RequestConstructor::appendItem(const std::string key, std::vector<Player> players){
-    std::cout << "app2 called " << std::endl;
     /*
     Input(s):
     - Key: Used to verify if the key is players
@@ -177,15 +176,31 @@ RequestConstructor::appendItem(const std::string key, std::vector<Player> player
         std::cout << "Error, supplied a vector of Players but key is: " << key << std::endl;
         return;
     }else{
-        JsonConverter converter;
         std::vector<Json> playersArr;
-        std::for_each(players.begin(), players.end(), [&playersArr, &converter](auto &item){
-            Json jitem = converter.ConvertFromPlayer(item);
+        std::for_each(players.begin(), players.end(), [&playersArr, this](auto &item){
+            Json jitem = this->converter.ConvertFromPlayer(item);
             playersArr.push_back(jitem);
         });
         subject["Players"] = playersArr;
         return;
     }
+}
+
+void RequestConstructor::appendItem(const std::string key, std::vector<AudienceMember> members){
+    std::string oracle = "AudienceMembers";
+    if(key != oracle){
+        std::cout << "Error, supplied a vector of Audience members but key is: " << key << std::endl;
+        return;
+    }else{
+        std::vector<Json> membersArr;
+        std::for_each(members.begin(), members.end(), [&membersArr, this](auto &item){
+            Json jitem = this->converter.ConvertFromAudienceMember(item);
+            membersArr.push_back(jitem);
+        });
+        subject["AudienceMembers"] = membersArr;
+        return;
+    }
+    return;
 }
 
 void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_vector){

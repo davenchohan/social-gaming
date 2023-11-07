@@ -75,7 +75,7 @@ public:
     template <class T1> void appendItem(const std::string key, const T1 val){ subject[key] = val;}
     // Override appendItem function for custom behaviour when appending a list of players into request
     void appendItem(const std::string , const std::vector<Player>);
-    void appendItem(const std::string key, const std::vector<AudienceMember> members){};
+    void appendItem(const std::string key, const std::vector<AudienceMember> members);
     std::string ConstructRequest();
     RequestInfo returnReqInfo();
 };
