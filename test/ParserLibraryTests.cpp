@@ -106,7 +106,7 @@ TEST(ParserLibraryTests, TestRequestParserConstructor){
     req.gameName = "Chess";
     req.gameID = "1111";
     req.request = "ReqGetGame";
-    std::vector<Player> players = {Player{"Gabe", "1234"}, Player{"Peter", "1212"}};
+    std::vector<Player> players = {Player{"Gabe", 1234}, Player{"Peter", 1212}};
     req.players = players;
     Json blankJson;
     req.gameConfig = blankJson;
@@ -114,7 +114,8 @@ TEST(ParserLibraryTests, TestRequestParserConstructor){
     RequestConstructor constructor(req);
 
     auto generated = constructor.ConstructRequest();
-    EXPECT_EQ(generated, "");
+    auto expected = "{\"GameConfig\":null,\"GameID\":\"1111\",\"GameName\":\"Chess\",\"Players\":[{\"id\":1234,\"name\":\"Gabe\",\"playerState\":\"WaitingTurn\"},{\"id\":1212,\"name\":\"Peter\",\"playerState\":\"WaitingTurn\"}],\"Request\":\"ReqGetGame\",\"misc\":null}";
+    EXPECT_EQ(generated, expected);
 }
 
 

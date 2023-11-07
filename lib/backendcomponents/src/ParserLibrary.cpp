@@ -123,11 +123,14 @@ AudienceMember JsonConverter::ConvertToAudienceMember(const Json&item){
 }
 
 GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
+    /*
     std::string varName;
     std::string varVal;
     item.at("variableName").get_to(varName);
     item.at("variableValue").get_to(varVal);
-    return GameVariable{varName, varVal};
+    */
+   int val = 0;
+   return GameVariable{val};
 }
 
 void

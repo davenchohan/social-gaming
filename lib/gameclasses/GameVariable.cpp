@@ -1,6 +1,7 @@
 #include "GameVariable.h"
 
 // Constructors
+GameVariable::GameVariable(const int &id) : id(id) {} 
 GameVariable::GameVariable(const std::string& name, const int id, const int& intValue) : data(intValue), id(id), variableName(name) {}
 
 GameVariable::GameVariable(const std::string& name, const int id, const double& doubleValue) : data(doubleValue), id(id), variableName(name) {}
