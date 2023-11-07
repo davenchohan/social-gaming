@@ -1,4 +1,6 @@
 #include "ParserLibrary.h"
+#include <typeinfo>
+#include <limits>
 
 
 //Appends each item from RequestInfo struct into the json object
@@ -123,16 +125,45 @@ AudienceMember JsonConverter::ConvertToAudienceMember(const Json&item){
 }
 
 GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
-    /*
-    std::string varName;
-    std::string varVal;
+   int varId;
+   std::string varName;
+   item.at("varId").get_to(varId);
+   try{
     item.at("variableName").get_to(varName);
-    item.at("variableValue").get_to(varVal);
-    */
-   int val = 0;
-   return GameVariable{val};
+    std::string strVal = item.value("stringVal", "");
+    double doubleVal = item.value("doubleVal", std::numeric_limits<double>::min());
+    int intVal = item.value("intVal", std::numeric_limits<int>::min() );
+    
+    // Can only have 1 of the below data types
+    if (doubleVal != std::numeric_limits<double>::min()){
+        return GameVariable{varName, varId, doubleVal};
+    }else if (intVal != std::numeric_limits<int>::min()){
+        return GameVariable{varName, varId, intVal};
+    }else if(strVal!= ""){ 
+        return GameVariable{varName, varId, strVal};
+    }else{
+        std::cout << "ERROR, could not parse Game variables from: " + item.dump() + ", item did not have a valid type" << std::endl;
+        return GameVariable{varId};
+    }
+   }
+   catch(const Json::type_error &e){
+    return GameVariable{varId};
+   }
 }
 
+Json JsonConverter::ConvertFromGameVariable(GameVariable &var){
+    Json item;
+    item["variableName"] = var.GetName();
+    item["varId"] = var.GetVariableId();
+    if(var.IsInt()){
+        item["intVal"] = var.GetData<int>();
+    }else if(var.IsString()){
+        item["doubleVal"] = var.GetData<std::string>();
+    }else if(var.IsDouble()){
+        item["strVal"] = var.GetData<double>();
+    }
+    return item;
+}
 void
 RequestConstructor::appendItem(const std::string key, std::vector<Player> players){
     std::cout << "app2 called " << std::endl;

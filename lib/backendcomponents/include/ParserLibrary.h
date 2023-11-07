@@ -53,11 +53,13 @@ public:
     Json GetJsonItem(const std::string);
     Json ConvertFromUser(User&);
     Json ConvertFromAudienceMember(AudienceMember &);
+    Json ConvertFromGameVariable(GameVariable&);
 
     User ConvertToUser(const Json &);
     Player ConvertToPlayer(const Json&);
     AudienceMember ConvertToAudienceMember(const Json&);
     GameVariable ConvertToGameVariable(const Json&);
+
     virtual void convertJsonToPlayersArr(Json&, std::vector<Player>&);
 };
 
