@@ -169,7 +169,7 @@ RequestConstructor::appendItem(const std::string key, std::vector<Player> player
     /*
     Input(s):
     - Key: Used to verify if the key is players
-    - vector of Player pointers to be added as a json array
+    - vector of Player to be added as a json array
     */
    std::string oracle = "Players";
     if(key != oracle){
@@ -187,6 +187,11 @@ RequestConstructor::appendItem(const std::string key, std::vector<Player> player
 }
 
 void RequestConstructor::appendItem(const std::string key, std::vector<AudienceMember> members){
+    /*
+    Input(s):
+    - Key: Used to verify if the key is players
+    - vector of Audience Members to be added as a json array
+    */
     std::string oracle = "AudienceMembers";
     if(key != oracle){
         std::cout << "Error, supplied a vector of Audience members but key is: " << key << std::endl;
