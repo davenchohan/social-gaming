@@ -1,4 +1,5 @@
 #include "TestGameComponent.h"
+#include "ClientWrapper.h"
 
 using namespace ftxui;
 
@@ -63,30 +64,43 @@ Component TestGamePage(std::vector<ComponentData> &data, networking::Client &cli
 };
 */
 
-Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list) {
-    auto game_selector = Radiobox(&values[0], &selected_items[0]);
+Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list,
+    Elements &texts, std::vector<std::string> &options, int &selection, networking::Client &client) {
+    // auto game_selector = Radiobox(&values[0], &selected_items[0]);
+    // auto block = Container::Vertical({
+    //     selector,
+    //     Renderer([&] {
+    //         return paragraph("First selected item: ");
+    //     }),
+    //     Renderer([&] {
+    //         return paragraph(std::to_string(selected_items[0]));
+    //     }),
+    //     Renderer([&] {
+    //         return paragraph("Second selected item: ");
+    //     }),
+    //     Renderer([&] {
+    //         return paragraph(std::to_string(selected_items[1]));
+    //     }),
+    //     Renderer([&] {
+    //         return vbox(text_list);
+    //     }),
+    // });
+    // networking::ClientWrapper wrapper;
+
+    auto selector = Radiobox(&options, &selection);
     auto block = Container::Vertical({
-        game_selector,
         Renderer([&] {
-            return paragraph("First selected item: ");
+            return vbox(texts);
         }),
-        Renderer([&] {
-            return paragraph(std::to_string(selected_items[0]));
-        }),
-        Renderer([&] {
-            return paragraph("Second selected item: ");
-        }),
-        Renderer([&] {
-            return paragraph(std::to_string(selected_items[1]));
-        }),
-        Renderer([&] {
-            return vbox(text_list);
+        selector,
+        Container::Horizontal({
+            Button("Submit Selection", [&] {
+                // GetGame getGame = GetGame("252434");
+                // wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame, client);
+            }),
         }),
     });
     return block;
 }
 
-// Component ComponentBlock(constants::GameComponentType type, ::vector<std::string> &values, int &selected) {
-//     // if(type == constants::GameComponentType::DISPLAY) {}
-// }
 }
