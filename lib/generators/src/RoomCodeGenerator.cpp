@@ -12,8 +12,9 @@ std::string RoomCodeGenerator::generateRoomCode() {
     const std::string alphanumericCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const int codeLength = 6;
     std::string code;
+    code.reserve(codeLength);
     for (int i = 0; i < codeLength; i++) {
-        code += alphanumericCharacters[getRandomNumber(0, alphanumericCharacters.length() - 1)];
+        code.push_back(alphanumericCharacters[getRandomNumber(0, alphanumericCharacters.length() - 1)]);
     }
     return code;
 }
