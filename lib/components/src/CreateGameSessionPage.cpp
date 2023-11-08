@@ -10,6 +10,7 @@
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp" 
 #include "CreateGameSessionPage.h"
+
 #include "ClientWrapper.h"
 #include "Constants.h"
 
@@ -68,6 +69,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
           selectedGameTitle,
           title3,
           Input(&session_name, "Enter game session name."),
+          //gameConfig,
           Renderer([] {
                return filler();
             }),

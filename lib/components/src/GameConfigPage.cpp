@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include "Client.h"
 #include "ftxui/component/captured_mouse.hpp" // for ftxui
 #include "ftxui/component/component.hpp"
@@ -15,37 +16,36 @@
 
 
 
-Class InputData{
+class InputData{
   public:
-  std::vector<std::string> input;
   std::map<std::string, std::string&> inputFields;
 
-//maybe avoid strings here?
-  void addInput(std::string value){
-    input.push_back(value);
-  }
 
-  void addInputField(std::string key, std::string value&){
-    inputFields.insert(key, value);
+  void addInputField(std::string key, std::string& value){
+    inputFields.insert({key, value});
   }
 
   std::string toJson(){
     std::string result;
-    //TODO: process input map into JSON
     /**
      * IE -
-     * Input = {
-     * "key":"value",
-     * "key2":"value2"
-     * }
-    */
+     *  {"key":"value", "key2":"value2"}
+    */  
+    result.append("{");
+    for(auto const& [key, val] : inputFields){
+      result.append(key);
+      result.append(":");
+      result.append(val);
+      result.append(", ");
+    }
+    result.append("}");
     return result;
   }
   private:
-}
+};
 
 //TODO: make this load after hitting next on game selection page.
-//TODO: 
+
 //TODO: look into bug where demo list loads before we receive list from server
 using namespace ftxui;
 namespace Pages
@@ -67,16 +67,14 @@ Component GameConfig(int &create_pagenum, std::string &session_name, std::vector
   Component num_rounds = Input(&input_num_rounds, "Number of Rounds");
   
 
-  data.addInputfield("num_rounds");
+  data.addInputField("num_rounds", input_num_rounds);
   
 
   
 
 
   auto configPage = Container::Vertical({
-    num_players,
-    questions,
-    answers,
+    num_rounds,
     Renderer([] {
       return filler();
     }),
@@ -85,18 +83,15 @@ Component GameConfig(int &create_pagenum, std::string &session_name, std::vector
       Button("Back", [&]{
         wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
         //TODO:Make this return to game select screen
-      })
+      }),
       Renderer([] {
       return filler();
       }),
       Button("Create", [&]{
-        for (int i = 0; i < data.input.size(); i++)
-        {
-          data.addInput()
-        }
         
         
-        //not sure what reqtype to send
+        
+        
         //TODO:verify this is correct
         //wrapper.sendReq(constants::ReqType::STARTGAME, data.toJSON(), client);
         
@@ -105,7 +100,7 @@ Component GameConfig(int &create_pagenum, std::string &session_name, std::vector
 
       })
     })
-  })
+  });
   
 
 
