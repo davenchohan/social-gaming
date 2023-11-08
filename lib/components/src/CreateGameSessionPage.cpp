@@ -59,6 +59,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
 
 
                create_pagenum++;
+
             }),
         }) | flex,
      });
