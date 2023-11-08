@@ -53,6 +53,9 @@ public:
     bool operator==(const GameSessionHandler& other) const;
     bool operator<(const GameSessionHandler& other) const;
 
+    void SetRoomCode(std::string newRoomCode);
+    std::string GetRoomCode() const;
+
 private:
     std::map<std::string, Player> players;
     std::map<std::string, AudienceMember> audienceMembers;
@@ -60,6 +63,7 @@ private:
     int sessionId;
     Game game;
     Player host;
+    std::string roomCode;
 };
 
 #endif

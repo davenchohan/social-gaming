@@ -22,3 +22,8 @@ target_link_libraries(networking
 PRIVATE
   executionnodes
 )
+
+target_link_libraries(backendClasses
+PRIVATE
+  generators
+)
