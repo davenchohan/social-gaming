@@ -7,6 +7,8 @@
 #include "CreateGamePage.h"
 #include "JoinGamePage.h"
 #include "CreateGameSessionPage.h"
+// #include "GamePlayPage.h"
+#include "TestGameComponent.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
@@ -14,15 +16,19 @@
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
 #include "Constants.h"
+#include "GameComponent.h"
+
+// #include "GameComponentsManager.h"
 
 using namespace ftxui;
+// using namespace ui;
 
 
 
 // FUNCTIONS #####################################################
 // ###########################################################
 // placeholder (until parser library is implemented)
-std::vector<std::string> parseServerResponseGameList(const std::string &response) {
+std::vector<std::string> parseServerResponseGameList(const std::string &response, std::vector<Element> &text_list) {
 
     // find the start of json
     size_t start = response.find('[');
@@ -45,6 +51,7 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
                     std::string game{games.substr(0, position)};
                     // std::cout << "found: " << game << std::endl;
                     result_list.push_back(game);
+                    text_list.push_back(paragraph(game));
                     start = false;
                 }else {
                     // found teh start
@@ -70,6 +77,9 @@ std::string parseServerResponseType(const std::string &response) {
     std::string reqType{response_view.substr(0, second_space)};
     return reqType;
 }
+
+// (still testing out design) function that manages dynamiclly generated components for the game play page
+// void addParagraphComponent()
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -124,6 +134,8 @@ int main(int argc, char* argv[]) {
       client.send(std::move(text));
     }
   };
+  // screen view state 0: landing page 1: game play
+  int view_state = 0;
   
 
   // DATA - landing page
@@ -150,6 +162,55 @@ int main(int argc, char* argv[]) {
   int create_pagenum = 0;
   std::string game_session_name;
 
+  // EXPERIMENTING COMPONENT GENERATION
+  std::vector<ComponentData> data_list;
+  std::vector<std::string> dummy_list {
+    "dummy1:; Lorem Ipsum is simply dummy text of the print.",
+    "dummy2: There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.",
+    "dummy3: Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
+  };
+  std::string dummy_string = "Just testing component generation prototype!";
+  int dummy_selected = 0;
+  // ComponentData dummy_data{dummy_list, dummy_string, dummy_selected};
+  // GameComponent dummy_game_component{constants::GameComponentType::DISPLAY, dummy_data};
+  ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
+  data_list.push_back(test_game_component_data);
+  std::vector<std::string> item1;
+  item1.push_back("item1: Option 1");
+  item1.push_back("item1: Option 2");
+  item1.push_back("item1: Option 3");
+  std::vector<std::string> item2;
+  item1.push_back("item2: Option 1");
+  item1.push_back("item2: Option 2");
+  item1.push_back("item2: Option 3");
+  std::vector<std::vector<std::string>> block_data;
+  block_data.push_back(item1);
+  block_data.push_back(item2);
+  int selected_item1 = 0;
+  int selected_item2 = 0;
+  std::vector<int> selected_items;
+  selected_items.push_back(selected_item1);
+  selected_items.push_back(selected_item2);
+
+  std::vector<Element> text_list;
+  text_list.push_back(paragraph("Randome text1"));
+  text_list.push_back(paragraph("Randome text2"));
+  text_list.push_back(paragraph("Randome text3"));
+  text_list.push_back(paragraph("Randome text4"));
+  std::vector<Element> text_list2;
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text1"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text2"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text3"));
+  text_list2.push_back(paragraph("TEXT_LIST2: Randome text4"));
+
+  std::vector<Component> game_page_components;
+
+  // Data for Game UI MVP
+  Elements texts; // DISPLAY
+  std::vector<std::string> options; // SINGLE_SELECT
+  int selection = 0;
+
+
 
 // COMPONENTS ################################################
 // page components
@@ -159,11 +220,17 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, client);
+  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state, client);
   auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
 
-  // MAIN PAGE 
+  // MAIN PAGES
   auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
+  // auto gamePlayPageElements = Pages::GamePlay(view_state, dummy_game_component, client);
+
+  // testing page with dynamic components
+  // auto testGamePageElements = Pages::TestGamePage(data_list, client);
+  auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list, texts, options, selection, client);
+  game_page_components.push_back(testGamePageElements);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -174,7 +241,11 @@ int main(int argc, char* argv[]) {
     Container::Horizontal({
       Button(
         "Home", [&] { 
-          client.send(std::move("home"));
+          view_state = 0;
+          // reset game component data
+          texts.clear();
+          options.clear();
+          selection = 0;
         }, ButtonStyle()
       ), 
     }) | flex,
@@ -184,8 +255,15 @@ int main(int argc, char* argv[]) {
   // the first argument is the component the second is the boolean
   // we will use this to render the different pages requrired for the desktop
   // by passing the components into this as a component and then having the renderer call render on page content 
+
+  // PASSING LIST OF COMPONENTS
+  // auto pageContent = Container::Vertical(game_page_components) | flex;
+
+
   auto pageContent = Container::Vertical({
-    landingPageElements,
+    landingPageElements | Maybe([&] {return view_state == 0;}),
+    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
+    testGamePageElements | Maybe([&] {return view_state == 1;}),
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
@@ -267,7 +345,8 @@ int main(int argc, char* argv[]) {
 
       // handle based on reponse type
       if(reqType == "DemoReqGetGamesList") {
-          radiobox_list = parseServerResponseGameList(response);
+          radiobox_list = parseServerResponseGameList(response, text_list);
+          options = parseServerResponseGameList(response, texts);
       }
 
       screen.RequestAnimationFrame();
