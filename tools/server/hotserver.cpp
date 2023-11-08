@@ -118,6 +118,30 @@ void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<st
   return;
 }
 
+/*
+bool evaluateFilledGame(std::map<std::string, std::string> &gameSpec, std::map<std::string, std:string> &receivedItems) {
+  if (gameSpec.size() != receivedItems.size()) {
+    return false;
+  }
+  for (const auto item : gameSpec) {
+    if (receivedItems.find(item.first) == receivedItems.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+*/
+
+//function to instantiate game from server request
+Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
+  Game newGame(stoi(gameRequest.gameId));
+  for (auto variable: gameRequest.gameVariables) {
+    GameVariable newVariable(variable.first, variable.second); 
+    newGame.AddVariable(variable.first, newVariable);
+  }
+  return newGame;
+}
+
 void
 onConnect(Connection c) {
   std::cout << "New connection found: " << c.id << "\n";
