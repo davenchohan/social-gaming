@@ -18,7 +18,9 @@ target_include_directories(backendClasses
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(networking
+
+target_link_libraries(backendClasses
 PRIVATE
   executionnodes
+  generators
 )
