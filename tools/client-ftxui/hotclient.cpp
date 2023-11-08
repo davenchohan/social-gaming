@@ -344,7 +344,7 @@ int main(int argc, char* argv[]) {
       std::string reqType = parseServerResponseType(response);
 
       // handle based on reponse type
-      if(reqType == "DemoReqGetGamesList") {
+      if(reqType == "ReqGetGamesList") {
           radiobox_list = parseServerResponseGameList(response, text_list);
           options = parseServerResponseGameList(response, texts);
       }

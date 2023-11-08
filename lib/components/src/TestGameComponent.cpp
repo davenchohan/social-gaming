@@ -96,7 +96,7 @@ Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vecto
         Container::Horizontal({
             Button("Submit Selection", [&] {
                 // GetGame getGame = GetGame("252434");
-                // wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame, client);
+                // wrapper.sendReq(constants::ReqType::GETGAME, getGame, client);
             }),
         }),
     });
