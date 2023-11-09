@@ -96,4 +96,19 @@ void Game::SetGameProgress(Game::GameProgress progress) {
 Game::GameProgress Game::GetGameProgress() const {
     return gameProgress;
 }
+void Game::setSource(std::string source_ )
+{
+    source = source_;
 
+}
+std::string Game::getSource(){
+    return source;
+}
+
+bool Game::operator==(const Game& other) const {
+    return this->GetGameId() == other.GetGameId();
+}
+
+bool Game::operator<(const Game& other) const {
+    return this->GetGameId() < other.GetGameId();
+}

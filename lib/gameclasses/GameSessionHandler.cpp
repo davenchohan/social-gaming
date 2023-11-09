@@ -82,3 +82,21 @@ Player GameSessionHandler::GetHost() const {
 void GameSessionHandler::SetHost(Player& gameHost) {
     host = gameHost;
 }
+
+bool GameSessionHandler::operator==(const GameSessionHandler& other) const {
+    return this->GetSessionId() == other.GetSessionId();
+}
+
+bool GameSessionHandler::operator<(const GameSessionHandler& other) const {
+    return this->GetSessionId() < other.GetSessionId();
+}
+
+// Get the room code
+std::string GameSessionHandler::GetRoomCode() const {
+    return roomCode;
+}
+
+// Set the room code
+void GameSessionHandler::SetRoomCode(std::string newRoomCode) {
+    roomCode = newRoomCode;
+}

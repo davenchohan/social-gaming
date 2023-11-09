@@ -1,8 +1,8 @@
-add_library(constants
-    src/Constants.cpp
+add_library(datatypes
+    src/DataTypes.cpp
 )
 
-target_include_directories(constants
+target_include_directories(datatypes
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -10,12 +10,12 @@ target_include_directories(constants
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-set_target_properties(constants
+set_target_properties(datatypes
                       PROPERTIES
                       LINKER_LANGUAGE CXX
                       CXX_STANDARD 17
 )
 
-install(TARGETS constants
+install(TARGETS datatypes
   ARCHIVE DESTINATION lib
 )

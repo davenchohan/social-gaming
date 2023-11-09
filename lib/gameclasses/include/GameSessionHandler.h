@@ -4,8 +4,6 @@
 #include <map>
 #include "Player.h"
 #include "AudienceMember.h"
-#include "GameVariable.h"
-#include "GameConstant.h"
 #include "Game.h"
 
 // TODO: HANDLE USER INPUT, SENDING GAMESTATE TO FRONT END, END THE SESSION
@@ -52,6 +50,12 @@ public:
 
     int GetSessionId() const;
 
+    bool operator==(const GameSessionHandler& other) const;
+    bool operator<(const GameSessionHandler& other) const;
+
+    void SetRoomCode(std::string newRoomCode);
+    std::string GetRoomCode() const;
+
 private:
     std::map<std::string, Player> players;
     std::map<std::string, AudienceMember> audienceMembers;
@@ -59,6 +63,7 @@ private:
     int sessionId;
     Game game;
     Player host;
+    std::string roomCode;
 };
 
 #endif

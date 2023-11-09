@@ -14,6 +14,10 @@ public:
     // Get the user's unique ID
     int GetUserId() const;
 
+    bool operator==(const User& other) const;
+
+    bool operator<(const User& other) const;
+
 private:
     std::string userName;
     int uniqueUserId;
