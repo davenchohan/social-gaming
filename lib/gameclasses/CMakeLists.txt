@@ -10,10 +10,17 @@ target_sources(backendClasses
   GameVariable.cpp
   Player.cpp
   User.cpp
+  GameSessionList.cpp
 )
 
 target_include_directories(backendClasses
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(backendClasses
+PRIVATE
+  executionnodes
+  generators
 )

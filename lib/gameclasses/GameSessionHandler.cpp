@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 // Constructor
-GameSessionHandler::GameSessionHandler(int id, Game& gameObj) : sessionId(id), game(gameObj) {
+GameSessionHandler::GameSessionHandler(int id, Game& gameObj, Player& gameHost) : sessionId(id), game(gameObj), host(gameHost) {
 }
 
 // Add a player
@@ -73,4 +73,30 @@ void GameSessionHandler::endSession() {
 // Get the session ID
 int GameSessionHandler::GetSessionId() const {
     return sessionId;
+}
+
+Player GameSessionHandler::GetHost() const {
+    return host;
+}
+
+void GameSessionHandler::SetHost(Player& gameHost) {
+    host = gameHost;
+}
+
+bool GameSessionHandler::operator==(const GameSessionHandler& other) const {
+    return this->GetSessionId() == other.GetSessionId();
+}
+
+bool GameSessionHandler::operator<(const GameSessionHandler& other) const {
+    return this->GetSessionId() < other.GetSessionId();
+}
+
+// Get the room code
+std::string GameSessionHandler::GetRoomCode() const {
+    return roomCode;
+}
+
+// Set the room code
+void GameSessionHandler::SetRoomCode(std::string newRoomCode) {
+    roomCode = newRoomCode;
 }

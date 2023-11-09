@@ -4,15 +4,13 @@
 #include <map>
 #include "Player.h"
 #include "AudienceMember.h"
-#include "GameVariable.h"
-#include "GameConstant.h"
 #include "Game.h"
 
 // TODO: HANDLE USER INPUT, SENDING GAMESTATE TO FRONT END, END THE SESSION
 class GameSessionHandler {
 public:
     // Constructor
-    GameSessionHandler(int id, Game& gameObj);
+    GameSessionHandler(int id, Game& gameObj, Player& gameHost);
 
     // Add a player
     void AddPlayer(const std::string& playerName, const Player& Player);
@@ -41,6 +39,9 @@ public:
     // Get the game specification
     Game GetGame() const;
 
+    Player GetHost() const;
+    void SetHost(Player& gameHost);
+
     void startSession();
 
     void endSession();
@@ -49,12 +50,20 @@ public:
 
     int GetSessionId() const;
 
+    bool operator==(const GameSessionHandler& other) const;
+    bool operator<(const GameSessionHandler& other) const;
+
+    void SetRoomCode(std::string newRoomCode);
+    std::string GetRoomCode() const;
+
 private:
     std::map<std::string, Player> players;
     std::map<std::string, AudienceMember> audienceMembers;
     int currentRound;
     int sessionId;
     Game game;
+    Player host;
+    std::string roomCode;
 };
 
 #endif
