@@ -362,11 +362,14 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqGetGame"){
         auto game = serverGameList.GetGameSpec(request.gameName);
         // append game config into RequestConstructor object
-
+        RequestConstructor constructor("ReqGetGameResponse");
         // call constructor.ConstructRequest();
-
+        constructor.appendItem("GameName", game.GetGameName());
+        // TODO: append a json item that contains all relevant config for that game
+        Json blankJson;
+        constructor.appendItem("GameConfig", blankJson);
         // initialize server response as constructed request
-
+        server_response = constructor.ConstructRequest();
       }else{
         std::cout << "Bad Request: " + request.request << std::endl;
         throw UnknownRequestException("Unknown Request: " + request.request);
