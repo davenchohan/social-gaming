@@ -369,7 +369,7 @@ bool isListType(std::string type){
      return std::find(listTypes.begin(),listTypes.end(),type) != listTypes.end();
 }
 void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node){
-    switch(getListTypeValue(node.getType())){
+    switch(getlistToValue(node.getType())){
         case ListTypes::EXTEND: 
             handleExtend();//extend
             break;

@@ -19,12 +19,12 @@ public:
     
     virtual ~ExecutionNode() = default;
 private:
-    virtual ExecutionNode* executeImpl() = 0;
+    //virtual ExecutionNode* executeImpl() = 0;
 
 };
 
 
-//Expression node classes
+//Expression node enums
 //________________________________________________________________________________________________________________________________
 enum class SimpleType {
     BOOLEAN,
@@ -45,16 +45,17 @@ enum class CompType {
     NOTEQ,
     GREATEREQ,
     LESSEQ
-}
+};
 enum class Builtins {
     SIZE,
     UPFROM,
     CONTAINS,
     COLLECT
-}
+};
 // might make this not be an execution node not 100 % sure if these will need to have execution implenetations or if they will be able to exist on their own
 
 //general expression node type generic expression nodes should not be created. Expression node will implement a evaluate function to allow for expression evaluation
+//_________________________________________________________________________________________________________________________________________________________________
 class ExpressionNode : public ExecutionNode {
 public: 
     ExpressionNode();
@@ -73,13 +74,16 @@ class ForExpressionNode : public ExpressionNode{
     void iterate();
 
 };
+
 class BuiltInNode : public ExpressionNode{
+public:
+BuiltInNode();
 
-
-}
+};
 
 class OpExpressionNode : public ExpressionNode{
     public: 
+    OpExpressionNode();
     OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation);
     private:
     ExpressionNode lhs;
@@ -90,7 +94,8 @@ class OpExpressionNode : public ExpressionNode{
 
 class CompExpressionNode : public ExpressionNode{
     public: 
-    OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation);
+    CompExpressionNode();
+    CompExpressionNode(ExpressionNode lhs, ExpressionNode rhs , CompType comparison);
     private:
     ExpressionNode lhs;
     ExpressionNode rhs;

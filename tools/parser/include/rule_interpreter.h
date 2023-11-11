@@ -120,7 +120,7 @@ const std::map<std::string,OpType>  opToEnum = {
 
 
 
-ListTypes getListTypeValue(std::string_view type);
+ListTypes getlistToValue(std::string_view type);
 InputTypes getInputTypeValue(std::string_view type);
 ControlTypes getControlTypeValue(std::string_view type);
 
@@ -161,3 +161,6 @@ ExpressionNode parseExpression(Game &active, ExecutionTree& tree,ts::Node node);
 ExpressionNode parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
 void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
 ExpressionNode parseComparison(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode parseForExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node);

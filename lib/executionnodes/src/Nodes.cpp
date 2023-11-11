@@ -11,8 +11,8 @@ ExecutionNode::ExecutionNode() {
      // I don't think we need a base node class
 }
 
-void ExecutionNode::execute() {
-    executeImpl();
+ExecutionNode* ExecutionNode::execute() {
+    //executeImpl();
 }
 
 
@@ -23,7 +23,7 @@ ForNode::ForNode(ExpressionNode* expression,   ExecutionTree* loop)
      // TODO:
 }
 
-void ForNode::executeImpl() {
+ExecutionNode* ForNode::executeImpl() {
     // TODO:
 }
 
@@ -34,7 +34,7 @@ WhileNode::WhileNode(ExpressionNode* condition, ExecutionTree* loop )
     // TODO:
 }
 
-void WhileNode::executeImpl() {
+ExecutionNode* WhileNode::executeImpl() {
     // TODO: 
 }
 
@@ -47,8 +47,21 @@ ParallelForNode::ParallelForNode(ExpressionNode* condition,  ExecutionTree* loop
     // Constructor implementation for ParallelForNode
 }
 
-void ParallelForNode::executeImpl() {
+ExecutionNode* ParallelForNode::executeImpl() {
     // TODO: Implement execution logic for ParallelForNode
+}
+
+OpExpressionNode::OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation): lhs(lhs), rhs(rhs), operation(operation){
+
+}
+SimpleExpression::SimpleExpression(SimpleType type, std::string value): type(type), value(value){
+
+}
+CompExpressionNode::CompExpressionNode(ExpressionNode lhs, ExpressionNode rhs , CompType comparison): lhs(lhs),rhs(rhs), comparison(comparison){
+
+}
+ForExpressionNode::ForExpressionNode(const std::vector<std::string>& identifiers, const ExpressionNode& builtIn){
+
 }
 
 
@@ -58,7 +71,7 @@ InParallelNode::InParallelNode(){
     // Constructor implementation for InParallelNode
 }
 
-void InParallelNode::executeImpl() {
+ExecutionNode* InParallelNode::executeImpl() {
     // TODO: Implement execution logic for InParallelNode
 }
 
@@ -66,7 +79,7 @@ ExpressionNode::ExpressionNode(){
     // contains a boolean expression
 }
 
-void ExpressionNode::executeImpl(){
+ExecutionNode* ExpressionNode::executeImpl(){
     //TODO:
 }
 
@@ -78,7 +91,7 @@ MatchNode::MatchNode(){
     // Constructor implementation for MatchNode
 }
 
-void MatchNode::executeImpl() {
+ExecutionNode* MatchNode::executeImpl() {
     // TODO: Implement execution logic for MatchNode
 }
 
@@ -89,7 +102,7 @@ ExtendNode::ExtendNode(){
     // Constructor implementation for ExtendNode
 }
 
-void ExtendNode::executeImpl() {
+ExecutionNode* ExtendNode::executeImpl() {
     // TODO: Implement execution logic for ExtendNode
 }
 
@@ -101,7 +114,7 @@ TimerNode::TimerNode() {
     // Constructor implementation for TimerNode
 }
 
-void TimerNode::executeImpl() {
+ExecutionNode* TimerNode::executeImpl() {
     // TODO: Implement execution logic for TimerNode
 }
 
@@ -112,7 +125,7 @@ InputChoiceNode::InputChoiceNode(){
     // Constructor implementation for InputChoiceNode
 }
 
-void InputChoiceNode::executeImpl() {
+ExecutionNode* InputChoiceNode::executeImpl() {
     // TODO: Implement execution logic for InputChoiceNode
 }
 
@@ -124,7 +137,7 @@ MessageNode::MessageNode() {
     // Constructor implementation for MessageNode
 }
 
-void MessageNode::executeImpl() {
+ExecutionNode* MessageNode::executeImpl() {
     // TODO: Implement execution logic for MessageNode
 }
 
@@ -135,18 +148,7 @@ VariableAssignmentNode::VariableAssignmentNode(){
     // Constructor implementation for VariableAssignmentNode
 }
 
-void VariableAssignmentNode::executeImpl() {
+ExecutionNode* VariableAssignmentNode::executeImpl() {
     // TODO: Implement execution logic for VariableAssignmentNode
-}
-
-
-// LiteralNode class
-
-LiteralNode::LiteralNode() {
-    // Constructor implementation for LiteralNode
-}
-
-void LiteralNode::executeImpl() {
-    // TODO: Implement execution logic for LiteralNode
 }
 
