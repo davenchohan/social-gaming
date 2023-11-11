@@ -54,11 +54,15 @@ public:
     Json ConvertFromUser(User&);
     Json ConvertFromAudienceMember(AudienceMember &);
     Json ConvertFromGameVariable(GameVariable&);
-
     User ConvertToUser(const Json &);
     Player ConvertToPlayer(const Json&);
     AudienceMember ConvertToAudienceMember(const Json&);
     GameVariable ConvertToGameVariable(const Json&);
+    // TODO: Implement below functions:
+    Json ConvertFromGame(const Game&);
+    Game ConvertToGame(const Game&);
+
+
 
     virtual void convertJsonToPlayersArr(Json&, std::vector<Player>&);
 };
