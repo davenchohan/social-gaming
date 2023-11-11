@@ -14,23 +14,111 @@ class ExecutionTree;
 class ExecutionNode {
 public:
     ExecutionNode();
-    void execute();
+    ExecutionNode* execute();
     ExecutionNode* next;
     
     virtual ~ExecutionNode() = default;
 private:
-    virtual void executeImpl() = 0;
+    virtual ExecutionNode* executeImpl() = 0;
 
 };
+
+
+//Expression node classes
+//________________________________________________________________________________________________________________________________
+enum class SimpleType {
+    BOOLEAN,
+    NUMBER,
+    STRING,
+    IDENTIFIER
+};
+enum class OpType {
+    ADD,
+    SUB,
+    MULT,
+    DIV
+};
+enum class CompType {
+    EQ,
+    GREATER,
+    LESS,
+    NOTEQ,
+    GREATEREQ,
+    LESSEQ
+}
+enum class Builtins {
+    SIZE,
+    UPFROM,
+    CONTAINS,
+    COLLECT
+}
+// might make this not be an execution node not 100 % sure if these will need to have execution implenetations or if they will be able to exist on their own
+
+//general expression node type generic expression nodes should not be created. Expression node will implement a evaluate function to allow for expression evaluation
 class ExpressionNode : public ExecutionNode {
 public: 
     ExpressionNode();
     bool evaluate();
+    std::vector<std::string> identifiers;
 private:
-    void executeImpl();
+    bool isFor;
+    bool isSimple = false;
+    ExecutionNode* executeImpl();
+    //virtual std::variant<> getValue(); // this will be implemented for all expression node types to allow for node evaluation
+};
+
+class ForExpressionNode : public ExpressionNode{
+    public:
+    ForExpressionNode(const std::vector<std::string>& identifiers, const ExpressionNode& builtIn);
+    void iterate();
+
+};
+class BuiltInNode : public ExpressionNode{
+
+
+}
+
+class OpExpressionNode : public ExpressionNode{
+    public: 
+    OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation);
+    private:
+    ExpressionNode lhs;
+    ExpressionNode rhs;
+    OpType operation;
+
+};
+
+class CompExpressionNode : public ExpressionNode{
+    public: 
+    OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation);
+    private:
+    ExpressionNode lhs;
+    ExpressionNode rhs;
+    CompType comparison;
+
 };
 
 
+
+
+class SimpleExpression : public ExpressionNode{
+    public:
+    SimpleExpression(SimpleType type, std::string value);
+    
+    private:
+    ExecutionNode* executeImpl();
+    SimpleType type;
+    std::string value;
+
+};
+
+
+
+
+
+
+//loop nodes classes
+//________________________________________________________________________________________________________________________________
 class ForNode : public ExecutionNode {
 public:
     ForNode();
@@ -39,12 +127,13 @@ public:
     void IncrementCondition();
     bool checkCondition(); 
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
     ExpressionNode* condition;
      
     ExecutionTree* loop;
 
 };
+
 class LoopEndNode : public ExecutionNode {
     public:
     LoopEndNode();
@@ -62,7 +151,7 @@ public:
     ExecutionNode* getCurrent();
     bool checkCondition(); 
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
     ExpressionNode* condition;
      
     ExecutionTree* loop;     
@@ -75,7 +164,7 @@ public:
     void IncrementCondition();
     bool checkCondition(); 
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
     ExpressionNode* condition; 
     ExecutionTree* loop;   
 
@@ -85,16 +174,20 @@ class InParallelNode : public ExecutionNode {
 public:
     InParallelNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
      
-};    
+}; 
+
+
+//Player action nodes below this is all template these will all probably be reworked
+//________________________________________________________________________________________________________________________________
 
 class MatchNode : public ExecutionNode {
 public:
     MatchNode();
 private:
     //ListType matchable;
-    void executeImpl();
+    ExecutionNode* executeImpl();
          
 };
 
@@ -102,7 +195,7 @@ class ExtendNode : public ExecutionNode {
 public:
     ExtendNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
        
 };
 
@@ -112,7 +205,7 @@ class TimerNode : public ExecutionNode {
 public:
     TimerNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
       
 };
 
@@ -121,7 +214,7 @@ class InputChoiceNode : public ExecutionNode {
 public:
     InputChoiceNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
       
 };
 
@@ -130,7 +223,7 @@ class MessageNode : public ExecutionNode {
 public:
     MessageNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
       
 };
 
@@ -140,7 +233,7 @@ class VariableAssignmentNode : public ExecutionNode {
 public:
     VariableAssignmentNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
       
 };
 
@@ -150,7 +243,7 @@ class LiteralNode : public ExecutionNode {
 public:
     LiteralNode();
 private:
-    void executeImpl();
+    ExecutionNode* executeImpl();
       
 };
 
