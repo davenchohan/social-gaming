@@ -220,3 +220,8 @@ void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_ve
         return;
     }
 }
+
+Json JsonConverter::ConvertFromGame(const Game& game){
+
+}
+
