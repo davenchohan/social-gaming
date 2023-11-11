@@ -5,6 +5,8 @@ add_executable(runAllTests
     dummy.cpp
     CustomExceptionsTests.cpp
     ParserLibraryTests.cpp
+    GameSessionHandlerTests.cpp
+    GamesDatabaseTests.cpp
 )
 
 target_link_libraries(runAllTests
@@ -13,6 +15,7 @@ target_link_libraries(runAllTests
     networking
     exceptions
     backendcomponents
+    backendClasses
 )
 
 set_target_properties(runAllTests
