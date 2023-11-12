@@ -12,6 +12,16 @@ using Json = nlohmann::json;
 #include "GameConstant.h"
 #include "Game.h"
 
+
+// Helper function to convert general Map to vector (discards keys)
+template <class M, class V>
+void MapToVec(const std::map<M,V>& map, std::vector<V>& vector){
+    for (const auto& item : map){
+        vector.push_back(item.second);
+    }
+}
+
+
 struct RequestInfo{
     std::string request;
     std::string gameName;
@@ -45,6 +55,12 @@ NLOHMANN_JSON_SERIALIZE_ENUM( AudienceMember::AudienceMemberState, {
     {AudienceMember::Inactive, "Inactive"},
 })
 
+NLOHMANN_JSON_SERIALIZE_ENUM( Game::GameProgress, {
+    {Game::NotStarted, "NotStarted"},
+    {Game::InProgress, "InProgress"},
+    {Game::Completed, "Completed"},
+ })
+
 
 class JsonConverter{
 public:
@@ -60,7 +76,7 @@ public:
     GameVariable ConvertToGameVariable(const Json&);
     // TODO: Implement below functions:
     Json ConvertFromGame(const Game&);
-    Game ConvertToGame(const Game&);
+    Game ConvertToGame(const Json&);
 
 
 
