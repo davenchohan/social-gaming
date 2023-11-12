@@ -1,7 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <string>
 #include "ParserLibrary.h"
+#include <string>
+#include <map>
+#include <vector>
 
 using namespace testing;
 
@@ -140,6 +142,15 @@ TEST(ParserLibraryTests, TestRequestParserAddMembers){
     auto generated = con.ConstructRequest();
     auto expected = "{\"AudienceMembers\":[{\"audienceMemberState\":\"Active\",\"id\":1234,\"name\":\"Gabe\"},{\"audienceMemberState\":\"Active\",\"id\":1111,\"name\":\"Peter\"}]}";
     EXPECT_EQ(generated, expected);
+}
+
+TEST(ParserLibraryTests, TestMapToVec){
+    std::map<std::string, int>testMap{ {"item1",1}, {"item2",2}, {"item3",3} };
+    std::vector<int> dumpVector;
+    std::vector<int> expectedVector = {1,2,3};
+
+    MapToVec(testMap, dumpVector);
+    EXPECT_EQ(dumpVector, expectedVector);
 }
 
 

@@ -3,6 +3,8 @@
 #include <limits>
 
 
+
+
 //Appends each item from RequestInfo struct into the json object
 RequestConstructor::RequestConstructor(RequestInfo &info){
     appendItem("Request", info.request);
@@ -222,6 +224,36 @@ void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_ve
 }
 
 Json JsonConverter::ConvertFromGame(const Game& game){
-
+    Json retItem;
+    retItem["GameName"] = game.GetGameName();
+    retItem["GameId"] = game.GetGameId();
+    retItem["MinPlayers"] = game.GetMinPlayers();
+    retItem["MaxPlayers"] = game.GetMaxPlayers();
+    retItem["AudienceEnabled"] = game.IsAudienceEnabled();
+    retItem["NumRounds"] = game.GetNumRounds();
+    retItem["GameProgress"] = game.GetGameProgress();
+    // TODO: Convert maps into json arrays
+    std::vector<GameVariable> gameVariableVector;
+    // MapToVec(game.)
 }
 
+Game JsonConverter::ConvertToGame(const Json& item){
+    std::string name;
+    int id, minPlayers, maxPlayers, numRounds;
+    bool audienceEnabled;
+    Game::GameProgress progress = item.at("GameProgress").template get<Game::GameProgress>();
+    item.at("GameId").get_to(id);
+    Game retGame(id);
+    item.at("GameName").get_to(name);
+    item.at("MinPlayers").get_to(minPlayers);
+    item.at("MaxPlayers").get_to(maxPlayers);
+    item.at("NumRounds").get_to(numRounds);
+    item.at("AudienceEnabled").get_to(audienceEnabled);
+    retGame.SetGameName(name);
+    retGame.SetMinPlayers(minPlayers);
+    retGame.SetMaxPlayers(maxPlayers);
+    retGame.SetAudienceEnabled(audienceEnabled);
+    retGame.SetNumRounds(numRounds);
+    retGame.SetGameProgress(progress);
+    return retGame;
+}
