@@ -276,7 +276,6 @@ Game JsonConverter::ConvertToGame(const Json& item){
     item.at("MaxPlayers").get_to(maxPlayers);
     item.at("NumRounds").get_to(numRounds);
     item.at("AudienceEnabled").get_to(audienceEnabled);
-
     retGame.SetGameName(name);
     retGame.SetMinPlayers(minPlayers);
     retGame.SetMaxPlayers(maxPlayers);
