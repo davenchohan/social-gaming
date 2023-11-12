@@ -153,4 +153,27 @@ TEST(ParserLibraryTests, TestMapToVec){
     EXPECT_EQ(dumpVector, expectedVector);
 }
 
+TEST(ParserLibraryTests, TestConvertToGame){
+    Game expectedGame(1234);
+    expectedGame.SetGameName("Chess");
+    expectedGame.SetMinPlayers(2);
+    expectedGame.SetMaxPlayers(2);
+    expectedGame.SetAudienceEnabled(true);
+    expectedGame.SetNumRounds(1);
+    expectedGame.SetGameProgress(Game::GameProgress::NotStarted);
+
+    Json toParse;
+    toParse["GameName"] =  "Chess";
+    toParse["GameId"] = 1234;
+    toParse["MinPlayers"] = 2;
+    toParse["MaxPlayers"] = 2;
+    toParse["AudienceEnabled"] = true;
+    toParse["NumRounds"] = 1;
+    toParse["GameProgress"] = Game::GameProgress::NotStarted;
+
+    JsonConverter converter;
+    auto generated = converter.ConvertToGame(toParse);
+    EXPECT_EQ(generated, expectedGame);
+}
+
 
