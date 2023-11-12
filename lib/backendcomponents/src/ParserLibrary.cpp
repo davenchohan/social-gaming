@@ -166,6 +166,23 @@ Json JsonConverter::ConvertFromGameVariable(GameVariable &var){
     }
     return item;
 }
+
+GameConstant JsonConverter::ConvertToGameConstant(const Json& item){
+    std::string name, value;
+    item.at("constantName").get_to(name);
+    item.at("constantVal").get_to(value);
+    return GameConstant{name, value};
+}
+
+Json JsonConverter::ConvertFromGameConstant(const GameVariable &var){
+    Json item;
+    // TODO: Remove commented out line when GetName() method is implemented
+    //item["constantName"] = var.GetName();
+    item["constantVal"] = var.GetConstantValue();
+    return item;
+}
+
+
 void
 RequestConstructor::appendItem(const std::string key, std::vector<Player> players){
     /*
@@ -232,9 +249,20 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     retItem["AudienceEnabled"] = game.IsAudienceEnabled();
     retItem["NumRounds"] = game.GetNumRounds();
     retItem["GameProgress"] = game.GetGameProgress();
+
     // TODO: Convert maps into json arrays
-    std::vector<GameVariable> gameVariableVector;
-    // MapToVec(game.)
+    std::vector<GameVariable> gameVariablesVector;
+    // MapToVec(game.GetVariables(), gameVariablesVector);
+    std::vector<GameConstant> gameConstantsVector;
+    // MapToVec(game.GetConstants(), gameConstantsVector)
+    std::vector<Json> jsonConstants;
+    std::vector<Json> jsonVariables;
+    std::for_each(gameConstantsVector.begin(), gameConstantsVector.end(), [&jsonConstants](auto &item){
+        jsonConstants.push_back(ConvertFromGameConstant(item));
+    })
+    std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables](auto &item){
+        jsonVariables.push_back(ConvertFromGameVariable(item));
+    })
 }
 
 Game JsonConverter::ConvertToGame(const Json& item){
@@ -249,11 +277,16 @@ Game JsonConverter::ConvertToGame(const Json& item){
     item.at("MaxPlayers").get_to(maxPlayers);
     item.at("NumRounds").get_to(numRounds);
     item.at("AudienceEnabled").get_to(audienceEnabled);
+
     retGame.SetGameName(name);
     retGame.SetMinPlayers(minPlayers);
     retGame.SetMaxPlayers(maxPlayers);
     retGame.SetAudienceEnabled(audienceEnabled);
     retGame.SetNumRounds(numRounds);
     retGame.SetGameProgress(progress);
+
+    // Set variables from Json array
+    // Set constants from Json array
+
     return retGame;
 }
