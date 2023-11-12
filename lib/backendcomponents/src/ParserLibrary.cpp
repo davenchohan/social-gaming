@@ -249,6 +249,7 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     retItem["AudienceEnabled"] = game.IsAudienceEnabled();
     retItem["NumRounds"] = game.GetNumRounds();
     retItem["GameProgress"] = game.GetGameProgress();
+<<<<<<< HEAD
 
     // TODO: Convert maps into json arrays
     std::vector<GameVariable> gameVariablesVector;
@@ -263,6 +264,11 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables](auto &item){
         jsonVariables.push_back(ConvertFromGameVariable(item));
     })
+=======
+    // TODO: Convert maps into json arrays
+    std::vector<GameVariable> gameVariableVector;
+    // MapToVec(game.)
+>>>>>>> Add test for MapToVec function
 }
 
 Game JsonConverter::ConvertToGame(const Json& item){
@@ -277,16 +283,22 @@ Game JsonConverter::ConvertToGame(const Json& item){
     item.at("MaxPlayers").get_to(maxPlayers);
     item.at("NumRounds").get_to(numRounds);
     item.at("AudienceEnabled").get_to(audienceEnabled);
+<<<<<<< HEAD
 
+=======
+>>>>>>> Add test for MapToVec function
     retGame.SetGameName(name);
     retGame.SetMinPlayers(minPlayers);
     retGame.SetMaxPlayers(maxPlayers);
     retGame.SetAudienceEnabled(audienceEnabled);
     retGame.SetNumRounds(numRounds);
     retGame.SetGameProgress(progress);
+<<<<<<< HEAD
 
     // Set variables from Json array
     // Set constants from Json array
 
+=======
+>>>>>>> Add test for MapToVec function
     return retGame;
 }

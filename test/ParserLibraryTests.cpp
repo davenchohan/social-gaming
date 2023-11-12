@@ -153,6 +153,7 @@ TEST(ParserLibraryTests, TestMapToVec){
     EXPECT_EQ(dumpVector, expectedVector);
 }
 
+<<<<<<< HEAD
 TEST(ParserLibraryTests, TestConvertToGame){
     Game expectedGame(1234);
     expectedGame.SetGameName("Chess");
@@ -176,4 +177,6 @@ TEST(ParserLibraryTests, TestConvertToGame){
     EXPECT_EQ(generated, expectedGame);
 }
 
+=======
+>>>>>>> Add test for MapToVec function
 
