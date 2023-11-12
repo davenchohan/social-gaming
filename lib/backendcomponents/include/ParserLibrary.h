@@ -77,6 +77,8 @@ public:
     // TODO: Implement below functions:
     Json ConvertFromGame(const Game&);
     Game ConvertToGame(const Json&);
+    GameConstant ConvertToGameConstant(const Json&);
+    Json ConvertFromGameConstant(const GameConstant&)
 
 
 
