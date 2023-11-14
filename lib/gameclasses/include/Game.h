@@ -45,6 +45,12 @@ public:
     // Get a global game variable
     GameVariable GetVariable(const std::string& variableName) const;
 
+    // Get all game variables
+    std::vector<GameVariable> GetAllVariables() const;
+
+    // Get all game constants
+    std::vector<GameConstant> GetAllConstants() const;
+
     // Set a global game constant
     void AddConstant(const std::string& constantName, const GameConstant& constant);
 
