@@ -160,9 +160,9 @@ Json JsonConverter::ConvertFromGameVariable(GameVariable &var){
     if(var.IsInt()){
         item["intVal"] = var.GetData<int>();
     }else if(var.IsString()){
-        item["doubleVal"] = var.GetData<std::string>();
+        item["strVal"] = var.GetData<std::string>();
     }else if(var.IsDouble()){
-        item["strVal"] = var.GetData<double>();
+        item["doubleVal"] = var.GetData<double>();
     }
     return item;
 }
@@ -174,7 +174,7 @@ GameConstant JsonConverter::ConvertToGameConstant(const Json& item){
     return GameConstant{name, value};
 }
 
-Json JsonConverter::ConvertFromGameConstant(const GameVariable &var){
+Json JsonConverter::ConvertFromGameConstant(const GameConstant &var){
     Json item;
     // TODO: Remove commented out line when GetName() method is implemented
     //item["constantName"] = var.GetName();
@@ -250,19 +250,20 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     retItem["NumRounds"] = game.GetNumRounds();
     retItem["GameProgress"] = game.GetGameProgress();
 
+    
     // TODO: Convert maps into json arrays
-    std::vector<GameVariable> gameVariablesVector;
-    // MapToVec(game.GetVariables(), gameVariablesVector);
-    std::vector<GameConstant> gameConstantsVector;
-    // MapToVec(game.GetConstants(), gameConstantsVector)
+    std::vector<GameVariable> gameVariablesVector = game.GetAllVariables();
+    std::vector<GameConstant> gameConstantsVector = game.GetAllConstants();
     std::vector<Json> jsonConstants;
     std::vector<Json> jsonVariables;
-    std::for_each(gameConstantsVector.begin(), gameConstantsVector.end(), [&jsonConstants](auto &item){
-        jsonConstants.push_back(ConvertFromGameConstant(item));
-    })
-    std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables](auto &item){
-        jsonVariables.push_back(ConvertFromGameVariable(item));
-    })
+    std::for_each(gameConstantsVector.begin(), gameConstantsVector.end(), [&jsonConstants, this](auto &item){
+        jsonConstants.push_back(this->ConvertFromGameConstant(item));
+    });
+
+    std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables, this](auto &item){
+        jsonVariables.push_back(this->ConvertFromGameVariable(item));
+    });
+    
 }
 
 Game JsonConverter::ConvertToGame(const Json& item){
