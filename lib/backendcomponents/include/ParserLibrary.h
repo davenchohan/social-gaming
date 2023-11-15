@@ -78,7 +78,7 @@ public:
     Json ConvertFromGame(const Game&);
     Game ConvertToGame(const Json&);
     GameConstant ConvertToGameConstant(const Json&);
-    Json ConvertFromGameConstant(const GameConstant&)
+    Json ConvertFromGameConstant(const GameConstant&);
 
 
 
