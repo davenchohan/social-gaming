@@ -250,12 +250,10 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     retItem["NumRounds"] = game.GetNumRounds();
     retItem["GameProgress"] = game.GetGameProgress();
 
-    
     // TODO: Convert maps into json arrays
     std::vector<GameVariable> gameVariablesVector = game.GetAllVariables();
     std::vector<GameConstant> gameConstantsVector = game.GetAllConstants();
-    std::vector<Json> jsonConstants;
-    std::vector<Json> jsonVariables;
+    std::vector<Json> jsonConstants, jsonVariables;
     std::for_each(gameConstantsVector.begin(), gameConstantsVector.end(), [&jsonConstants, this](auto &item){
         jsonConstants.push_back(this->ConvertFromGameConstant(item));
     });
@@ -263,7 +261,9 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables, this](auto &item){
         jsonVariables.push_back(this->ConvertFromGameVariable(item));
     });
-    
+    retItem["GameConstants"] = jsonConstants;
+    retItem["GameVariables"] = jsonVariables;
+    return retItem;
 }
 
 Game JsonConverter::ConvertToGame(const Json& item){
