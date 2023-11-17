@@ -170,6 +170,8 @@ TEST(ParserLibraryTests, TestConvertToGame){
     toParse["AudienceEnabled"] = true;
     toParse["NumRounds"] = 1;
     toParse["GameProgress"] = Game::GameProgress::NotStarted;
+    toParse["GameConstants"] = nullptr;
+    toParse["GameVariables"] = nullptr;
 
     JsonConverter converter;
     auto generated = converter.ConvertToGame(toParse);

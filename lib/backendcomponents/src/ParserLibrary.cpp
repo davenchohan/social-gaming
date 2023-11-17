@@ -285,8 +285,19 @@ Game JsonConverter::ConvertToGame(const Json& item){
     retGame.SetNumRounds(numRounds);
     retGame.SetGameProgress(progress);
 
-    // Set variables from Json array
     // Set constants from Json array
+    auto jsonConstants = item.at("GameConstants");
+    std::for_each(jsonConstants.begin(), jsonConstants.end(), [&retGame, this](auto &item){
+        GameConstant constant = this->ConvertToGameConstant(item);
+        retGame.AddConstant(constant.GetName(), constant);
+    });
+
+    // Set variables from Json array
+    auto jsonVariables = item.at("GameVariables");
+    std::for_each(jsonVariables.begin(), jsonVariables.end(), [&retGame, this](auto &item){
+        GameVariable var = this->ConvertToGameVariable(item);
+        retGame.AddVariable(var.GetName(), var);
+    });
 
     return retGame;
 }
