@@ -52,6 +52,44 @@ enum class Builtins {
     CONTAINS,
     COLLECT
 };
+enum class ControlTypes {
+    FOR,
+    WHILE,
+    PARALLEL_FOR,
+    MATCH,
+    INPARALLEL,
+};
+enum class ListTypes {
+    EXTEND,
+    REVERSE,
+    SHUFFLE,
+    SORT,
+    DISCARD,
+    
+};
+enum class InputTypes {
+    TEXT,
+    CHOICE,
+    RANGE,
+    VOTE,
+    
+};
+enum class InteractionType {
+    MESSAGE,
+    INPUTCHOICE,
+  
+    
+};
+enum class TimeTypes {
+    TIME
+};
+enum class ExpressionTypes {
+    BOOLEAN,
+    OPERATION,
+    BUILTIN,
+    IDENTIFIER,
+
+};
 // might make this not be an execution node not 100 % sure if these will need to have execution implenetations or if they will be able to exist on their own
 
 //general expression node type generic expression nodes should not be created. Expression node will implement a evaluate function to allow for expression evaluation
@@ -68,26 +106,24 @@ private:
     //virtual std::variant<> getValue(); // this will be implemented for all expression node types to allow for node evaluation
 };
 
-class ForExpressionNode : public ExpressionNode{
-    public:
-    ForExpressionNode(const std::vector<std::string>& identifiers, const ExpressionNode& builtIn);
-    void iterate();
 
-};
 
-class BuiltInNode : public ExpressionNode{
+class BuiltInNode : public ExpressionNode {
 public:
-BuiltInNode();
-
+    BuiltInNode(Builtins type,std::vector<std::string> identifiers, const std::vector<ExpressionNode*>& args);
+private:
+    std::vector<std::string> identifiers;
+    Builtins builtinType;
+    std::vector<ExpressionNode*> args;
 };
 
 class OpExpressionNode : public ExpressionNode{
     public: 
     OpExpressionNode();
-    OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation);
+    OpExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , OpType operation);
     private:
-    ExpressionNode lhs;
-    ExpressionNode rhs;
+    ExpressionNode* lhs;
+    ExpressionNode* rhs;
     OpType operation;
 
 };
@@ -95,10 +131,10 @@ class OpExpressionNode : public ExpressionNode{
 class CompExpressionNode : public ExpressionNode{
     public: 
     CompExpressionNode();
-    CompExpressionNode(ExpressionNode lhs, ExpressionNode rhs , CompType comparison);
+    CompExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , CompType comparison);
     private:
-    ExpressionNode lhs;
-    ExpressionNode rhs;
+    ExpressionNode* lhs;
+    ExpressionNode* rhs;
     CompType comparison;
 
 };
@@ -127,14 +163,14 @@ class SimpleExpression : public ExpressionNode{
 class ForNode : public ExecutionNode {
 public:
     ForNode();
-    ForNode(ExpressionNode* expression, ExecutionTree* loop);
+    ForNode(std::string identifier ,ExpressionNode* expression, ExecutionTree* loop);
     ExecutionNode* getCurrent();
     void IncrementCondition();
     bool checkCondition(); 
 private:
     ExecutionNode* executeImpl();
     ExpressionNode* condition;
-     
+    std::string identifier; 
     ExecutionTree* loop;
 
 };
@@ -186,7 +222,14 @@ private:
 
 //Player action nodes below this is all template these will all probably be reworked
 //________________________________________________________________________________________________________________________________
-
+class ListOperation : public ExecutionNode {
+public:
+    ListOperation(ListTypes type, ExpressionNode* expr, std::vector<std::string> identifiers );
+private:
+    ExpressionNode* expression;
+    ListTypes type;
+    std::vector<std::string> identifiers;
+};
 class MatchNode : public ExecutionNode {
 public:
     MatchNode();
@@ -217,19 +260,31 @@ private:
 
 class InputChoiceNode : public ExecutionNode {
 public:
-    InputChoiceNode();
+    InputChoiceNode(std::vector<std::string> recipientIdentifiers,
+                    const std::string& prompt, 
+                    const std::vector<std::string> choicesIdentifiers, 
+                    const std::vector<std::string> targetIdentifiers, 
+                    ExpressionNode* timeout);
+    
+
 private:
-    ExecutionNode* executeImpl();
-      
+    std::vector<std::string> recipientIdentifiers;
+    std::string prompt;
+    std::vector<std::string> targetIdentifiers;
+    std::vector<std::string> choicesIdentifiers;
+    ExpressionNode* timeout;
 };
 
 
 class MessageNode : public ExecutionNode {
 public:
-    MessageNode();
+    MessageNode(const std::string& message, const std::string& playerSet);
+  
+
 private:
+    std::string message;
+    std::string playerSet;
     ExecutionNode* executeImpl();
-      
 };
 
 
