@@ -153,10 +153,6 @@ TEST(ParserLibraryTests, TestMapToVec){
     EXPECT_EQ(dumpVector, expectedVector);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Add unit test for converting from json to Game object
 TEST(ParserLibraryTests, TestConvertToGame){
     Game expectedGame(1234);
     expectedGame.SetGameName("Chess");
@@ -180,9 +176,4 @@ TEST(ParserLibraryTests, TestConvertToGame){
     EXPECT_EQ(generated, expectedGame);
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> Add test for MapToVec function
-=======
->>>>>>> Add unit test for converting from json to Game object
 
