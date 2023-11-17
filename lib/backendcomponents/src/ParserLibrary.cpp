@@ -176,8 +176,7 @@ GameConstant JsonConverter::ConvertToGameConstant(const Json& item){
 
 Json JsonConverter::ConvertFromGameConstant(const GameConstant &var){
     Json item;
-    // TODO: Remove commented out line when GetName() method is implemented
-    //item["constantName"] = var.GetName();
+    item["constantName"] = var.GetName();
     item["constantVal"] = var.GetConstantValue();
     return item;
 }
