@@ -18,8 +18,8 @@ ExecutionNode* ExecutionNode::execute() {
 
 // ForNode class
 
-ForNode::ForNode(ExpressionNode* expression,   ExecutionTree* loop)
-    : condition(expression), loop(loop) {
+ForNode::ForNode(std::string identifier,ExpressionNode* expression,   ExecutionTree* loop)
+    :identifier(identifier), condition(expression), loop(loop) {
      // TODO:
 }
 
@@ -51,16 +51,16 @@ ExecutionNode* ParallelForNode::executeImpl() {
     // TODO: Implement execution logic for ParallelForNode
 }
 
-OpExpressionNode::OpExpressionNode(ExpressionNode lhs, ExpressionNode rhs , OpType operation): lhs(lhs), rhs(rhs), operation(operation){
+OpExpressionNode::OpExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , OpType operation): lhs(lhs), rhs(rhs), operation(operation){
 
 }
 SimpleExpression::SimpleExpression(SimpleType type, std::string value): type(type), value(value){
 
 }
-CompExpressionNode::CompExpressionNode(ExpressionNode lhs, ExpressionNode rhs , CompType comparison): lhs(lhs),rhs(rhs), comparison(comparison){
+CompExpressionNode::CompExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , CompType comparison): lhs(lhs),rhs(rhs), comparison(comparison){
 
 }
-ForExpressionNode::ForExpressionNode(const std::vector<std::string>& identifiers, const ExpressionNode& builtIn){
+BuiltInNode::BuiltInNode(Builtins type,std::vector<std::string> identifiers, const std::vector<ExpressionNode*>& args): builtinType(type), identifiers(identifiers),args(args){
 
 }
 
@@ -119,24 +119,17 @@ ExecutionNode* TimerNode::executeImpl() {
 }
 
 
-// InputChoiceNode class
-
-InputChoiceNode::InputChoiceNode(){
-    // Constructor implementation for InputChoiceNode
-}
-
-ExecutionNode* InputChoiceNode::executeImpl() {
-    // TODO: Implement execution logic for InputChoiceNode
-}
-
 
 
 // MessageNode class
 
-MessageNode::MessageNode() {
+MessageNode::MessageNode(const std::string& message, const std::string& playerSet): message(message), playerSet(playerSet) {
     // Constructor implementation for MessageNode
 }
+InputChoiceNode::InputChoiceNode(std::vector<std::string> recipientIdentifiers,const std::string& prompt, const std::vector<std::string> choicesIdentifiers, const std::vector<std::string> targetIdentifiers, ExpressionNode* timeout)
+:recipientIdentifiers(recipientIdentifiers),prompt(prompt),choicesIdentifiers(choicesIdentifiers),targetIdentifiers(targetIdentifiers),timeout(timeout){
 
+                    }
 ExecutionNode* MessageNode::executeImpl() {
     // TODO: Implement execution logic for MessageNode
 }
@@ -150,5 +143,12 @@ VariableAssignmentNode::VariableAssignmentNode(){
 
 ExecutionNode* VariableAssignmentNode::executeImpl() {
     // TODO: Implement execution logic for VariableAssignmentNode
+}
+
+
+//discardNode
+
+ListOperation::ListOperation(ListTypes type, ExpressionNode* expr, std::vector<std::string> identifiers ):expression(expr), identifiers(identifiers){
+
 }
 

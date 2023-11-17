@@ -11,45 +11,10 @@ using json = nlohmann::json;
 #include <cstdio>
 #include <memory>
 
-enum class ControlTypes {
-    FOR,
-    WHILE,
-    PARALLEL_FOR,
-    MATCH,
-    INPARALLEL,
-};
-enum class ListTypes {
-    EXTEND,
-    REVERSE,
-    SHUFFLE,
-    SORT,
-    DISCARD,
-    
-};
-enum class InputTypes {
-    
-    TEXT,
-    CHOICE,
-    RANGE,
-    VOTE,
-    
-};
-enum class TimeTypes {
-    TIME
-};
 
-enum class ExpressionTypes {
-    BOOLEAN,
-    OPERATION,
-    BUILTIN,
-    IDENTIFIER,
-
-};
 const std::vector<std::string> humanInputTypes = {
-    "text",
-    "choice",
-    "range",
-    "vote"
+    "message",
+    "input_choice",
   };
 
 const std::vector<std::string> controlTypes = {
@@ -75,11 +40,23 @@ const std::map<std::string, ControlTypes> controlToValue={
     {"match", ControlTypes::MATCH},
     {"inparallel", ControlTypes::INPARALLEL}
 };
+const std::map<std::string, Builtins> builtinToValue={
+    {"size", Builtins::SIZE},
+    {"upfrom",Builtins::UPFROM},
+    {"collect", Builtins::COLLECT},
+    {"contains", Builtins::CONTAINS}
+ 
+};
 const std::map<std::string, InputTypes> inputToValue={
     {"text", InputTypes::TEXT},
     {"choice", InputTypes::CHOICE},
     {"range",InputTypes::RANGE},
     {"vote", InputTypes::VOTE}
+};
+const std::map<std::string, InteractionType> interactionEnum={
+    {"message", InteractionType::MESSAGE},
+    {"input_choice", InteractionType::INPUTCHOICE},
+   
 };
  const std::map<std::string, ListTypes> listToValue = {
     {"extend", ListTypes::EXTEND},
@@ -136,14 +113,12 @@ void handleText();
 void handleChoice();
 void handleRange();
 void handleVote();
+void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) ;
 bool isHumanInput(std::string type);
 void handleInput(Game& active, ExecutionTree& tree, ts::Node node);
 
-void handleExtend();
-void handleReverse();
-void handleShuffle();
-void handleSort();
-void handleDiscard();
+
+
 bool isListType(std::string type);
 void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node);
 
@@ -154,13 +129,15 @@ void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node);
 void bodyHandler(Game& active, ExecutionTree& tree, ts::Node node);
 void rulesHandler(Game& active, ExecutionTree& tree, ts::Node node);
 void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
+void handleMessageRule(Game &active, ExecutionTree &tree, ts::Node node); 
 
 
 
-ExpressionNode parseExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
 void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
-ExpressionNode parseComparison(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode parseForExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseComparison(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseForExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
