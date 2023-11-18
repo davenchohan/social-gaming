@@ -16,6 +16,25 @@
 
 
 using namespace ftxui;
+
+// Component DisplayBlock(Elements &paragraphs) {
+//     auto block = Container::Vertical({
+//         Renderer([&] {
+//             return vbox(paragraphs);
+//         }),
+//     });
+//     return block;
+// }
+
+// Component SingleSelectBlock(std::vector<std::string> &values, int &selection) {
+//     auto selector = Radiobox(&values, &selection);
+//     auto block = Container::Vertical({
+//         selector,
+//     });
+//     return block;
+// }
+
+
 /*
 // namespace ui {
 class ComponentData {
