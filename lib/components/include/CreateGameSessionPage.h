@@ -14,5 +14,5 @@
 
 using namespace ftxui;
 namespace Pages{
-    Component CreateGameSession(int &pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client);
+    Component CreateGameSession(int &pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, Component gameConfig,  networking::Client &client);
 }

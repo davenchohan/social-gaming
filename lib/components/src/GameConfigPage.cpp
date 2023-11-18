@@ -16,33 +16,7 @@
 
 
 
-class InputData{
-  public:
-  std::map<std::string, std::string&> inputFields;
 
-
-  void addInputField(std::string key, std::string& value){
-    inputFields.insert({key, value});
-  }
-
-  std::string toJson(){
-    std::string result;
-    /**
-     * IE -
-     *  {"key":"value", "key2":"value2"}
-    */  
-    result.append("{");
-    for(auto const& [key, val] : inputFields){
-      result.append(key);
-      result.append(":");
-      result.append(val);
-      result.append(", ");
-    }
-    result.append("}");
-    return result;
-  }
-  private:
-};
 
 //TODO: make this load after hitting next on game selection page.
 
@@ -50,12 +24,12 @@ class InputData{
 using namespace ftxui;
 namespace Pages
 {
-Component GameConfig(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, networking::Client &client){
+Component GameConfig(networking::Client &client, InputData data){
 
   networking::ClientWrapper wrapper;
   //wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
 
-  InputData data;  
+  InputData data = InputData();  
   
 
   //textFields for input, need some way to define which type of input.
