@@ -132,7 +132,7 @@ GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
    item.at("varId").get_to(varId);
    try{
     item.at("variableName").get_to(varName);
-    std::string strVal = item.value("stringVal", "");
+    std::string strVal = item.value("strVal", "");
     double doubleVal = item.value("doubleVal", std::numeric_limits<double>::min());
     int intVal = item.value("intVal", std::numeric_limits<int>::min() );
     
@@ -141,7 +141,7 @@ GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
         return GameVariable{varName, varId, doubleVal};
     }else if (intVal != std::numeric_limits<int>::min()){
         return GameVariable{varName, varId, intVal};
-    }else if(strVal!= ""){ 
+    }else if(strVal != ""){ 
         return GameVariable{varName, varId, strVal};
     }else{
         std::cout << "ERROR, could not parse Game variables from: " + item.dump() + ", item did not have a valid type" << std::endl;
@@ -249,7 +249,6 @@ Json JsonConverter::ConvertFromGame(const Game& game){
     retItem["NumRounds"] = game.GetNumRounds();
     retItem["GameProgress"] = game.GetGameProgress();
 
-    // TODO: Convert maps into json arrays
     std::vector<GameVariable> gameVariablesVector = game.GetAllVariables();
     std::vector<GameConstant> gameConstantsVector = game.GetAllConstants();
     std::vector<Json> jsonConstants, jsonVariables;

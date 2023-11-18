@@ -74,7 +74,6 @@ public:
     Player ConvertToPlayer(const Json&);
     AudienceMember ConvertToAudienceMember(const Json&);
     GameVariable ConvertToGameVariable(const Json&);
-    // TODO: Implement below functions:
     Json ConvertFromGame(const Game&);
     Game ConvertToGame(const Json&);
     GameConstant ConvertToGameConstant(const Json&);

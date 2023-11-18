@@ -178,4 +178,47 @@ TEST(ParserLibraryTests, TestConvertToGame){
     EXPECT_EQ(generated, expectedGame);
 }
 
+TEST(ParserLibraryTests, TestConvertToGameFilled){
+    std::vector<GameConstant> constants = {{"constant1", "Queen"}, {"constant2", "King"}};
+    std::vector<GameVariable> variables = {{"variable1", 1234,"timer"}};
+
+    JsonConverter converter;
+    Game expectedGame(1234);
+    expectedGame.SetGameName("Chess");
+    expectedGame.SetMinPlayers(2);
+    expectedGame.SetMaxPlayers(2);
+    expectedGame.SetAudienceEnabled(true);
+    expectedGame.SetNumRounds(1);
+    expectedGame.SetGameProgress(Game::GameProgress::NotStarted);
+    expectedGame.AddConstant("constant1", constants[0]);
+    expectedGame.AddConstant("constant2", constants[1]);
+    expectedGame.AddVariable("variable1", variables[0]);
+
+    std::vector<Json> jsonConstants;
+    std::for_each(constants.begin(), constants.end(), [&jsonConstants, &converter](GameConstant& item){
+        jsonConstants.push_back(converter.ConvertFromGameConstant(item));
+    });
+    std::vector<Json> jsonVariables;
+    std::for_each(variables.begin(), variables.end(), [&jsonVariables, &converter](GameVariable &item){
+        jsonVariables.push_back(converter.ConvertFromGameVariable(item));
+    });
+
+    ASSERT_EQ(jsonConstants.size(), constants.size());
+    ASSERT_EQ(jsonVariables.size(), variables.size());
+
+    Json toParse;
+    toParse["GameName"] =  "Chess";
+    toParse["GameId"] = 1234;
+    toParse["MinPlayers"] = 2;
+    toParse["MaxPlayers"] = 2;
+    toParse["AudienceEnabled"] = true;
+    toParse["NumRounds"] = 1;
+    toParse["GameProgress"] = Game::GameProgress::NotStarted;
+    toParse["GameConstants"] = jsonConstants;
+    toParse["GameVariables"] = jsonVariables;
+
+    auto generated = converter.ConvertToGame(toParse);
+    EXPECT_EQ(generated, expectedGame);
+}
+
 
