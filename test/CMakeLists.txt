@@ -7,6 +7,7 @@ add_executable(runAllTests
     ParserLibraryTests.cpp
     GameSessionHandlerTests.cpp
     GamesDatabaseTests.cpp
+    GameClassTests.cpp
 )
 
 target_link_libraries(runAllTests

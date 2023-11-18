@@ -16,6 +16,7 @@
 #include "GameList.h"
 #include "ParserLibrary.h"
 #include "GameSessionList.h"
+#include "RandomIdGenerator.h"
 
 
 #include <fstream>
@@ -88,17 +89,6 @@ serverRequest demoParseReq(const std::string log){
   }else{
     throw UnknownRequestException("Bad Request, could not parse");
   }
-}
-
-// Generates a unique ID, may have to move this elsewhere in the future
-int generateUniqueID() {
-    std::time_t result = std::time(nullptr);
-    std::string uniqueID = std::to_string(result);
-    int randomNum = std::rand();
-    uniqueID += std::to_string(randomNum);
-
-    std::hash<std::string> hasher;
-    return static_cast<int>(hasher(uniqueID));
 }
 
 // TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
@@ -203,7 +193,7 @@ main(int argc, char* argv[]) {
   // Instantiate game list
   GameList serverGameList = GameList();
   // Instantiate Rock, Paper, Scissors
-  Game rockPaperScissors = Game(generateUniqueID());
+  Game rockPaperScissors = Game(RandomIdGenerator::generateUniqueId());
   rockPaperScissors.SetGameName("Rock,Paper,Scissors");
   serverGameList.AddGame(rockPaperScissors);
   std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
@@ -270,7 +260,7 @@ main(int argc, char* argv[]) {
         auto variable = request.gameVariables.find("Rock");
         std::string varName = variable->first;
         std::string varVal = variable->second;
-        GameVariable someVar(varName, generateUniqueID(), varVal);
+        GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
         newGame.AddVariable(varName, someVar);
 
         // Add Game to session handler
@@ -300,7 +290,7 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
         if (sessionHandlerDB.DoesSessionExist(id)){
-          int newAudienceId = generateUniqueID();
+          int newAudienceId = RandomIdGenerator::generateUniqueId();
           AudienceMember member("dummy_viewer", newAudienceId); // TODO: Ask the viewer for their name to pass to the audience constructor
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.AddAudienceMember(member.GetName(), member);
@@ -322,7 +312,7 @@ main(int argc, char* argv[]) {
           std::string varName = variable->first;
           std::string varVal = variable->second;
           // Create new variable
-          GameVariable someVar(varName, generateUniqueID(), varVal);
+          GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
           // Set updated variable
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.GetGame().AddVariable(varName, someVar);

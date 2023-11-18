@@ -1,12 +1,21 @@
 #include "GameSessionList.h"
+#include "RoomCodeGenerator.h"
 #include "GameSessionHandler.h"
 #include <stdexcept>
 
 // Constructor
-GameSessionList::GameSessionList() {}
+GameSessionList::GameSessionList() {
+    roomCodeGenerator = RoomCodeGenerator();
+}
 
 // Add a game session handler to the list
-void GameSessionList::AddGameSessionHandler(const std::string& sessionId, const GameSessionHandler& gameSessionHandler) {
+void GameSessionList::AddGameSessionHandler(const std::string& sessionId, GameSessionHandler& gameSessionHandler) {
+    std::string newRoomCode;
+    do {
+        newRoomCode = roomCodeGenerator.generateRoomCode();
+    } while (doesCodeExist(newRoomCode));
+    gameSessionHandler.SetRoomCode(newRoomCode);
+    roomCodes.insert(std::make_pair(newRoomCode, gameSessionHandler));
     sessionHandlerDB.insert(std::make_pair(sessionId, gameSessionHandler));
 }
 
@@ -26,5 +35,14 @@ GameSessionHandler GameSessionList::GetGameSessionHandler(const std::string& ses
         return it->second;
     } else {
         throw std::runtime_error("Session not found");
+    }
+}
+
+bool GameSessionList::doesCodeExist(std::string enteredRoomCode) const {
+    auto iterator = roomCodes.find(enteredRoomCode);
+    if (iterator != roomCodes.end()) {
+        return true;
+    } else {
+        return false;
     }
 }

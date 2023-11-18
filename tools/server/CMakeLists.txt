@@ -18,6 +18,7 @@ target_link_libraries(hotserver
   exceptions
   backendClasses
   backendcomponents
+  generators
   ${CMAKE_THREAD_LIBS_INIT}
 )
 

@@ -12,10 +12,7 @@ ExecutionTree::ExecutionTree(){
     current = nullptr;
     end = nullptr;
 };
-ExecutionTree::ExecutionTree(ExecutionNode* node){
-    start= node;
-    current= node;
-    end = node;
+ExecutionTree::ExecutionTree(ExecutionNode* node):start(node), current(node),end(node){
 };
 
 void ExecutionTree::append(ExecutionNode* node){
