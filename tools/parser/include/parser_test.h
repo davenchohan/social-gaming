@@ -21,8 +21,7 @@ class SGParser {
     ts::Node getRoot(); 
     std::string getChildStrByField(ts::Node parent, const std::string field);
     std::string source;
-    // added function
-    ts::Tree* getTree();
+
    private:
     static const std::string rootFields[6];
     static const std::string configFields[2];
