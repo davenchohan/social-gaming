@@ -17,33 +17,6 @@
 
 using namespace ftxui;
 namespace Pages{
-// Component TestGamePage(std::vector<ComponentData> &data, networking::Client &client);
-Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list); 
+Component TestGamePage(std::vector<std::vector<std::string>> &values, std::vector<int> &selected_items, std::vector<Element> &text_list,
+    Elements &texts, std::vector<std::string> &options, int &selection, networking::Client &client); 
 }
-/*
-class ComponentGenerator {
-    public:
-    Component createDisplayComponent(const std::vector<std::string> &values);
-
-    // returns a component with a radiobox
-    // Component createSingleSelector(const std::vector<std::string> &values, int &selected);
-
-    // returns a component with a checkbox
-    // Component createMultiSelector();
-
-    // returns a component with an input
-    // Component createInput(std::string &input);
-};
-
-class TestGameComponent {
-    public:
-    TestGameComponent(constants::GameComponentType type, ComponentGenerator generator, std::vector<std::string> &values, std::string &text, int selected);
-    Component getGameComponent();
-
-    private:
-    Component block;
-    std::vector<std::string> values;// radiobox or paragraphs
-    std::string text; //input
-    int selected; //radiobox
-};
-*/

@@ -3,6 +3,8 @@
 #include <limits>
 
 
+
+
 //Appends each item from RequestInfo struct into the json object
 RequestConstructor::RequestConstructor(RequestInfo &info){
     appendItem("Request", info.request);
@@ -130,7 +132,7 @@ GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
    item.at("varId").get_to(varId);
    try{
     item.at("variableName").get_to(varName);
-    std::string strVal = item.value("stringVal", "");
+    std::string strVal = item.value("strVal", "");
     double doubleVal = item.value("doubleVal", std::numeric_limits<double>::min());
     int intVal = item.value("intVal", std::numeric_limits<int>::min() );
     
@@ -139,7 +141,7 @@ GameVariable JsonConverter::ConvertToGameVariable(const Json& item){
         return GameVariable{varName, varId, doubleVal};
     }else if (intVal != std::numeric_limits<int>::min()){
         return GameVariable{varName, varId, intVal};
-    }else if(strVal!= ""){ 
+    }else if(strVal != ""){ 
         return GameVariable{varName, varId, strVal};
     }else{
         std::cout << "ERROR, could not parse Game variables from: " + item.dump() + ", item did not have a valid type" << std::endl;
@@ -158,12 +160,28 @@ Json JsonConverter::ConvertFromGameVariable(GameVariable &var){
     if(var.IsInt()){
         item["intVal"] = var.GetData<int>();
     }else if(var.IsString()){
-        item["doubleVal"] = var.GetData<std::string>();
+        item["strVal"] = var.GetData<std::string>();
     }else if(var.IsDouble()){
-        item["strVal"] = var.GetData<double>();
+        item["doubleVal"] = var.GetData<double>();
     }
     return item;
 }
+
+GameConstant JsonConverter::ConvertToGameConstant(const Json& item){
+    std::string name, value;
+    item.at("constantName").get_to(name);
+    item.at("constantVal").get_to(value);
+    return GameConstant{name, value};
+}
+
+Json JsonConverter::ConvertFromGameConstant(const GameConstant &var){
+    Json item;
+    item["constantName"] = var.GetName();
+    item["constantVal"] = var.GetConstantValue();
+    return item;
+}
+
+
 void
 RequestConstructor::appendItem(const std::string key, std::vector<Player> players){
     /*
@@ -219,4 +237,65 @@ void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_ve
         });
         return;
     }
+}
+
+Json JsonConverter::ConvertFromGame(const Game& game){
+    Json retItem;
+    retItem["GameName"] = game.GetGameName();
+    retItem["GameId"] = game.GetGameId();
+    retItem["MinPlayers"] = game.GetMinPlayers();
+    retItem["MaxPlayers"] = game.GetMaxPlayers();
+    retItem["AudienceEnabled"] = game.IsAudienceEnabled();
+    retItem["NumRounds"] = game.GetNumRounds();
+    retItem["GameProgress"] = game.GetGameProgress();
+
+    std::vector<GameVariable> gameVariablesVector = game.GetAllVariables();
+    std::vector<GameConstant> gameConstantsVector = game.GetAllConstants();
+    std::vector<Json> jsonConstants, jsonVariables;
+    std::for_each(gameConstantsVector.begin(), gameConstantsVector.end(), [&jsonConstants, this](auto &item){
+        jsonConstants.push_back(this->ConvertFromGameConstant(item));
+    });
+
+    std::for_each(gameVariablesVector.begin(), gameVariablesVector.end(), [&jsonVariables, this](auto &item){
+        jsonVariables.push_back(this->ConvertFromGameVariable(item));
+    });
+    retItem["GameConstants"] = jsonConstants;
+    retItem["GameVariables"] = jsonVariables;
+    return retItem;
+}
+
+Game JsonConverter::ConvertToGame(const Json& item){
+    std::string name;
+    int id, minPlayers, maxPlayers, numRounds;
+    bool audienceEnabled;
+    Game::GameProgress progress = item.at("GameProgress").template get<Game::GameProgress>();
+    item.at("GameId").get_to(id);
+    Game retGame(id);
+    item.at("GameName").get_to(name);
+    item.at("MinPlayers").get_to(minPlayers);
+    item.at("MaxPlayers").get_to(maxPlayers);
+    item.at("NumRounds").get_to(numRounds);
+    item.at("AudienceEnabled").get_to(audienceEnabled);
+    retGame.SetGameName(name);
+    retGame.SetMinPlayers(minPlayers);
+    retGame.SetMaxPlayers(maxPlayers);
+    retGame.SetAudienceEnabled(audienceEnabled);
+    retGame.SetNumRounds(numRounds);
+    retGame.SetGameProgress(progress);
+
+    // Set constants from Json array
+    auto jsonConstants = item.at("GameConstants");
+    std::for_each(jsonConstants.begin(), jsonConstants.end(), [&retGame, this](auto &item){
+        GameConstant constant = this->ConvertToGameConstant(item);
+        retGame.AddConstant(constant.GetName(), constant);
+    });
+
+    // Set variables from Json array
+    auto jsonVariables = item.at("GameVariables");
+    std::for_each(jsonVariables.begin(), jsonVariables.end(), [&retGame, this](auto &item){
+        GameVariable var = this->ConvertToGameVariable(item);
+        retGame.AddVariable(var.GetName(), var);
+    });
+
+    return retGame;
 }

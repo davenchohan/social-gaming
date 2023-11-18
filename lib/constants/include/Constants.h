@@ -19,7 +19,7 @@ enum class GameComponentType : char {
 constexpr inline std::string_view
 to_string(const constants::ReqType request) noexcept {
   switch (request) {
-    case constants::ReqType::GETGAMES:   return "ReqGetGame"; // this doesn't exist in the backend right now
+    case constants::ReqType::GETGAMES:   return "ReqGetGamesList";
     case constants::ReqType::JOINGAME: return "ReqJoinGame";
     case constants::ReqType::CREATEGAME: return "ReqCreateGame";
     case constants::ReqType::CREATEGAMEFILLED: return "ReqCreateGameFilled";

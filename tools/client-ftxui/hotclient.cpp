@@ -205,6 +205,11 @@ int main(int argc, char* argv[]) {
 
   std::vector<Component> game_page_components;
 
+  // Data for Game UI MVP
+  Elements texts; // DISPLAY
+  std::vector<std::string> options; // SINGLE_SELECT
+  int selection = 0;
+
 
 
 // COMPONENTS ################################################
@@ -224,10 +229,8 @@ int main(int argc, char* argv[]) {
 
   // testing page with dynamic components
   // auto testGamePageElements = Pages::TestGamePage(data_list, client);
-  auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list);
-  auto testGamePageElements2 = Pages::TestGamePage(block_data, selected_items, text_list2);
+  auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list, texts, options, selection, client);
   game_page_components.push_back(testGamePageElements);
-  game_page_components.push_back(testGamePageElements2);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
 
@@ -239,7 +242,10 @@ int main(int argc, char* argv[]) {
       Button(
         "Home", [&] { 
           view_state = 0;
-          // client.send(std::move("home"));
+          // reset game component data
+          texts.clear();
+          options.clear();
+          selection = 0;
         }, ButtonStyle()
       ), 
     }) | flex,
@@ -338,8 +344,9 @@ int main(int argc, char* argv[]) {
       std::string reqType = parseServerResponseType(response);
 
       // handle based on reponse type
-      if(reqType == "DemoReqGetGamesList") {
+      if(reqType == "ReqGetGamesList") {
           radiobox_list = parseServerResponseGameList(response, text_list);
+          options = parseServerResponseGameList(response, texts);
       }
 
       screen.RequestAnimationFrame();

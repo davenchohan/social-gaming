@@ -87,6 +87,7 @@ serverRequest demoParseReq(const std::string log){
     temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
     return temp;
   }else{
+    std::cout << "Error with request" << std::endl;
     throw UnknownRequestException("Bad Request, could not parse");
   }
 }
@@ -95,17 +96,43 @@ serverRequest demoParseReq(const std::string log){
 // Possible inputs: Game game, serverRequest request
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
   if (gameSpec.size() != receivedItems.size()){
+    std::cout << "Error with request" << std::endl;
     throw IncompleteGameException("Error, incomplete game");
   }else{
     // Checking for missing game spec items from client
     for (auto item : gameSpec){
       if(receivedItems.find(item.first) == receivedItems.end()){
+        std::cout << "Error with request" << std::endl;
         throw IncompleteGameException("Error, recived game spec does not have: " + item.first);
       }
     }
     return;
   }
   return;
+}
+
+/*
+bool evaluateFilledGame(std::map<std::string, std::string> &gameSpec, std::map<std::string, std:string> &receivedItems) {
+  if (gameSpec.size() != receivedItems.size()) {
+    return false;
+  }
+  for (const auto item : gameSpec) {
+    if (receivedItems.find(item.first) == receivedItems.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+*/
+
+//function to instantiate game from server request
+Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
+  Game newGame(stoi(gameRequest.gameId));
+  for (auto variable: gameRequest.gameVariables) {
+    GameVariable newVariable(variable.first, RandomIdGenerator::generateUniqueId(), variable.second); 
+    newGame.AddVariable(variable.first, newVariable);
+  }
+  return newGame;
 }
 
 void
@@ -238,6 +265,7 @@ main(int argc, char* argv[]) {
           // TODO: Parse game rules + game variables into a format for client
           server_response = rules_template;
         }else{
+          std::cout << "Error with request" << std::endl;
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqCreateGameFilled"){
