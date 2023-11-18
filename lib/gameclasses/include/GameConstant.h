@@ -11,6 +11,10 @@ public:
     // Get the value of the constant
     std::string GetConstantValue() const;
 
+    bool operator==(const GameConstant& other) const;
+    bool operator<(const GameConstant& other) const;
+
+    std::string GetName() const;
 private:
     std::string constantName;
     std::string constantValue;

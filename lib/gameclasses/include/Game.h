@@ -8,6 +8,7 @@
 #include "AudienceMember.h"
 #include "GameVariable.h"
 #include "GameConstant.h"
+#include "../../executionnodes/include/Tree.h"
 
 class Game {
 public:
@@ -18,7 +19,7 @@ public:
     };
 
     // Constructors
-    Game(int newGameId, Player& gameHost);
+    Game(int newGameId);
 
     // Getters and Setters
     std::string GetGameName() const;
@@ -36,9 +37,6 @@ public:
     int GetNumRounds() const;
     void SetNumRounds(int numRounds);
 
-    Player GetHost() const;
-    void SetHost(Player& gameHost);
-
     int GetGameId() const;
 
     // Set a global game variable
@@ -46,6 +44,12 @@ public:
 
     // Get a global game variable
     GameVariable GetVariable(const std::string& variableName) const;
+
+    // Get all game variables
+    std::vector<GameVariable> GetAllVariables() const;
+
+    // Get all game constants
+    std::vector<GameConstant> GetAllConstants() const;
 
     // Set a global game constant
     void AddConstant(const std::string& constantName, const GameConstant& constant);
@@ -58,11 +62,17 @@ public:
 
     // Set the progress of the game
     void SetGameProgress(GameProgress progress);
+    ExecutionTree gameloop;
+    void setSource(std::string source);
+    std::string getSource();  
 
-private:
+    bool operator==(const Game& other) const;
+
+    bool operator<(const Game& other) const;
+
+private: 
     std::string gameName;
     int gameId;
-    Player host;
     int minPlayers;
     int maxPlayers;
     bool audienceEnabled;
@@ -70,6 +80,8 @@ private:
     GameProgress gameProgress;
     std::map<std::string, GameVariable> variables;
     std::map<std::string, GameConstant> constants;
-};
+    std::string source;
+    
+};   
 
 #endif

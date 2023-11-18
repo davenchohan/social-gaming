@@ -17,11 +17,27 @@ endif()
 add_executable(client-ftxui
   hotclient.cpp
 )
+add_executable(mobile-client-ftxui
+  mobile_hotclient.cpp
+)
 
 set_target_properties(client-ftxui PROPERTIES
   LINKER_LANGUAGE CXX
   CXX_STANDARD 17
   PREFIX ""
+)
+set_target_properties(mobile-client-ftxui PROPERTIES
+  LINKER_LANGUAGE CXX
+  CXX_STANDARD 17
+  PREFIX ""
+)
+target_link_libraries(mobile-client-ftxui
+  PRIVATE networking
+  PRIVATE ftxui::screen
+  PRIVATE ftxui::dom
+  PRIVATE ftxui::component
+  PRIVATE components
+  PRIVATE constants
 )
 
 target_link_libraries(client-ftxui
@@ -30,14 +46,23 @@ target_link_libraries(client-ftxui
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
   PRIVATE components
+  PRIVATE constants
 )
 
 install(TARGETS client-ftxui
   RUNTIME DESTINATION bin
 )
+install(TARGETS mobile-client-ftxui
+  RUNTIME DESTINATION bin
+)
+
 
 if (NETWORKING_EMSCRIPTEN_BUILD)
   target_compile_options(client-ftxui
+    PRIVATE
+      -s USE_PTHREADS
+  )
+  target_compile_options(mobile-client-ftxui
     PRIVATE
       -s USE_PTHREADS
   )
@@ -49,6 +74,11 @@ if (NETWORKING_EMSCRIPTEN_BUILD)
     PRIVATE
       "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
   )
+  target_link_options(mobile-client-ftxui
+  PRIVATE
+    "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
+)
+
 
   foreach(file "index.html" "run_webassembly.py")
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${file}" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${file})

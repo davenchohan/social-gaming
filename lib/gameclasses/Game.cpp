@@ -1,8 +1,9 @@
 #include "Game.h"
 #include <stdexcept>
+#include <algorithm>
 
 // Default constructor
-Game::Game(int newGameId, Player& gameHost) : gameId(newGameId), host(gameHost) {
+Game::Game(int newGameId) : gameId(newGameId) {
     gameName = "Game";
     minPlayers = 2; // Default minimum players
     maxPlayers = 4; // Default maximum players
@@ -52,14 +53,6 @@ void Game::SetNumRounds(int rounds) {
     numRounds = rounds;
 }
 
-Player Game::GetHost() const {
-    return host;
-}
-
-void Game::SetHost(Player& gameHost) {
-    host = gameHost;
-}
-
 // Set a game variable
 void Game::AddVariable(const std::string& variableName, const GameVariable& variable) {
     variables.insert(std::make_pair(variableName, variable));
@@ -104,4 +97,39 @@ void Game::SetGameProgress(Game::GameProgress progress) {
 Game::GameProgress Game::GetGameProgress() const {
     return gameProgress;
 }
+void Game::setSource(std::string source_ )
+{
+    source = source_;
 
+}
+std::string Game::getSource(){
+    return source;
+}
+
+bool Game::operator==(const Game& other) const {
+    return this->GetGameId() == other.GetGameId();
+}
+
+bool Game::operator<(const Game& other) const {
+    return this->GetGameId() < other.GetGameId();
+}
+
+std::vector<GameVariable> Game::GetAllVariables() const {
+    std::vector<GameVariable> variableValues;
+    variableValues.reserve(variables.size());
+
+    std::transform(variables.begin(), variables.end(), std::back_inserter(variableValues),
+                   [](const auto& pair) { return pair.second; });
+
+    return variableValues;
+}
+
+std::vector<GameConstant> Game::GetAllConstants() const {
+    std::vector<GameConstant> constantValues;
+    constantValues.reserve(constants.size());
+
+    std::transform(constants.begin(), constants.end(), std::back_inserter(constantValues),
+                   [](const auto& pair) { return pair.second; });
+
+    return constantValues;
+}
