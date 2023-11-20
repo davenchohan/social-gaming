@@ -63,7 +63,9 @@ CompExpressionNode::CompExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs 
 BuiltInNode::BuiltInNode(Builtins type,std::vector<std::string> identifiers, const std::vector<ExpressionNode*>& args): builtinType(type), identifiers(identifiers),args(args){
 
 }
+NotNode::NotNode(ExpressionNode* express): express(express){
 
+}
 
 // InParallelNode class
 
@@ -87,8 +89,11 @@ ExecutionNode* ExpressionNode::executeImpl(){
 
 // MatchNode class
 
-MatchNode::MatchNode(){
+MatchNode::MatchNode(ExpressionNode* condition ,  std::vector<ExecutionNode*> entries): condition(condition),entries(entries){
     // Constructor implementation for MatchNode
+}
+MatchEntryNode::MatchEntryNode(ExpressionNode* entry, ExecutionTree* subtree):entry(entry),subtree(subtree){
+
 }
 
 ExecutionNode* MatchNode::executeImpl() {
@@ -137,7 +142,8 @@ ExecutionNode* MessageNode::executeImpl() {
 
 // VariableAssignmentNode class
 
-VariableAssignmentNode::VariableAssignmentNode(){
+VariableAssignmentNode::VariableAssignmentNode(std::vector<std::string> identifiers, ExpressionNode* express):express(express),identifiers(identifiers){
+
     // Constructor implementation for VariableAssignmentNode
 }
 

@@ -31,7 +31,7 @@ const std::vector<std::string> listTypes = {
     "sort",
     "discard"
 };
-//enum for all possible node types
+//enum converters for all possible node types
 //some still need to be added 
 const std::map<std::string, ControlTypes> controlToValue={
     {"for", ControlTypes::FOR},
@@ -66,12 +66,14 @@ const std::map<std::string, InteractionType> interactionEnum={
     {"discard", ListTypes::DISCARD}
 };
 const std::map<std::string, ExpressionTypes> expToValue = {
-    {"=>", ExpressionTypes::BOOLEAN},
-    {"==", ExpressionTypes::BOOLEAN},
+    {"!=", ExpressionTypes::BOOLEAN},
+    {"=", ExpressionTypes::BOOLEAN},
     {"=>", ExpressionTypes::BOOLEAN},
     {"=<", ExpressionTypes::BOOLEAN},
     {">", ExpressionTypes::BOOLEAN},
     {"<", ExpressionTypes::BOOLEAN},
+    {"||", ExpressionTypes::BOOLEAN},
+    {"&&", ExpressionTypes::BOOLEAN},
     {"+", ExpressionTypes::OPERATION},
     {"-", ExpressionTypes::OPERATION},
     {"*", ExpressionTypes::OPERATION},
@@ -91,7 +93,18 @@ const std::map<std::string,OpType>  opToEnum = {
     {"+",OpType::ADD},
     {"-",OpType::SUB},
     {"*",OpType::MULT},
-    {"/",OpType::DIV}
+    {"/",OpType::DIV},
+
+};
+const std::map<std::string,CompType> compTypeToEnum = {
+    {"!=", CompType::NOTEQ},
+    {"=", CompType::EQ},
+    {"=>", CompType::LESSEQ},
+    {"=<", CompType::GREATEREQ},
+    {">", CompType::LESS},
+    {"<", CompType::GREATER},
+    {"||", CompType::OR},
+    {"&&", CompType::AND}
 };
 
 
@@ -102,11 +115,15 @@ InputTypes getInputTypeValue(std::string_view type);
 ControlTypes getControlTypeValue(std::string_view type);
 
 bool isControlType(std::string type);
+
 void forLoopHandler(Game& active, ExecutionTree& tree, ts::Node node);
 void whileLoopHanler(Game& active, ExecutionTree& tree, ts::Node node);
 void parallel_forHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void matchHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void handleMatch(Game&active, ExecutionTree& tree, ts::Node node);
 void inparallelHandler(Game& active, ExecutionTree& tree, ts::Node node);
+
+ExecutionNode* parseMatchEntry(Game&active, ExecutionTree& tree, ts::Node node);
+
 void handleControlType(Game& active, ExecutionTree& tree, ts::Node node);
 
 void handleText();

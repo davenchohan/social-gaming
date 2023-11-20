@@ -44,7 +44,9 @@ enum class CompType {
     LESS,
     NOTEQ,
     GREATEREQ,
-    LESSEQ
+    LESSEQ,
+    AND,
+    OR
 };
 enum class Builtins {
     SIZE,
@@ -125,6 +127,13 @@ class OpExpressionNode : public ExpressionNode{
     ExpressionNode* lhs;
     ExpressionNode* rhs;
     OpType operation;
+    
+};
+class NotNode : public ExpressionNode{
+    public: 
+    NotNode(ExpressionNode* express);
+    private:
+    ExpressionNode* express;
 
 };
 
@@ -232,11 +241,19 @@ private:
 };
 class MatchNode : public ExecutionNode {
 public:
-    MatchNode();
+    MatchNode(ExpressionNode* condition ,  std::vector<ExecutionNode*> entries);
 private:
-    //ListType matchable;
     ExecutionNode* executeImpl();
+    ExpressionNode* condition ;
+    std::vector<ExecutionNode*> entries;
          
+};
+class MatchEntryNode: public ExecutionNode{
+    public:
+    MatchEntryNode(ExpressionNode* entry, ExecutionTree* subtree);
+    private:
+    ExpressionNode* entry;
+    ExecutionTree* subtree;
 };
 
 class ExtendNode : public ExecutionNode {
@@ -291,9 +308,11 @@ private:
 
 class VariableAssignmentNode : public ExecutionNode {
 public:
-    VariableAssignmentNode();
+    VariableAssignmentNode(std::vector<std::string> identifiers, ExpressionNode* express);
 private:
     ExecutionNode* executeImpl();
+    std::vector<std::string> identifiers;
+    ExpressionNode* express;
       
 };
 
