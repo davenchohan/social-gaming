@@ -20,7 +20,6 @@ TEST(GameSessionHandlerTests, AddAndGetPlayer) {
 	// tests nonexistent player error message
 	try {
 		ghandler.GetPlayer("Player3");
-		//std::runtime_error("Player not found")
 	} 
 	catch (std::runtime_error const& err) {
 		EXPECT_EQ(err.what(), std::string("Player not found"));
@@ -43,42 +42,16 @@ TEST(GameSessionHandlerTests, RemovePlayer) {
 
 	ghandler.RemovePlayer("Player1");
 	try {
-		Player p3 = ghandler.GetPlayer("Player1");
-	} catch (const char* msg) {
-		EXPECT_EQ("Player not found", msg);
-	}
-	ghandler.RemovePlayer("Player2");
-	try {
-		Player p4 = ghandler.GetPlayer("Player2");
-	} catch (const char* msg) {
-		EXPECT_EQ("Player not found", msg);
-	}
-}
-
-TEST(GameSessionHandlerTests, AddandGetAudienceMember) {
-	Game gameObj;
-	GameSessionHandler ghandler(3, gameObj);
-
-	AudienceMember audience1("Audience1");
-	AudienceMember audience1("Audience2");
-
-	Player p2 ("Player2", 2);
-	ghandler.AddPlayer("Player2", p2);
-
-	ghandler.RemovePlayer("Player2");
-	ghandler.RemovePlayer("Player1");
-
-	// tests if player 1 is deleted
-	try {
 		ghandler.GetPlayer("Player1");
 	} 
 	catch (std::runtime_error const& err) {
 		EXPECT_EQ(err.what(), std::string("Player not found"));
 	}
 	catch (...) {
-		FAIL() << "Expected GetPlayer error message not found";
+		FAIL() << "Player1 is not deleted";
 	}
-	// tests if player 2 is deleted
+
+	ghandler.RemovePlayer("Player2");
 	try {
 		ghandler.GetPlayer("Player2");
 	} 
@@ -86,10 +59,9 @@ TEST(GameSessionHandlerTests, AddandGetAudienceMember) {
 		EXPECT_EQ(err.what(), std::string("Player not found"));
 	}
 	catch (...) {
-		FAIL() << "Expected GetPlayer error message not found";
+		FAIL() << "Player2 is not deleted";
 	}
 }
-
 
 TEST(GameSessionHandlerTests, AddandGetAudienceMember) {
 	Game gameObj(1);

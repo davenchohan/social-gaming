@@ -4,14 +4,10 @@ add_executable(runAllTests
 # Add tests here
     dummy.cpp
     CustomExceptionsTests.cpp
-<<<<<<< HEAD
-    GameSessionHandlerTests.cpp
-=======
     ParserLibraryTests.cpp
     GameSessionHandlerTests.cpp
     GamesDatabaseTests.cpp
     GameClassTests.cpp
->>>>>>> error-kaixiny
 )
 
 target_link_libraries(runAllTests
@@ -19,9 +15,6 @@ target_link_libraries(runAllTests
     GTest::gmock GTest::gtest GTest::gtest_main
     networking
     exceptions
-<<<<<<< HEAD
-    gameclasses
-=======
     backendcomponents
     backendClasses
 )
