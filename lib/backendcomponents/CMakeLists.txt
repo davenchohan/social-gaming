@@ -32,3 +32,18 @@ set_target_properties(backendcomponents
 install(TARGETS backendcomponents
   ARCHIVE DESTINATION lib
 )
+
+if (NETWORKING_EMSCRIPTEN_BUILD)
+target_compile_options(backendcomponents
+    PRIVATE
+      -s USE_PTHREADS   
+  )
+  # NOTE: emscripten intercepts linker arguments, so passing custom
+  #  arguments means that we need to remove the compiler specific flags
+  #  that CMake would otherwise add in.
+  set (CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
+  target_link_options(backendcomponents
+    PRIVATE
+      "LINKER:-sUSE_PTHREADS,-sASYNCIFY,-sPROXY_TO_PTHREAD"
+  )
+  endif()

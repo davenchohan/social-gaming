@@ -6,6 +6,7 @@ add_executable(runAllTests
     CustomExceptionsTests.cpp
     ParserLibraryTests.cpp
     GameClassTests.cpp
+    GameListTests.cpp
 )
 
 target_link_libraries(runAllTests
