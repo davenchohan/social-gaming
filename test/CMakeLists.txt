@@ -23,7 +23,6 @@ set_target_properties(runAllTests
                       PROPERTIES
                       LINKER_LANGUAGE CXX
                       CXX_STANDARD 17
->>>>>>> error-kaixiny
 )
 
 add_test(NAME AllTests
