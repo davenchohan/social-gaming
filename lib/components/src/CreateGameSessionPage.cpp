@@ -12,6 +12,7 @@
 #include "CreateGameSessionPage.h"
 #include "ClientWrapper.h"
 #include "Constants.h"
+#include "ParserLibrary.h"
 
 using namespace ftxui;
 namespace Pages{
@@ -54,8 +55,14 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                // wrapper.sendReq(constants::ReqType::, )
 
                // testing sending request from component
-               GetGame getGame = GetGame("252434");
-               wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame, client);
+               RequestConstructor reqConstructor("ReqGetGame");
+               reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+               //reqConstructor.appendItem("MinPlayers", "3");
+               //reqConstructor.appendItem("MaxPlayers", "6");
+               auto json_string = reqConstructor.ConstructRequest();
+               GetGameName getGameName = GetGameName(json_string);
+               GetGame getGame = GetGame("Hi");
+               wrapper.sendReq(constants::ReqType::GETGAME, getGameName, client);
 
 
                create_pagenum++;

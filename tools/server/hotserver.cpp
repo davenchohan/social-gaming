@@ -79,12 +79,26 @@ serverRequest demoParseReq(const std::string log){
     return temp;
   }
   if (pos != log_cp.npos){
+    JsonConverter converter;
+    size_t equalsPos = log_cp.find('=');
+    // Extract the string after the equals sign
+    std::string afterEquals = (equalsPos != std::string::npos) ? log_cp.substr(equalsPos + 1) : "";
+    std::string newGameName = "";
+    if (!afterEquals.empty())
+    {
+      Json json_object = converter.GetJsonItem(afterEquals);
+      if(json_object.find("GameName") != json_object.end()){
+          newGameName = json_object["GameName"].dump();
+          newGameName.erase(std::remove(newGameName.begin(), newGameName.end(), '\"'), newGameName.end());
+      }
+    }
+    
     std::string req = log_cp.substr(0, pos);
     temp.request = req;
     temp.data = "";
     temp.gameInfo = {{"Rule1",""}, {"Rule2",""}};
-    temp.gameName = "";
-    temp.gameId = log_cp.substr(pos + 1);
+    temp.gameName = newGameName;
+    temp.gameId = "";
     temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
     return temp;
   }else{
@@ -391,15 +405,15 @@ main(int argc, char* argv[]) {
         std::string final_response = "Req ReqGetGamesList Successful\n";
         server_response = final_response + "jsonObject={'gamesList':'[" + concatenatedNames + "]'}";
         std::cout << "Server Response: " + server_response << std::endl;
-      }else if(request.request == "DemoReqGetGame"){
+      }else if(request.request == "ReqGetGame"){
         // TODO: Remove once communication format is implemented
-        std::cout << "Got: DemoReqGetGame" << std::endl;
-        auto it = demoSessionHandlerDB.find(request.gameId);
-        if( it!= demoSessionHandlerDB.end()){
-          std::string final_response = "DemoReqGetGame Success\n";
-          server_response = final_response + "jsonObject={'game':" + "'" + it->second + "'" + "}";
+        std::cout << "Got: ReqGetGame" << std::endl;
+        auto foundGame = serverGameList.GetGameSpec(request.gameName);
+        if( foundGame.GetGameId() != 0){
+          std::string final_response = "ReqGetGame Success\n";
+          server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
         }else{
-          server_response = "DemoReqGetGame Failure: No such game\n";
+          server_response = "ReqGetGame Failure: No such game\n";
         }
         std::cout << server_response << std::endl;
       }else{

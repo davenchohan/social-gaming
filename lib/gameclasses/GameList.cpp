@@ -28,5 +28,6 @@ Game GameList::GetGameSpec(const std::string& gameName) const {
     if (it != games.end()) {
         return it->second;
     }
-    throw std::runtime_error("Game not found"); // Game not found, return an empty string or handle the case as needed
+    //throw std::runtime_error("Game not found"); // Game not found, return an empty string or handle the case as needed
+    return Game(000);
 }
