@@ -20,12 +20,15 @@ using json = nlohmann::json;
 #include <algorithm>
 #include "Nodes.h"
 #include "Tree.h"
+#include "ExpressNodes.h"
 #include "parser_test.h"
 
 extern "C" {
 TSLanguage *tree_sitter_socialgaming();
 }
-
+// this is a debugging function that allows for printing of the tree from any node within the tree 
+// to use it properly it should be called treePrinter("",node)
+// where "" is used as the prefix for the base level
 void treePrinter(const std::string& prefix,ts::Node parent){
     if (!parent.isNull()){
         auto numNodes = parent.getNumChildren();
@@ -46,7 +49,8 @@ void treePrinter(const std::string& prefix,ts::Node parent){
     }
 }
 
-// get the byte value of the feild and return the relevent string 
+// get the byte value of the field and return the relevent string from the source code file
+//________________________________________________________________________________________________________________________________
 
 std::string getField(ts::Node node,  const std::string source) {
     if (!node.isNull()) {
@@ -88,11 +92,7 @@ CompType getCompType(std::string_view type){
     std::string sType = (std::string)type;
     std::cout<<sType<<"\n";
     return compTypeToEnum.at(sType);
-}
-
-
-//map from type string to decision making value
-
+};
 InputTypes getInputTypeValue(std::string_view type){
       std::string sType = (std::string)type;
     return inputToValue.at(sType);
@@ -107,13 +107,30 @@ ListTypes getlistToValue(std::string_view type){
 
 };
 
-//control types handling functions
+//NodeType Checking:
+//________________________________________________________________________________________________________
 
 
 bool isControlType(std::string type){
      return  std::find(controlTypes.begin(),controlTypes.end(),type) != controlTypes.end();
 };
-
+bool isListType(std::string type){
+     return std::find(listTypes.begin(),listTypes.end(),type) != listTypes.end();
+};
+bool isHumanInput(std::string type){
+     return std::find(humanInputTypes.begin(),humanInputTypes.end(),type) != humanInputTypes.end();
+};
+bool isAssignment(std::string type ){
+    return type == "assignment";
+};
+bool isMatch(std::string type){
+    return type == "match";
+};
+/**
+bool isTiming(std::string type){
+    return std::find(timingTypes.begin(),timingTypes.end(),type) != timingTypes.end();
+};
+*/
 
 
 
@@ -127,14 +144,14 @@ bool isControlType(std::string type){
  * based on the enum for expression type it triggers the relevent parsing expression
 */
 
-ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node){
-    std::cout<<"expression handle\n";
+ExpressionNode* parseExpression(ActiveGame& active, ExecutionTree& tree,ts::Node node){
+    //std::cout<<"expression handle\n";
     if(node.getNumChildren() == 1){
         return parseSimpleExpression(active,tree,node);
     }else{
         auto expressionType = node.getChild(1).getType();
         treePrinter("",node);
-        std::cout <<"expression is "<<expressionType<<"\n";
+        //std::cout <<"expression is "<<expressionType<<"\n";
         if(node.getChild(0).getType() == "!"){
             ExpressionNode* express = parseExpression(active, tree, node.getChild(1));
             return new NotNode(express);
@@ -146,17 +163,17 @@ ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node)
 
         switch(getExpressionTypeValue(expressionType)){
             case ExpressionTypes::BOOLEAN:
-                std::cout<<"parseComp\n";
+                //std::cout<<"parseComp\n";
                 return parseComparison(active, tree,node);
                 break;
 
             case ExpressionTypes::OPERATION:
-             std::cout<<"parseOp\n";
+             //std::cout<<"parseOp\n";
                 return parseOperatorExpression(active, tree,node);
                 break;
 
             case ExpressionTypes::BUILTIN:
-                std::cout<<"parseBuilt\n";
+                //std::cout<<"parseBuilt\n";
                 return parseBuiltIn(active, tree,node);
                 break;
 
@@ -169,9 +186,10 @@ ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node)
 
 
 
-//parsers and creates an operator expressionNode 
-ExpressionNode* parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node){
-    std::cout<<"parseOperatorExpression handle\n";
+//parsers addition subtraction multiplication.
+//creates an OperatorExpressionNode with a lefthandside righthand side and the type of operation to be done  
+ExpressionNode* parseOperatorExpression(ActiveGame & active, ExecutionTree& tree,ts::Node node){
+    //std::cout<<"parseOperatorExpression handle\n";
     ExpressionNode* lhs = parseExpression(active,tree,node.getChild(0));
     ExpressionNode* rhs = parseExpression(active,tree,node.getChild(2));
     OpType expression = getOpType(node.getChild(1).getType());
@@ -182,17 +200,17 @@ ExpressionNode* parseOperatorExpression(Game &active, ExecutionTree& tree,ts::No
 };
 
 // this handles expressions that are either just identifiers, numbers or values
-ExpressionNode* parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node){
-    std::cout<<"parseSimpleExpression handle\n";
+ExpressionNode* parseSimpleExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node){
+    //std::cout<<"parseSimpleExpression handle\n";
     ts::Node child = node.getChild(0);
     std::string value;
     SimpleType sType = getSimpType(child.getType());
     switch(sType){
     case SimpleType::BOOLEAN:
-        value = getField(child.getChild(0),active.getSource());
+        value = getField(child.getChild(0),active.game.getSource());
         break;
     default:
-        value = getField(child,active.getSource());
+        value = getField(child,active.game.getSource());
         break;
     }
     
@@ -201,9 +219,9 @@ ExpressionNode* parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node
 }
 
 // This handles expression nodes that use the builtin or in syntax creating a loop identifier as well as a set of values to 
-// iterate through for the For loop
-ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node){
-    std::cout<<"parseBuiltIn handle\n";
+// This will create a BuiltInExpressionNode with a builtin Type as well as an argument list
+ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node){
+    //std::cout<<"parseBuiltIn handle\n";
     std::vector<std::string> identifiers;
     recursiveIdent(active,identifiers, node);
     ts::Node builtNode = node.getChildByFieldName("builtin");
@@ -227,10 +245,11 @@ ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node){
 }
 
 
-// This will parse the node into a comparison expression node that holds two expressions and a comparison operation.
-ExpressionNode* parseComparison(Game &active, ExecutionTree& tree,ts::Node node){
+// This will parse the node into a comparison expression node
+// this holds two expressions and a comparison operation to be used for evaluation later
+ExpressionNode* parseComparison(ActiveGame & active, ExecutionTree& tree,ts::Node node){
     
-    std::cout<<"parseComp\n";
+    //std::cout<<"parseComp\n";
     ExpressionNode* lhs = parseExpression(active,tree,node.getChild(0));
     ExpressionNode* rhs = parseExpression(active,tree,node.getChild(2));
     CompType expression = getCompType(node.getChild(1).getType());
@@ -238,17 +257,18 @@ ExpressionNode* parseComparison(Game &active, ExecutionTree& tree,ts::Node node)
 
 }
 
-//helper to recursivly traverse nodes and get all identifiers 
-void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node){
-    std::cout<<node.getType()<<"\n";
+//helper function to recursivly traverse nodes and get all identifiers  this works on qualified identifiers 
+//and expression identifiers
+void recursiveIdent(ActiveGame & active,std::vector<std::string>& identifiers, ts::Node node){
+    //std::cout<<node.getType()<<"\n";
     if((std::string)node.getType() == "expression"||(std::string)node.getType() == "qualified_identifier" ){
         for(size_t i = 0; i < node.getNumChildren(); i++){
             recursiveIdent(active, identifiers, node.getChild(i));
         }        
     }
     else if((std::string) node.getType() == "identifier"){
-        identifiers.emplace_back(getField(node,active.getSource()));
-        std::cout<<getField(node,active.getSource())<<"\n";
+        identifiers.emplace_back(getField(node,active.game.getSource()));
+        //std::cout<<getField(node,active.game.getSource())<<"\n";
     }
     else {
         return;
@@ -265,24 +285,24 @@ void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node
 //________________________________________________________________________________________________________________________________
 
 
-void forLoopHandler(Game &active, ExecutionTree& tree,ts::Node node){
-    std::string identifier = getField(node.getChild(1),active.getSource());
+void forLoopHandler(ActiveGame & active, ExecutionTree& tree,ts::Node node){
+    std::string identifier = getField(node.getChild(1),active.game.getSource());
     ExpressionNode* condition = parseExpression(active,tree, node.getChild(3));
     ExecutionTree loopTree;
-    std::cout <<"identifier "<< identifier << "\n";
+    //std::cout <<"identifier "<< identifier << "\n";
     
     //this should collect the body of the loop and create a new tree that is attached to the for loop node.
     ts::Node body = node.getChildByFieldName("body");
     bodyHandler(active,loopTree,body);
 
-    ForNode newNode{identifier,condition, &loopTree};
+    ;
     //the loop node is then appended to its parent tree.
-    //tree.append(&newNode);
+    tree.append(std::make_unique<ForNode>(identifier,condition, std::move(loopTree)));
    
 }
 
 // uneccisary for RPS
-void whileLoopHanler(Game &active, ExecutionTree& tree,ts::Node node){
+void whileLoopHanler(ActiveGame & active, ExecutionTree& tree,ts::Node node){
     std::string variable = (std::string)node.getFieldNameForChild(1);
     ExpressionNode* condition = parseExpression(active,tree,node.getChildByFieldName("expression"));
     ExecutionTree loopTree;
@@ -292,15 +312,15 @@ void whileLoopHanler(Game &active, ExecutionTree& tree,ts::Node node){
     ts::Node body = node.getChildByFieldName("body");
     bodyHandler(active,loopTree,body);
 
-    WhileNode newNode{condition, &loopTree};
+   
     //the loop node is then appended to its parent tree.
-    //tree.append(&newNode);
+    tree.append(std::make_unique<WhileNode>(condition, std::move(loopTree)));
     //todo
 }
 
 
-void parallel_forHandler(Game &active, ExecutionTree& tree,ts::Node node){
-    std::string identifier = getField(node.getChild(1),active.getSource());
+void parallel_forHandler(ActiveGame & active, ExecutionTree& tree,ts::Node node){
+    std::string identifier = getField(node.getChild(1),active.game.getSource());
     ExpressionNode* condition = parseExpression(active,tree, node.getChild(3));
     ExecutionTree loopTree;
     std::cout <<"identifier "<< identifier << "\n";
@@ -309,18 +329,20 @@ void parallel_forHandler(Game &active, ExecutionTree& tree,ts::Node node){
     ts::Node body = node.getChildByFieldName("body");
     bodyHandler(active,loopTree,body);
 
-    ForNode newNode{identifier,condition, &loopTree};
+    
     //the loop node is then appended to its parent tree.
-    //tree.append(&newNode);
+    tree.append(std::make_unique<ParallelForNode>(identifier,condition, std::move(loopTree)));
 }
-void inparallelHandler(Game &active, ExecutionTree& tree,ts::Node node){
+/**
+ * this is not needed for rps
+void inparallelHandler(ActiveGame & active, ExecutionTree& tree,ts::Node node){
     //todo
 }
+*/
 
 
 
-
-void handleControlType(Game& active, ExecutionTree& tree, ts::Node node){
+void handleControlType(ActiveGame &  active, ExecutionTree& tree, ts::Node node){
     std::cout<<"controlHandle\n";
     // val = getCaseValue(node.getType());
     switch(getControlTypeValue(node.getType())){
@@ -337,16 +359,16 @@ void handleControlType(Game& active, ExecutionTree& tree, ts::Node node){
             handleMatch(active,tree,node);
             break;
         case ControlTypes::INPARALLEL:
-            inparallelHandler(active,tree,node);
+            //inparallelHandler(active,tree,node);
             break;
         default :
         std::cout <<"error invalid control Type\n";
     }
 }
 
-//message nodes 
+//Player interaction Nodes 
 //____________________________________________________________________________________________________________
-void handleMessageRule(Game &active, ExecutionTree &tree, ts::Node node) {
+void handleMessageRule(ActiveGame & active, ExecutionTree &tree, ts::Node node) {
     std::cout << "parseMessageRule handle\n";
 
     ts::Node playerSetNode = node.getChildByFieldName("player_set");
@@ -360,22 +382,22 @@ void handleMessageRule(Game &active, ExecutionTree &tree, ts::Node node) {
     std::string message;
     //get the message
     if (!expressionNode.isNull() && expressionNode.getChild(0).getType() == "quotedString" ) {
-        message = getField(expressionNode.getChild(0),active.getSource());
+        message = getField(expressionNode.getChild(0),active.game.getSource());
     }
 
-   //tree.append(new MessageNode(message, playerSet));
+   tree.append(std::make_unique<MessageNode>(message, playerSet));
 }
 // rule_interpreter.cpp
-void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) {
-    std::cout << "parseInputChoiceRule handle\n";
+void handleInputChoice(ActiveGame & active, ExecutionTree &tree, ts::Node node) {
+    //std::cout << "parseInputChoiceRule handle\n";
 
     // Parse the recipient (to)
     ts::Node recipientNode = node.getChild(2);
     
     std::vector<std::string> recipientIdentifiers;
-   
+    //get vector of recipients
     if (!recipientNode.isNull()) {
-         recursiveIdent(active,recipientIdentifiers,recipientNode); // A function to extract the identifier text
+         recursiveIdent(active,recipientIdentifiers,recipientNode); 
     }
 
     // Parse the prompt
@@ -383,21 +405,21 @@ void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) {
     std::string prompt;
   
     if (!promptNode.isNull()) {
-        prompt = getField(promptNode.getChild(0),active.getSource()); // A function to extract the quoted string
+        prompt = getField(promptNode.getChild(0),active.game.getSource()); 
     }
 
     // Parse the choices
     ts::Node choicesNode = node.getChild(7);
     std::vector<std::string> choicesIdentifiers;
- 
+    //fills a vector with identifier for the choices
     if (!recipientNode.isNull()) {
-         recursiveIdent(active,choicesIdentifiers,choicesNode); // A function to extract the identifier text
+         recursiveIdent(active,choicesIdentifiers,choicesNode); 
     }
 
   
     // Parse the target
     ts::Node targetNode = node.getChild(9);
-
+    //vector of the target identifiers 
     std::vector<std::string> targetIdentifiers;
     recursiveIdent(active,targetIdentifiers,targetNode);
 
@@ -408,45 +430,10 @@ void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) {
         timeout = parseExpression(active,tree,timeoutNode); // A function to extract the number
     }
 
-    //tree.append( new InputChoiceNode(recipientIdentifiers, prompt, choicesIdentifiers, targetIdentifiers, timeout));
+    tree.append(std::make_unique<InputChoiceNode>(recipientIdentifiers, prompt, choicesIdentifiers, targetIdentifiers, timeout));
 }
 
-
-
-//This section will probably get reworked i think that these might not need individual handlers for all node types
-
-
-
-
-
-
-
-
-//human input node handling 
-
-//human input handler 
-void handleText(){
-    //todo
-
-}
-void handleChoice(){
-    //todo
-
-}
-void handleRange(){
-    //todo
-
-}
-void handleVote(){
-    //todo
-
-}
-
-bool isHumanInput(std::string type){
-
-     return std::find(humanInputTypes.begin(),humanInputTypes.end(),type) != humanInputTypes.end();
-}
-void handleInput(Game& active, ExecutionTree& tree, ts::Node node){
+void handleInput(ActiveGame& active, ExecutionTree& tree, ts::Node node){
     switch(getInteracionChoiceValue(node.getType())){
         case InteractionType::MESSAGE : //send message
             handleMessageRule(active,tree,node);
@@ -458,46 +445,39 @@ void handleInput(Game& active, ExecutionTree& tree, ts::Node node){
 }
 
 
-bool isListType(std::string type){
-     return std::find(listTypes.begin(),listTypes.end(),type) != listTypes.end();
-}
-void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node){
+
+
+void handleListOperation(ActiveGame& active, ExecutionTree& tree, ts::Node node){
     std::cout << "handleListOperation handle\n";
     ListTypes type = getlistToValue(node.getType());
-    ts::Node expressionNode = node.getChildByFieldName("expression");
-    ExpressionNode* expr = nullptr;
-    if (!expressionNode.isNull()) {
-        expr = parseExpression(active, tree, expressionNode);  
-    }
+    ts::Node expressionNode = node.getChild(1);
+    ExpressionNode* expr1 = nullptr;
+    expr1 = parseExpression(active, tree, expressionNode);  
 
-    ts::Node fromNode = node.getChildByFieldName("qualified_identifier");
-    std::string sourceIdentifier;
-    if (!fromNode.isNull()) {
-        std::vector<std::string> identifiers;
-    }
-    //tree.append(new ListOperation(type,expr, identifiers));
+    ts::Node changeNode = node.getChild(3);
+    ExpressionNode* expr2 = parseExpression(active,tree,changeNode);
+    
+    tree.append(std::make_unique<ListOperation>(type,expr1, expr2));
 }
 
 //timing types handling 
+//we don't actuall use these
+/**
 const std::vector<std::string>timingTypes = {
     "time"
 };
 
-bool isTiming(std::string type){
-    return std::find(timingTypes.begin(),timingTypes.end(),type) != timingTypes.end();
-}
 
-void handleTiming(Game& active, ExecutionTree& tree, ts::Node node){
+
+void handleTiming(ActiveGame& active, ExecutionTree& tree, ts::Node node){
     //handle timing 
   
 }
-bool isAssignment(std::string type ){
-    return type == "assignment";
-}
-bool isMatch(std::string type){
-    return type == "match";
-}
-void handleAssignement(Game& active, ExecutionTree& tree, ts::Node node){
+*/
+//variable assignemnt node handling
+//____________________________________________________________________________________________________________________________
+
+void handleAssignement(ActiveGame& active, ExecutionTree& tree, ts::Node node){
     std::vector<std::string> identifiers;
     std::cout<<"handling assignement\n";
     recursiveIdent(active, identifiers,node.getChild(0));
@@ -505,32 +485,32 @@ void handleAssignement(Game& active, ExecutionTree& tree, ts::Node node){
     VariableAssignmentNode newNode {identifiers,express};
     
 }
-ExecutionNode* parseMatchEntry(Game&active, ExecutionTree& tree, ts::Node node) {
-    std::cout<<"parseMatchEntry\n";
-    ExpressionNode* ident = parseExpression(active , tree , node.getChild(0));
-    ExecutionTree subtree;
-    bodyHandler(active, subtree,node.getChildByFieldName("body"));
-    return new MatchEntryNode{ident,&subtree};
+//Match node handling 
+//____________________________________________________________________________________________________________________________
 
+ExecutionNode* parseMatchEntry(ActiveGame& active, ExecutionTree& tree, ts::Node node) {
+    std::cout << "parseMatchEntry\n";
+    ExpressionNode* ident = parseExpression(active, tree, node.getChild(0));
+    auto subtree = std::make_unique<ExecutionTree>();
+    bodyHandler(active, *subtree, node.getChildByFieldName("body"));
+    return new MatchEntryNode(ident, std::move(subtree));
 }
 
-void handleMatch(Game&active, ExecutionTree& tree, ts::Node node){
-    std::cout<<"handleMatch\n";
-    ExpressionNode* condition = parseExpression(active,tree, node.getChild(1));
-    std::vector<ExecutionNode*> entries;
-    for( auto i = 3; i < node.getNumChildren()-2;i++){
-        auto match = parseMatchEntry(active, tree,node.getChild(i));
-        entries.push_back(match);
-
+void handleMatch(ActiveGame& active, ExecutionTree& tree, ts::Node node){
+    std::cout << "handleMatch\n";
+    ExpressionNode* condition = parseExpression(active, tree, node.getChild(1));
+    std::vector<std::unique_ptr<ExecutionNode>> entries;
+    for (auto i = 3u; i < node.getNumChildren() - 2; i++) {
+        auto match = parseMatchEntry(active, tree, node.getChild(i));
+        entries.push_back(std::unique_ptr<ExecutionNode>(match));
     }
-    //tree.append(new MatchNode{condition,entries});
-    //create match execution node
-
+    tree.append(std::make_unique<MatchNode>(condition, std::move(entries)));
 }
 
 
 
-void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node){
+
+void ruleVisitor(ActiveGame& active, ExecutionTree& tree, ts::Node node){
     std::cout<<"ruleVisit\n";
     std::string rule = (std::string)node.getType();
     assert(rule == "rule");
@@ -543,8 +523,8 @@ void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node){
     }
     else if(isListType(type)){
         handleListOperation(active,tree,current);
-    }else if(isTiming(type)){
-        handleTiming(active,tree,current);
+    //}else if(isTiming(type)){
+        //handleTiming(active,tree,current);
     }else if(isHumanInput(type)){
       
         handleInput(active,tree,current);
@@ -557,7 +537,7 @@ void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node){
         std::cout<<"not recognized rule node\n";
     }
 }
-void bodyHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
+void bodyHandler(ActiveGame& active, ExecutionTree& tree ,ts::Node node ){
     auto numRules = node.getNumChildren();
     std::cout<<"body\n";
     for(size_t i = 1; i < numRules-1;i++){
@@ -566,7 +546,7 @@ void bodyHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
     }
     
 }
-void rulesHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
+void rulesHandler(ActiveGame& active, ExecutionTree& tree ,ts::Node node ){
     if(node.getType() != "rules" || node.getNumChildren() > 2){
         std::cout<<"error non rules node in rules handler";
     }
@@ -578,15 +558,17 @@ void rulesHandler(Game& active, ExecutionTree& tree ,ts::Node node ){
 
 int main() {
     Player mockPlayer = {"test",1};
-    Game mockGame {1};
+    Game game {1};
     std::cout << "start"<<"\n";
     SGParser p("./lib/gameSpecs/rock_paper_scissors.txt");
-    mockGame.setSource(p.source);
+    game.setSource(p.source);
     auto tree = p.getRoot();
     auto rules = p.getRules();
     treePrinter("",rules);
     std::cout << tree.getType()<<"\n";
+    ActiveGame mockGame(game);
     rulesHandler(mockGame,mockGame.gameloop,rules);
+    mockGame.gameloop.print();
    // treePrinter("",rules);
     
 

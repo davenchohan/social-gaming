@@ -10,6 +10,8 @@ using json = nlohmann::json;
 #include <cassert>
 #include <cstdio>
 #include <memory>
+#include "ExpressNodes.h"
+#include "Nodes.h"
 
 
 const std::vector<std::string> humanInputTypes = {
@@ -116,45 +118,45 @@ ControlTypes getControlTypeValue(std::string_view type);
 
 bool isControlType(std::string type);
 
-void forLoopHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void whileLoopHanler(Game& active, ExecutionTree& tree, ts::Node node);
-void parallel_forHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void handleMatch(Game&active, ExecutionTree& tree, ts::Node node);
-void inparallelHandler(Game& active, ExecutionTree& tree, ts::Node node);
+void forLoopHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void whileLoopHanler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void parallel_forHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void handleMatch(ActiveGame&active, ExecutionTree& tree, ts::Node node);
+void inparallelHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
-ExecutionNode* parseMatchEntry(Game&active, ExecutionTree& tree, ts::Node node);
+ExecutionNode* parseMatchEntry(ActiveGame&active, ExecutionTree& tree, ts::Node node);
 
-void handleControlType(Game& active, ExecutionTree& tree, ts::Node node);
+void handleControlType(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 void handleText();
 void handleChoice();
 void handleRange();
 void handleVote();
-void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) ;
+void handleInputChoice(ActiveGame &active, ExecutionTree &tree, ts::Node node) ;
 bool isHumanInput(std::string type);
-void handleInput(Game& active, ExecutionTree& tree, ts::Node node);
+void handleInput(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 
 
 bool isListType(std::string type);
-void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node);
+void handleListOperation(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 bool isTiming(std::string type);
-void handleTiming(Game& active, ExecutionTree& tree, ts::Node node);
+void handleTiming(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
-void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node);
-void bodyHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void rulesHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
-void handleMessageRule(Game &active, ExecutionTree &tree, ts::Node node); 
+void ruleVisitor(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void bodyHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void rulesHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts::Node node);
+void handleMessageRule(ActiveGame &active, ExecutionTree &tree, ts::Node node); 
 
 
 
-ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
-void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
-ExpressionNode* parseComparison(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseForExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts::Node node);
+ExpressionNode* parseComparison(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseForExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseSimpleExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseOperatorExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node);

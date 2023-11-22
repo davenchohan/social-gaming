@@ -6,6 +6,7 @@
 #include "../../gameclasses/include/Player.h"
 #include "Tree.h"
 #include "../../datatypes/include/DataTypes.h"
+#include "ExpressNodes.h"
 
 class ExecutionTree; 
 
@@ -14,46 +15,20 @@ class ExecutionTree;
 class ExecutionNode {
 public:
     ExecutionNode();
-    ExecutionNode* execute();
-    ExecutionNode* next;
-    
+    std::unique_ptr<ExecutionNode> execute();
+    std::unique_ptr<ExecutionNode> next;
+    virtual void print()=0;
     virtual ~ExecutionNode() = default;
 private:
-    //virtual ExecutionNode* executeImpl() = 0;
+    //virtual std::unique_ptr<ExecutionNode> executeImpl() = 0;
 
 };
 
 
 //Expression node enums
 //________________________________________________________________________________________________________________________________
-enum class SimpleType {
-    BOOLEAN,
-    NUMBER,
-    STRING,
-    IDENTIFIER
-};
-enum class OpType {
-    ADD,
-    SUB,
-    MULT,
-    DIV
-};
-enum class CompType {
-    EQ,
-    GREATER,
-    LESS,
-    NOTEQ,
-    GREATEREQ,
-    LESSEQ,
-    AND,
-    OR
-};
-enum class Builtins {
-    SIZE,
-    UPFROM,
-    CONTAINS,
-    COLLECT
-};
+
+
 enum class ControlTypes {
     FOR,
     WHILE,
@@ -94,75 +69,6 @@ enum class ExpressionTypes {
 };
 // might make this not be an execution node not 100 % sure if these will need to have execution implenetations or if they will be able to exist on their own
 
-//general expression node type generic expression nodes should not be created. Expression node will implement a evaluate function to allow for expression evaluation
-//_________________________________________________________________________________________________________________________________________________________________
-class ExpressionNode : public ExecutionNode {
-public: 
-    ExpressionNode();
-    bool evaluate();
-    std::vector<std::string> identifiers;
-private:
-    bool isFor;
-    bool isSimple = false;
-    ExecutionNode* executeImpl();
-    //virtual std::variant<> getValue(); // this will be implemented for all expression node types to allow for node evaluation
-};
-
-
-
-class BuiltInNode : public ExpressionNode {
-public:
-    BuiltInNode(Builtins type,std::vector<std::string> identifiers, const std::vector<ExpressionNode*>& args);
-private:
-    std::vector<std::string> identifiers;
-    Builtins builtinType;
-    std::vector<ExpressionNode*> args;
-};
-
-class OpExpressionNode : public ExpressionNode{
-    public: 
-    OpExpressionNode();
-    OpExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , OpType operation);
-    private:
-    ExpressionNode* lhs;
-    ExpressionNode* rhs;
-    OpType operation;
-    
-};
-class NotNode : public ExpressionNode{
-    public: 
-    NotNode(ExpressionNode* express);
-    private:
-    ExpressionNode* express;
-
-};
-
-class CompExpressionNode : public ExpressionNode{
-    public: 
-    CompExpressionNode();
-    CompExpressionNode(ExpressionNode* lhs, ExpressionNode* rhs , CompType comparison);
-    private:
-    ExpressionNode* lhs;
-    ExpressionNode* rhs;
-    CompType comparison;
-
-};
-
-
-
-
-class SimpleExpression : public ExpressionNode{
-    public:
-    SimpleExpression(SimpleType type, std::string value);
-    
-    private:
-    ExecutionNode* executeImpl();
-    SimpleType type;
-    std::string value;
-
-};
-
-
 
 
 
@@ -172,23 +78,25 @@ class SimpleExpression : public ExpressionNode{
 class ForNode : public ExecutionNode {
 public:
     ForNode();
-    ForNode(std::string identifier ,ExpressionNode* expression, ExecutionTree* loop);
-    ExecutionNode* getCurrent();
+    ForNode(std::string identifier ,ExpressionNode* expression, ExecutionTree loop);
+    std::unique_ptr<ExecutionNode> getCurrent();
     void IncrementCondition();
     bool checkCondition(); 
+    void print(); 
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
     ExpressionNode* condition;
     std::string identifier; 
-    ExecutionTree* loop;
+    std::unique_ptr<ExecutionTree> loop;
 
 };
 
 class LoopEndNode : public ExecutionNode {
     public:
     LoopEndNode();
-    LoopEndNode(ExecutionNode* parentLoop);
-    ExecutionNode * goToParentLoop(ExecutionNode* parentLoop);
+    LoopEndNode(std::unique_ptr<ExecutionNode> parentLoop);
+    ExecutionNode * goToParentLoop(std::unique_ptr<ExecutionNode> parentLoop);
+    void print(); 
     private:
     ExecutionNode * parentLoop;
 
@@ -197,83 +105,63 @@ class LoopEndNode : public ExecutionNode {
 class WhileNode : public ExecutionNode {
 public:
     WhileNode();
-    WhileNode(ExpressionNode* condition,  ExecutionTree* loop);
-    ExecutionNode* getCurrent();
+    WhileNode(ExpressionNode* condition,  ExecutionTree loop);
+    std::unique_ptr<ExecutionNode> getCurrent();
     bool checkCondition(); 
+    void print(); 
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
     ExpressionNode* condition;
      
-    ExecutionTree* loop;     
+    std::unique_ptr<ExecutionTree> loop;     
 };
 
 class ParallelForNode : public ExecutionNode {
 public:
-    ParallelForNode(ExpressionNode* condition,  ExecutionTree* loop );
-    ExecutionNode* getCurrent();
+    ParallelForNode(std::string identifier, ExpressionNode* condition,  ExecutionTree loop );
+    std::unique_ptr<ExecutionNode> getCurrent();
     void IncrementCondition();
     bool checkCondition(); 
+    void print(); 
 private:
-    ExecutionNode* executeImpl();
-    ExpressionNode* condition; 
-    ExecutionTree* loop;   
+    std::unique_ptr<ExecutionNode> executeImpl();
+    ExpressionNode* condition;
+    std::string identifier; 
+    std::unique_ptr<ExecutionTree> loop;  
 
 };
-
+/**
 class InParallelNode : public ExecutionNode {
 public:
     InParallelNode();
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
      
 }; 
-
+*/
 
 //Player action nodes below this is all template these will all probably be reworked
 //________________________________________________________________________________________________________________________________
-class ListOperation : public ExecutionNode {
-public:
-    ListOperation(ListTypes type, ExpressionNode* expr, std::vector<std::string> identifiers );
-private:
-    ExpressionNode* expression;
-    ListTypes type;
-    std::vector<std::string> identifiers;
-};
+
 class MatchNode : public ExecutionNode {
 public:
-    MatchNode(ExpressionNode* condition ,  std::vector<ExecutionNode*> entries);
+    MatchNode(ExpressionNode* condition ,  std::vector<std::unique_ptr<ExecutionNode>> entries);
+    void print(); 
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
     ExpressionNode* condition ;
-    std::vector<ExecutionNode*> entries;
+    std::vector<std::unique_ptr<ExecutionNode>> entries;
          
 };
 class MatchEntryNode: public ExecutionNode{
     public:
-    MatchEntryNode(ExpressionNode* entry, ExecutionTree* subtree);
+    MatchEntryNode(ExpressionNode* entry, std::unique_ptr<ExecutionTree> subtree);
+    void print(); 
     private:
+    std::unique_ptr<ExecutionNode> executeImpl();
     ExpressionNode* entry;
-    ExecutionTree* subtree;
+    std::unique_ptr<ExecutionTree> subtree;
 };
-
-class ExtendNode : public ExecutionNode {
-public:
-    ExtendNode();
-private:
-    ExecutionNode* executeImpl();
-       
-};
-
-
-
-class TimerNode : public ExecutionNode {
-public:
-    TimerNode();
-private:
-    ExecutionNode* executeImpl();
-      
-};
-
 
 class InputChoiceNode : public ExecutionNode {
 public:
@@ -282,6 +170,7 @@ public:
                     const std::vector<std::string> choicesIdentifiers, 
                     const std::vector<std::string> targetIdentifiers, 
                     ExpressionNode* timeout);
+    void print(); 
     
 
 private:
@@ -290,39 +179,87 @@ private:
     std::vector<std::string> targetIdentifiers;
     std::vector<std::string> choicesIdentifiers;
     ExpressionNode* timeout;
+    std::unique_ptr<ExecutionNode> executeImpl();
 };
 
 
 class MessageNode : public ExecutionNode {
 public:
     MessageNode(const std::string& message, const std::string& playerSet);
+    void print(); 
   
 
 private:
-    std::string message;
+    std::string message; 
+    //messages can have identifiers stored within them in the format of {ident} so in execution
+    // the strings will need to be searched for brackets and then the values will need to be inserted before the message is sent.
     std::string playerSet;
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
 };
 
 
 
+//List operation Nodes
+//__________________________________________________________________________________________________________________-
+class ListOperation : public ExecutionNode {
+public:
+    ListOperation(ListTypes type, ExpressionNode* expr1, ExpressionNode* expr2 );
+    void print(); 
+private:
+std::unique_ptr<ExecutionNode> executeImpl();
+    ExpressionNode* expr1;
+    ExpressionNode* expr2;
+    ListTypes type;
+    
+};
+
+
+//Variable Assignment Node
+//__________________________________________________________________________________________________________________-
+
 class VariableAssignmentNode : public ExecutionNode {
 public:
     VariableAssignmentNode(std::vector<std::string> identifiers, ExpressionNode* express);
+    void print(); 
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
     std::vector<std::string> identifiers;
     ExpressionNode* express;
       
 };
 
 
+/**
+class ExtendNode : public ExecutionNode {
+public:
+    ExtendNode();
+private:
+    std::unique_ptr<ExecutionNode> executeImpl();
+       
+};
+
+
+
+
+class TimerNode : public ExecutionNode {
+public:
+    TimerNode();
+private:
+    std::unique_ptr<ExecutionNode> executeImpl();
+      
+};
+*/
+
+
+
+/*
 
 class LiteralNode : public ExecutionNode {
 public:
     LiteralNode();
 private:
-    ExecutionNode* executeImpl();
+    std::unique_ptr<ExecutionNode> executeImpl();
       
 };
+*/
 
