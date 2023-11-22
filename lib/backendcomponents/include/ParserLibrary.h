@@ -94,9 +94,10 @@ public:
     RequestConstructor(std::string);
     // This is dumb, have to implement template function in .h file
     template <class T1> void appendItem(const std::string key, const T1 val){ subject[key] = val;}
-    // Override appendItem function for custom behaviour when appending a list of players into request
+    // Override appendItem function for custom behaviour when appending custom classes
     void appendItem(const std::string , const std::vector<Player>);
     void appendItem(const std::string key, const std::vector<AudienceMember> members);
+    void appendItem(const std::string, const Game&);
     std::string ConstructRequest();
     RequestInfo returnReqInfo();
 };

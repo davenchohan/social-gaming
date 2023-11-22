@@ -226,6 +226,11 @@ void RequestConstructor::appendItem(const std::string key, std::vector<AudienceM
     return;
 }
 
+void RequestConstructor::appendItem(const std::string key, const Game& game){
+    subject[key] = converter.ConvertFromGame(game);
+    return;
+}
+
 void JsonConverter::convertJsonToPlayersArr(Json &arr, std::vector<Player> &p_vector){
     if(arr.empty()){
         std::cout << "Empty array passed" << std::endl;

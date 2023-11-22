@@ -222,3 +222,28 @@ TEST(ParserLibraryTests, TestConvertToGameFilled){
 }
 
 
+TEST(ParserLibraryTests, TestRequestConstructionWithGame){
+    RequestConstructor constructor;
+    constructor.appendItem("SessionId", 11561);
+    GameVariable var1{"var1", 1111, "timer"};
+    GameConstant constant1{"constant1", "Rock"};
+    Game someGame{1234};
+    someGame.SetGameName("Rock,Paper,Scissors");
+    someGame.SetMinPlayers(2);
+    someGame.SetMaxPlayers(2);
+    someGame.SetAudienceEnabled(true);
+    someGame.SetNumRounds(2);
+    someGame.AddVariable("var1", var1);
+    someGame.AddConstant("constant1", constant1);
+    someGame.SetGameProgress(Game::GameProgress::NotStarted);
+    someGame.setSource("nothing");
+    constructor.appendItem("Game1", someGame);
+
+    auto generated = constructor.ConstructRequest();
+    auto expected = "{\"Game1\":{\"AudienceEnabled\":true,\"GameConstants\":[{\"constantName\":\"constant1\",\"constantVal\":\"Rock\"}],\"GameId\":1234,\"GameName\":\"Rock,Paper,Scissors\",\"GameProgress\":\"NotStarted\",\"GameVariables\":[{\"strVal\":\"timer\",\"varId\":1111,\"variableName\":\"var1\"}],\"MaxPlayers\":2,\"MinPlayers\":2,\"NumRounds\":2},\"SessionId\":11561}";
+    EXPECT_EQ(generated, expected);
+
+}
+
+
+
