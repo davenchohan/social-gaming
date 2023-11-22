@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include "Client.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
@@ -10,13 +11,14 @@
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp" 
 #include "CreateGameSessionPage.h"
+#include "DataClasses.h"
 
 #include "ClientWrapper.h"
 #include "Constants.h"
 
 using namespace ftxui;
 namespace Pages{
-Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state,Component gameConfig, networking::Client &client){
+Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, std::string &input_num_rounds, networking::Client &client){
 
      networking::ClientWrapper wrapper;
      wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
@@ -37,6 +39,10 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      auto selectedGameTitle = Renderer([&] {
           return paragraph("Selected game: " + radiobox_list[radiobox_selected]);
      });
+
+     InputData data = InputData();
+     Component num_rounds = Input(&input_num_rounds, "Number of Rounds");
+     data.addInputField("num_rounds", input_num_rounds);
 
      // pages
      auto page1 = Container::Vertical({
@@ -69,7 +75,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
           selectedGameTitle,
           title3,
           Input(&session_name, "Enter game session name."),
-          gameConfig,
+          num_rounds,
           Renderer([] {
                return filler();
             }),
@@ -83,7 +89,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             }),
             Button("Create", [&]{
                view_state = 1;
-              wrapper.sendNoBody(constants::ReqType::CREATEGAME, data.toJson, client);
+               wrapper.sendReq(constants::ReqType::CREATEGAME, input_num_rounds, client);
             }),// transfer page to game play page
         }) | flex,
      });

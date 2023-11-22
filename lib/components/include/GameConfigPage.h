@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include "../../networking/include/Client.h"
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
@@ -12,7 +13,8 @@
 
 
 
+
 using namespace ftxui;
 namespace Pages{
-    Component GameConfig(networking::Client &client);
+    Component GameConfig(networking::Client &client, std::string &num_rounds);
 }

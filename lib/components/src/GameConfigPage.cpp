@@ -24,7 +24,7 @@
 using namespace ftxui;
 namespace Pages
 {
-Component GameConfig(networking::Client &client, InputData data){
+Component GameConfig(networking::Client &client, std::string &input_num_rounds){
 
   networking::ClientWrapper wrapper;
   //wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
@@ -32,10 +32,10 @@ Component GameConfig(networking::Client &client, InputData data){
   InputData data = InputData();  
   
 
-  //textFields for input, need some way to define which type of input.
-  //doing a demo of config for a quiz game, was not sure what input rock paper scissors would need.
-  //once I get server responding will make this dynamic.
-  std::string input_num_rounds;
+
+  
+  
+  
   
  
   Component num_rounds = Input(&input_num_rounds, "Number of Rounds");

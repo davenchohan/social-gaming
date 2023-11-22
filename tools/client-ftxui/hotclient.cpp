@@ -155,39 +155,7 @@ int main(int argc, char* argv[]) {
   };
   int radiobox_selected = 0;
 
-  // data - gameconfig class for sending info
-  class InputData{
-  public:
-  
-  InputData() = default;
-  
 
-  void addInputField(std::string key, std::string& value){
-    inputFields.insert({key, value});
-  }
-
- 
-
-  std::string toJson(){
-    std::string result;
-    /**
-     * IE -
-     *  {"key":"value", "key2":"value2"}
-    */  
-   //This is not really perfect will need testing
-    result.append("{");
-    for(auto const& [key, val] : inputFields){
-      result.append(key);
-      result.append(":");
-      result.append(val);
-      result.append(", ");
-    }
-    result.append("}");
-    return result;
-  }
-  private:
-  std::map<std::string, std::string&> inputFields;
-};
 
   // variables - join game session page
   int pagenum = 0;
@@ -196,6 +164,7 @@ int main(int argc, char* argv[]) {
   // variables - create game session page
   int create_pagenum = 0;
   std::string game_session_name;
+  std::string input_num_rounds;
 
   //variables - InputData instance for gameConfigPage
   InputData data = InputData();
@@ -259,7 +228,7 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto gameConfig = Pages::GameConfig(client, data);
+  auto gameConfig = Pages::GameConfig(client, input_num_rounds);
   auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state,gameConfig, client);
   auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
 
