@@ -37,6 +37,7 @@ using Json = nlohmann::json;
 
 
 std::vector<Connection> clients;
+std::vector<Player> players;
 
 // Empty struct for hold server request items
 // This is a bad fake, to be used temporarily
@@ -88,7 +89,7 @@ serverRequest demoParseReq(const std::string log){
     return temp;
   }else{
     std::cout << "Error with request" << std::endl;
-    throw UnknownRequestException("Bad Request, could not parse");
+    //throw UnknownRequestException("Bad Request, could not parse");
   }
 }
 
@@ -97,13 +98,13 @@ serverRequest demoParseReq(const std::string log){
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
   if (gameSpec.size() != receivedItems.size()){
     std::cout << "Error with request" << std::endl;
-    throw IncompleteGameException("Error, incomplete game");
+    //throw IncompleteGameException("Error, incomplete game");
   }else{
     // Checking for missing game spec items from client
     for (auto item : gameSpec){
       if(receivedItems.find(item.first) == receivedItems.end()){
         std::cout << "Error with request" << std::endl;
-        throw IncompleteGameException("Error, recived game spec does not have: " + item.first);
+        //throw IncompleteGameException("Error, recived game spec does not have: " + item.first);
       }
     }
     return;
@@ -135,10 +136,18 @@ Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
   return newGame;
 }
 
+void registerNewPlayer(int id){
+  std::string name = "player";
+  name.append(std::to_string(id));
+  players.push_back(Player(name, id));
+}
+
 void
 onConnect(Connection c) {
   std::cout << "New connection found: " << c.id << "\n";
   clients.push_back(c);
+  int newId = c.id;
+  registerNewPlayer(newId);
 }
 
 
@@ -147,6 +156,12 @@ onDisconnect(Connection c) {
   std::cout << "Connection lost: " << c.id << "\n";
   auto eraseBegin = std::remove(std::begin(clients), std::end(clients), c);
   clients.erase(eraseBegin, std::end(clients));
+  int playerIdToRemove = c.id;
+  players.erase(std::remove_if(players.begin(), players.end(),
+                  [playerIdToRemove](const Player& player) {
+                      return player.GetUserId() == playerIdToRemove;
+                  }),
+                  players.end());
 }
 
 
@@ -266,7 +281,7 @@ main(int argc, char* argv[]) {
           server_response = rules_template;
         }else{
           std::cout << "Error with request" << std::endl;
-          throw UnknownGameException("Game not found: " + request.gameName);
+          //throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqCreateGameFilled"){
         std::cout << "ReqCreateGameFilled" << std::endl;
@@ -313,7 +328,8 @@ main(int argc, char* argv[]) {
           std::string server_status = "ReqJoinGame Successful" + '\n' + player.GetName() + " added into " + std::to_string(handler.GetGame().GetGameId());
           server_response = server_status; 
         }else{
-          throw UnknownGameException("Game not found: " + request.gameName);
+          std::cout << "Error with request" << std::endl;
+          //throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
@@ -348,7 +364,8 @@ main(int argc, char* argv[]) {
           // Construct Response
           server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + handler.GetGame().GetGameName();
         }else{
-          throw UnknownGameException("Game not found: " + request.gameName);
+          std::cout << "Error with request" << std::endl;
+          //throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqUpdatePlayer"){
         std::cout << "ReqUpdatePlayer" << std::endl;
@@ -356,7 +373,8 @@ main(int argc, char* argv[]) {
         if (sessionHandlerDB.DoesSessionExist(id)){
           // TODO: Evaluate if we need to update the player state
         }else{
-          throw UnknownGameException("Game not found: " + request.gameName);
+          std::cout << "Error with request" << std::endl;
+          //throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if(request.request == "ReqGetGamesList"){
         std::cout << "Got: ReqGetGamesList" << std::endl;
@@ -386,7 +404,7 @@ main(int argc, char* argv[]) {
         std::cout << server_response << std::endl;
       }else{
         std::cout << "Bad Request: " + request.request << std::endl;
-        throw UnknownRequestException("Unknown Request: " + request.request);
+        //throw UnknownRequestException("Unknown Request: " + request.request);
       }
       auto outgoing = buildOutgoing(server_response);
       server.send(outgoing);
