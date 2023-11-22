@@ -96,6 +96,8 @@ json SGParser::configToJson() {
     ret[getChildStrByField(getConfig(), "name")] = j;
     return ret;
 }
+
+
 /**
 int main() {
     SGParser p("./lib/gameSpecs/empty_spec.txt");

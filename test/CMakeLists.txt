@@ -5,6 +5,8 @@ add_executable(runAllTests
     dummy.cpp
     CustomExceptionsTests.cpp
     ParserLibraryTests.cpp
+    GameSessionHandlerTests.cpp
+    GamesDatabaseTests.cpp
     GameClassTests.cpp
 )
 
