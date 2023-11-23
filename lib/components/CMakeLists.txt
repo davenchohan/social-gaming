@@ -26,6 +26,8 @@ if(NOT ftxui_POPULATED)
 endif()
 
 target_link_libraries(components
+  PRIVATE backendClasses
+  PRIVATE backendcomponents
   PRIVATE networking
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom

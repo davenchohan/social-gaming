@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <stdexcept>
+#include <algorithm>
 
 // Default constructor
 Game::Game(int newGameId) : gameId(newGameId) {
@@ -111,4 +112,28 @@ bool Game::operator==(const Game& other) const {
 
 bool Game::operator<(const Game& other) const {
     return this->GetGameId() < other.GetGameId();
+}
+
+std::vector<GameVariable> Game::GetAllVariables() const {
+    std::vector<GameVariable> variableValues;
+    variableValues.reserve(variables.size());
+
+    std::transform(variables.begin(), variables.end(), std::back_inserter(variableValues),
+                   [](const auto& pair) { return pair.second; });
+
+    return variableValues;
+}
+
+std::vector<GameConstant> Game::GetAllConstants() const {
+    std::vector<GameConstant> constantValues;
+    constantValues.reserve(constants.size());
+
+    std::transform(constants.begin(), constants.end(), std::back_inserter(constantValues),
+                   [](const auto& pair) { return pair.second; });
+
+    return constantValues;
+}
+
+ActiveGame::ActiveGame(Game other):game(other){
+    
 }
