@@ -226,19 +226,15 @@ std::string handleRequest(const std::string& request,
         std::string gameName;
         iss >> gameName;
 
-        // Check if the game exists in the serverGameList
-        if (serverGameList.gameExists(gameName)) {
-            // Game exists, return some response
-            return "Game already exists: " + gameName;
-        } else {
-            // Create the game and add it to the serverGameList
-            Game newGame(generateUniqueID());
-            newGame.SetGameName(gameName);
-            serverGameList.AddGame(newGame);
+      
+        // Create the game and add it to the serverGameList
+        Game newGame(generateUniqueID());
+        newGame.SetGameName(gameName);
+        serverGameList.AddGame(newGame);
 
             // Return a success response
-            return "Game created: " + gameName + ", GameID: " + std::to_string(newGame.GetGameId());
-        }
+        return "Game created: " + gameName + ", GameID: " + std::to_string(newGame.GetGameId());
+
     } else if (requestType == "ReqJoinGame") {
         // Handle ReqJoinGame logic
         // Example: Assume the request format is "ReqJoinGame GameID PlayerName"
@@ -247,18 +243,13 @@ std::string handleRequest(const std::string& request,
         iss >> gameId >> playerName;
 
         // Check if the game session exists
-        if (sessionHandlerDB.DoesSessionExist(std::to_string(gameId))) {
             // Add player to the game session
-            GameSessionHandler& handler = sessionHandlerDB.GetGameSessionHandler(std::to_string(gameId));
-            Player player(playerName, generateUniqueID()); // Assuming Player constructor takes name and ID
-            handler.AddPlayer(player.GetName(), player);
+        GameSessionHandler handler = sessionHandlerDB.GetGameSessionHandler(std::to_string(gameId));
+        Player player(playerName, generateUniqueID()); // Assuming Player constructor takes name and ID
+        handler.AddPlayer(player.GetName(), player);
 
-            // Return a success response
-            return "Player " + playerName + " joined GameID: " + std::to_string(gameId);
-        } else {
-            // Return an error response
-            return "Game session not found for GameID: " + std::to_string(gameId);
-        }
+        // Return a success response
+        return "Player " + playerName + " joined GameID: " + std::to_string(gameId);
     }
     // Add more cases for other request types as needed
 
