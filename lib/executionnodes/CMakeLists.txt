@@ -1,5 +1,6 @@
 add_library(executionnodes
     src/Nodes.cpp
+    src/ExpressNodes.cpp
     src/Tree.cpp
 )
 
