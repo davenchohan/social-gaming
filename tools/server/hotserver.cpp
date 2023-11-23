@@ -16,7 +16,6 @@
 #include "GameList.h"
 #include "ParserLibrary.h"
 #include "GameSessionList.h"
-#include "RandomIdGenerator.h"
 
 
 #include <fstream>
@@ -87,22 +86,30 @@ serverRequest demoParseReq(const std::string log){
     temp.gameVariables = {{"Rock","Beats Scissors"}, {"Paper", "Beats Rock"}, {"Scissors", "Beats Paper"}};
     return temp;
   }else{
-    std::cout << "Error with request" << std::endl;
     throw UnknownRequestException("Bad Request, could not parse");
   }
+}
+
+// Generates a unique ID, may have to move this elsewhere in the future
+int generateUniqueID() {
+    std::time_t result = std::time(nullptr);
+    std::string uniqueID = std::to_string(result);
+    int randomNum = std::rand();
+    uniqueID += std::to_string(randomNum);
+
+    std::hash<std::string> hasher;
+    return static_cast<int>(hasher(uniqueID));
 }
 
 // TODO: Replace this function wtih better implementation that verifies all aspects of Game are filled
 // Possible inputs: Game game, serverRequest request
 void evaluateFilledGame(std::map<std::string,std::string> &gameSpec, std::map<std::string, std::string> &receivedItems){
   if (gameSpec.size() != receivedItems.size()){
-    std::cout << "Error with request" << std::endl;
     throw IncompleteGameException("Error, incomplete game");
   }else{
     // Checking for missing game spec items from client
     for (auto item : gameSpec){
       if(receivedItems.find(item.first) == receivedItems.end()){
-        std::cout << "Error with request" << std::endl;
         throw IncompleteGameException("Error, recived game spec does not have: " + item.first);
       }
     }
@@ -129,7 +136,7 @@ bool evaluateFilledGame(std::map<std::string, std::string> &gameSpec, std::map<s
 Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
   Game newGame(stoi(gameRequest.gameId));
   for (auto variable: gameRequest.gameVariables) {
-    GameVariable newVariable(variable.first, RandomIdGenerator::generateUniqueId(), variable.second); 
+    GameVariable newVariable(variable.first, generateUniqueID(), variable.second); 
     newGame.AddVariable(variable.first, newVariable);
   }
   return newGame;
@@ -205,6 +212,60 @@ getHTTPMessage(const char* htmlLocation) {
   std::exit(-1);
 }
 
+std::string handleRequest(const std::string& request,
+                          GameList& serverGameList,
+                          GameSessionList& sessionHandlerDB,
+                          const std::map<std::string, std::string>& demoSessionHandlerDB) {
+    std::istringstream iss(request);
+    std::string requestType;
+    iss >> requestType;
+
+    if (requestType == "ReqCreateGame") {
+        // Handle ReqCreateGame logic
+        // Example: Assume the request format is "ReqCreateGame GameName"
+        std::string gameName;
+        iss >> gameName;
+
+        // Check if the game exists in the serverGameList
+        if (serverGameList.gameExists(gameName)) {
+            // Game exists, return some response
+            return "Game already exists: " + gameName;
+        } else {
+            // Create the game and add it to the serverGameList
+            Game newGame(generateUniqueID());
+            newGame.SetGameName(gameName);
+            serverGameList.AddGame(newGame);
+
+            // Return a success response
+            return "Game created: " + gameName + ", GameID: " + std::to_string(newGame.GetGameId());
+        }
+    } else if (requestType == "ReqJoinGame") {
+        // Handle ReqJoinGame logic
+        // Example: Assume the request format is "ReqJoinGame GameID PlayerName"
+        int gameId;
+        std::string playerName;
+        iss >> gameId >> playerName;
+
+        // Check if the game session exists
+        if (sessionHandlerDB.DoesSessionExist(std::to_string(gameId))) {
+            // Add player to the game session
+            GameSessionHandler& handler = sessionHandlerDB.GetGameSessionHandler(std::to_string(gameId));
+            Player player(playerName, generateUniqueID()); // Assuming Player constructor takes name and ID
+            handler.AddPlayer(player.GetName(), player);
+
+            // Return a success response
+            return "Player " + playerName + " joined GameID: " + std::to_string(gameId);
+        } else {
+            // Return an error response
+            return "Game session not found for GameID: " + std::to_string(gameId);
+        }
+    }
+    // Add more cases for other request types as needed
+
+    // If the request type is not recognized, return an error response
+    return "Unknown request type: " + requestType;
+}
+
 
 int
 main(int argc, char* argv[]) {
@@ -217,14 +278,57 @@ main(int argc, char* argv[]) {
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
+  GameList serverGameList;
+  GameSessionList sessionHandlerDB = GameSessionList();
+
+  Game rockPaperScissors = Game(generateUniqueID());
+  rockPaperScissors.SetGameName("Rock, Paper, Scissors");
+  serverGameList.AddGame(rockPaperScissors);
+
+  std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi", "Rock,Paper,Scissors"}};
+
+  while (true) {
+    bool errorUpdating = false;
+    try {
+      server.update();
+    }catch (std::exception& e) {
+      std::cerr << "Exception from Server update:\n"
+                << " " << e.what() << "\n\n";
+      errorUpdating = true;
+    }
+
+    const auto incoming = server.receive();
+    const auto [log, shouldQuit, returnAll] = processMessages(server, incoming);
+    std::string server_response;
+    allMessages.push_back(log+"\n");
+
+    if (returnAll) {
+      for (std::string str : allMessages) {
+      auto outgoing = buildOutgoing(str);
+      server.send(outgoing);
+      }
+    } else {      
+      server_response = handleRequest(log, serverGameList, sessionHandlerDB, demoSessionHandlerDB);
+      auto outgoing = buildOutgoing(server_response);
+      server.send(outgoing);
+    }
+
+    if (shouldQuit || errorUpdating) {
+      break;
+    }
+
+    sleep(1);
+  }
+
   // Instantiate game list
-  GameList serverGameList = GameList();
+  /*GameList serverGameList = GameList();
   // Instantiate Rock, Paper, Scissors
-  Game rockPaperScissors = Game(RandomIdGenerator::generateUniqueId());
+  Game rockPaperScissors = Game(generateUniqueID());
   rockPaperScissors.SetGameName("Rock,Paper,Scissors");
   serverGameList.AddGame(rockPaperScissors);
-  std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
-  std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
+
+  //std::vector<std::string> fakeServerGameList = {"Rock,Paper,Scissors"};
+  //std::map<std::string, std::string> fakeGameRules = {{"Rock,Paper,Scissors", "Rules:None"}};
   GameSessionList sessionHandlerDB = GameSessionList();
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi","Rock,Paper,Scissors"}};
 
@@ -244,6 +348,7 @@ main(int argc, char* argv[]) {
     const auto [log, shouldQuit, returnAll] = processMessages(server, incoming);
     std::string server_response;
     allMessages.push_back(log+"\n");
+
     if(returnAll){
       for(std::string str : allMessages){
         auto outgoing = buildOutgoing(str);
@@ -265,7 +370,6 @@ main(int argc, char* argv[]) {
           // TODO: Parse game rules + game variables into a format for client
           server_response = rules_template;
         }else{
-          std::cout << "Error with request" << std::endl;
           throw UnknownGameException("Game not found: " + request.gameName);
         }
       }else if (request.request == "ReqCreateGameFilled"){
@@ -288,7 +392,7 @@ main(int argc, char* argv[]) {
         auto variable = request.gameVariables.find("Rock");
         std::string varName = variable->first;
         std::string varVal = variable->second;
-        GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
+        GameVariable someVar(varName, varVal);
         newGame.AddVariable(varName, someVar);
 
         // Add Game to session handler
@@ -318,7 +422,7 @@ main(int argc, char* argv[]) {
       }else if(request.request == "ReqViewGame"){
         std::string id = request.gameId;
         if (sessionHandlerDB.DoesSessionExist(id)){
-          int newAudienceId = RandomIdGenerator::generateUniqueId();
+          int newAudienceId = generateUniqueID();
           AudienceMember member("dummy_viewer", newAudienceId); // TODO: Ask the viewer for their name to pass to the audience constructor
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.AddAudienceMember(member.GetName(), member);
@@ -340,7 +444,7 @@ main(int argc, char* argv[]) {
           std::string varName = variable->first;
           std::string varVal = variable->second;
           // Create new variable
-          GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
+          GameVariable someVar(varName, varVal);
           // Set updated variable
           auto handler = sessionHandlerDB.GetGameSessionHandler(id);
           handler.GetGame().AddVariable(varName, someVar);
@@ -398,7 +502,7 @@ main(int argc, char* argv[]) {
     }
 
     sleep(1);
-  }
+  }*/
 
   return 0;
 }
