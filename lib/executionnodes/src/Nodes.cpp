@@ -28,6 +28,7 @@ std::unique_ptr<ExecutionNode> ExecutionNode::execute() {
 //______________________________________________________________________________________________________________________________
 ForNode::ForNode(std::string identifier, ExpressionNode* expression, ExecutionTree loop)
     : identifier(std::move(identifier)), condition(expression), loop(std::make_unique<ExecutionTree>(std::move(loop))) {
+        expression->printIdents();
 }
 
 std::unique_ptr<ExecutionNode> ForNode::executeImpl() {
@@ -35,6 +36,7 @@ std::unique_ptr<ExecutionNode> ForNode::executeImpl() {
 }
 void ForNode::print()   {
     std::cout << "ForNode:" << std::endl;
+    condition->print();
     loop.get()->print();
     // Print specific members of ForNode here
 }
@@ -80,6 +82,7 @@ std::unique_ptr<ExecutionNode> ParallelForNode::executeImpl() {
 }
 void ParallelForNode::print()   {
     std::cout << "ParallelForNode:" << std::endl;
+    condition->print();
     loop.get()->print();
     // Print specific members of ForNode here
 }
@@ -93,17 +96,22 @@ void ParallelForNode::print()   {
 //______________________________________________________________________________________________________________________________
 
 MatchNode::MatchNode(ExpressionNode* condition ,  std::vector<std::unique_ptr<ExecutionNode>> entries_): condition(condition){
+
     entries = std::move(entries_);    // Constructor implementation for MatchNode
+    std::cout << "MatchNode: " << entries.size() << " entries" << std::endl;
 }
 
 
 std::unique_ptr<ExecutionNode> MatchNode::executeImpl() {
     // TODO: Implement execution logic for MatchNode
 }
-void MatchNode::print()   {
-    std::cout << "MatchNode:" << std::endl;
-    
-    // Print specific members of ForNode here
+void MatchNode::print() {
+    std::cout << "MatchNode: " << entries.size() << " entries" << std::endl;
+    condition->print();
+    for(auto& entr : entries){
+        entr->print();
+    }
+    // Print specific members of MatchNode here
 }
 
 
@@ -112,9 +120,20 @@ void MatchNode::print()   {
 //____________________________________________________________________________________________________________________________
 MatchEntryNode::MatchEntryNode(ExpressionNode* entry,  std::unique_ptr<ExecutionTree>  subtree_):entry(entry){
     subtree = std::move(subtree_);
+    //if(entry){entry->print();}
+    //else{
+    //    std::cout<<"missing entry\n";
+    //};
 }
 void MatchEntryNode::print()   {
-    std::cout << "MatchNode:" << std::endl;
+    std::cout << "MatchEntryNode:" << std::endl;
+    if(entry){entry->print();}
+    else{
+        std::cout<<"missing entry\n";
+    };
+    subtree.get()->print();
+    
+    
     // Print specific members of ForNode here
 }
 
@@ -174,6 +193,8 @@ std::unique_ptr<ExecutionNode> VariableAssignmentNode::executeImpl() {
 }
 void VariableAssignmentNode::print()   {
     std::cout << "VariableAssignmentNode:" << std::endl;
+    express->print();
+    
     // Print specific members of ForNode here
 }
 
@@ -194,6 +215,23 @@ std::unique_ptr<ExecutionNode> ListOperation::executeImpl() {
 }
 void ListOperation::print()   {
     std::cout << "ListOperation:" << std::endl;
+    switch(type){
+        case ListTypes::DISCARD:
+        std::cout<<"discard"<<"\n";
+        break;
+        case ListTypes::EXTEND:
+        std::cout<<"extend"<<"\n";
+        break;
+        case ListTypes::REVERSE:
+        break;
+        case ListTypes::SHUFFLE:
+        break;
+        case ListTypes::SORT:
+        break;
+    }
+    expr1->print();
+    expr2->print();
+    
     // Print specific members of ForNode here
 }
 
