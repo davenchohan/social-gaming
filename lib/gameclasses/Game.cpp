@@ -133,3 +133,7 @@ std::vector<GameConstant> Game::GetAllConstants() const {
 
     return constantValues;
 }
+
+ActiveGame::ActiveGame(Game other):game(other){
+    
+}

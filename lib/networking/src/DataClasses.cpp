@@ -20,3 +20,10 @@ GetGame::GetGame(const std::string& gameID) : gameID(gameID) {}
 std::string GetGame::toJSON() {
     return "{\"GameID\":\"" + gameID + "\"}";
 }
+
+// Temporary implementation to test get game
+GetGameName::GetGameName(const std::string& gameName) : gameName(gameName) {}
+
+std::string GetGameName::toJSON() {
+    return gameName;
+}

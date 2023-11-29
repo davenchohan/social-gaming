@@ -10,6 +10,8 @@ using json = nlohmann::json;
 #include <cassert>
 #include <cstdio>
 #include <memory>
+#include "ExpressNodes.h"
+#include "Nodes.h"
 
 
 const std::vector<std::string> humanInputTypes = {
@@ -31,7 +33,7 @@ const std::vector<std::string> listTypes = {
     "sort",
     "discard"
 };
-//enum for all possible node types
+//enum converters for all possible node types
 //some still need to be added 
 const std::map<std::string, ControlTypes> controlToValue={
     {"for", ControlTypes::FOR},
@@ -66,18 +68,20 @@ const std::map<std::string, InteractionType> interactionEnum={
     {"discard", ListTypes::DISCARD}
 };
 const std::map<std::string, ExpressionTypes> expToValue = {
-    {"=>", ExpressionTypes::BOOLEAN},
-    {"==", ExpressionTypes::BOOLEAN},
+    {"!=", ExpressionTypes::BOOLEAN},
+    {"=", ExpressionTypes::BOOLEAN},
     {"=>", ExpressionTypes::BOOLEAN},
     {"=<", ExpressionTypes::BOOLEAN},
     {">", ExpressionTypes::BOOLEAN},
     {"<", ExpressionTypes::BOOLEAN},
+    {"||", ExpressionTypes::BOOLEAN},
+    {"&&", ExpressionTypes::BOOLEAN},
     {"+", ExpressionTypes::OPERATION},
     {"-", ExpressionTypes::OPERATION},
     {"*", ExpressionTypes::OPERATION},
     {"/", ExpressionTypes::OPERATION},
     {"builtin",ExpressionTypes::BUILTIN},
-    {"indentifier",ExpressionTypes::IDENTIFIER},
+    {"identifier",ExpressionTypes::IDENTIFIER},
 
 
 };
@@ -91,7 +95,18 @@ const std::map<std::string,OpType>  opToEnum = {
     {"+",OpType::ADD},
     {"-",OpType::SUB},
     {"*",OpType::MULT},
-    {"/",OpType::DIV}
+    {"/",OpType::DIV},
+
+};
+const std::map<std::string,CompType> compTypeToEnum = {
+    {"!=", CompType::NOTEQ},
+    {"=", CompType::EQ},
+    {"=>", CompType::LESSEQ},
+    {"=<", CompType::GREATEREQ},
+    {">", CompType::LESS},
+    {"<", CompType::GREATER},
+    {"||", CompType::OR},
+    {"&&", CompType::AND}
 };
 
 
@@ -102,42 +117,46 @@ InputTypes getInputTypeValue(std::string_view type);
 ControlTypes getControlTypeValue(std::string_view type);
 
 bool isControlType(std::string type);
-void forLoopHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void whileLoopHanler(Game& active, ExecutionTree& tree, ts::Node node);
-void parallel_forHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void matchHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void inparallelHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void handleControlType(Game& active, ExecutionTree& tree, ts::Node node);
+
+void forLoopHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void whileLoopHanler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void parallel_forHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void handleMatch(ActiveGame&active, ExecutionTree& tree, ts::Node node);
+void inparallelHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+
+ExecutionNode* parseMatchEntry(ActiveGame&active, ExecutionTree& tree, ts::Node node);
+
+void handleControlType(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 void handleText();
 void handleChoice();
 void handleRange();
 void handleVote();
-void handleInputChoice(Game &active, ExecutionTree &tree, ts::Node node) ;
+void handleInputChoice(ActiveGame &active, ExecutionTree &tree, ts::Node node) ;
 bool isHumanInput(std::string type);
-void handleInput(Game& active, ExecutionTree& tree, ts::Node node);
+void handleInput(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 
 
 bool isListType(std::string type);
-void handleListOperation(Game& active, ExecutionTree& tree, ts::Node node);
+void handleListOperation(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
 bool isTiming(std::string type);
-void handleTiming(Game& active, ExecutionTree& tree, ts::Node node);
+void handleTiming(ActiveGame& active, ExecutionTree& tree, ts::Node node);
 
-void ruleVisitor(Game& active, ExecutionTree& tree, ts::Node node);
-void bodyHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void rulesHandler(Game& active, ExecutionTree& tree, ts::Node node);
-void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
-void handleMessageRule(Game &active, ExecutionTree &tree, ts::Node node); 
+void ruleVisitor(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void bodyHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void rulesHandler(ActiveGame& active, ExecutionTree& tree, ts::Node node);
+void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts::Node node);
+void handleMessageRule(ActiveGame &active, ExecutionTree &tree, ts::Node node); 
 
 
-
-ExpressionNode* parseExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
-void recursiveIdent(Game &active,std::vector<std::string>& identifiers, ts::Node node);
-ExpressionNode* parseComparison(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseForExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseSimpleExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseOperatorExpression(Game &active, ExecutionTree& tree,ts::Node node);
-ExpressionNode* parseBuiltIn(Game &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseIdentifierExpression(ActiveGame & active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts::Node node);
+ExpressionNode* parseComparison(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseForExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseSimpleExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseOperatorExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
+ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node);

@@ -11,6 +11,7 @@ target_sources(backendClasses
   Player.cpp
   User.cpp
   GameSessionList.cpp
+  GamesDatabase.cpp
 )
 
 target_include_directories(backendClasses

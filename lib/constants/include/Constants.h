@@ -8,7 +8,7 @@
 namespace constants
 {
 enum class ReqType : char {
-  GETGAMES, JOINGAME, CREATEGAME, VIEWGAME, UPDATEGAME, DEMOGETGAMES, DEMOGETGAME,CREATEGAMEFILLED, UPDATEPLAYER
+  GETGAMES, JOINGAME, CREATEGAME, VIEWGAME, UPDATEGAME, DEMOGETGAMES, DEMOGETGAME, CREATEGAMEFILLED, UPDATEPLAYER, GETGAME
 };
 enum class GameComponentType : char {
   DISPLAY, SINGLE_SELECT, MULTI_SELECT, INPUT
@@ -28,6 +28,7 @@ to_string(const constants::ReqType request) noexcept {
     case constants::ReqType::UPDATEGAME:  return "ReqUpdateGame";
     case constants::ReqType::DEMOGETGAMES:  return "DemoReqGetGamesList";
     case constants::ReqType::DEMOGETGAME:  return "DemoReqGetGame";
+    case constants::ReqType::GETGAME:  return "ReqGetGame";
   }
   __builtin_unreachable();
 }
