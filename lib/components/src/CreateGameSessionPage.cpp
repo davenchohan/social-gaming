@@ -79,7 +79,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             }),
           Container::Horizontal({
             Button("Back", [&]{
-               wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
+               wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
                create_pagenum--;
             }) | Maybe([&] {return create_pagenum > 0;}),
             Renderer([] {
