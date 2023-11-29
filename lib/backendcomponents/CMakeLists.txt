@@ -8,6 +8,7 @@ CPMAddPackage(
 
 add_library(backendcomponents
     src/ParserLibrary.cpp
+    src/ResponseQueue.cpp
 )
 
 target_include_directories(backendcomponents

@@ -9,6 +9,7 @@ add_executable(runAllTests
     GamesDatabaseTests.cpp
     GameClassTests.cpp
     GameListTests.cpp
+    ResponseQueueTests.cpp
 )
 
 target_link_libraries(runAllTests
