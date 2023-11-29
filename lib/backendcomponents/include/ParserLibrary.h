@@ -107,7 +107,9 @@ class RequestParser{
         Json subject;
         JsonConverter converter;
     public:
+        RequestParser(){}
         RequestParser(std::string&);
         RequestInfo getRequestStruct();
+        std::string getValue(const std::string &, Json &);
 };
 

@@ -54,6 +54,23 @@ TEST(ParserLibraryTests, TestRequestParserClassInitialize){
     EXPECT_EQ(expected, generated);
 }
 
+TEST(ParserLibraryTests, TestRequestParserGetValue){
+    Json someJson;
+    someJson["Prompt"] = "This is a prompt";
+    RequestParser parser;
+    auto expected = "This is a prompt";
+    auto generated = parser.getValue("Prompt", someJson);
+    EXPECT_EQ(expected, generated);
+}
+
+TEST(ParserLibraryTests, TestRequetParserGetNonExisitentValue){
+    Json someJson;
+    RequestParser parser;
+    auto expected = "NO_Value_Found";
+    auto generated = parser.getValue("nonexistent", someJson);
+    EXPECT_EQ(expected, generated);
+}
+
 TEST(ParserLibraryTests, TestRequestParserAppendBasic){
     RequestConstructor parser("ReqCreateGame");
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
@@ -220,5 +237,7 @@ TEST(ParserLibraryTests, TestConvertToGameFilled){
     auto generated = converter.ConvertToGame(toParse);
     EXPECT_EQ(generated, expectedGame);
 }
+
+
 
 

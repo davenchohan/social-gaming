@@ -50,6 +50,16 @@ RequestParser::RequestParser(std::string& logStr){
     subject = Json::parse(logStr);
 }
 
+std::string RequestParser::getValue(const std::string &key, Json& jsonItem){
+    std::string item;
+    try{
+        jsonItem.at(key).get_to(item);
+        return item;
+    }catch(...){
+        return "NO_Value_Found";
+    }
+}
+
 // Expected formats:
 RequestInfo
 RequestParser::getRequestStruct(){
