@@ -6,7 +6,7 @@
 #include "Nodes.h"
 #include "Tree.h"
 #include "ExpressNodes.h"
-
+#include "ParserLibrary.h"
 
 // ExecutionNode class
 //______________________________________________________________________________________________________________________________

@@ -18,6 +18,11 @@ set_target_properties(executionnodes
                       CXX_STANDARD 17
 )
 
+target_link_libraries(executionnodes
+    backendcomponents
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+
 install(TARGETS executionnodes
   ARCHIVE DESTINATION lib
 )
