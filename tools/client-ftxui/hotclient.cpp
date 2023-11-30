@@ -69,13 +69,10 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
     return {};
 }
 std::string parseServerResponseType(const std::string &response) {
-    std::string_view response_view{response};
-  // find req type (response type)
-    size_t first_space = response_view.find(' ');
-    response_view = response_view.substr(first_space+1, response_view.size()-first_space);
-    size_t second_space = response_view.find(' ');
-    std::string reqType{response_view.substr(0, second_space)};
-    return reqType;
+  size_t first_space = response.find(' ');
+  std::string reqType = response.substr(0, first_space);
+  return reqType;
+
 }
 
 // (still testing out design) function that manages dynamiclly generated components for the game play page
