@@ -55,7 +55,6 @@ struct serverRequest{
 class RequestHandler {
   public:
   virtual std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) = 0;
-  // virtual std::string process(serverRequest& request, GameSessionList& sessionHandlerDB) = 0;
 };
 
 
