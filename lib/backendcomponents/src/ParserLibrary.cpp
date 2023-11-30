@@ -46,8 +46,22 @@ RequestConstructor::returnReqInfo(){
 
 // Takes a message received from server and sets the request subject as the parsed JSon item
 // logStr should be in string format 
-RequestParser::RequestParser(std::string& logStr){
+RequestParser::RequestParser(const std::string& logStr){
     subject = Json::parse(logStr);
+}
+
+std::string RequestParser::getValue(const std::string &key){
+    return getValue(key, subject);
+}
+
+std::string RequestParser::getValue(const std::string &key, Json& jsonItem){
+    std::string item;
+    try{
+        jsonItem.at(key).get_to(item);
+        return item;
+    }catch(...){
+        return "NO_Value_Found";
+    }
 }
 
 // Expected formats:

@@ -359,14 +359,11 @@ int main(int argc, char* argv[]) {
         
         // display game configuration
         std::string jsonStr = getJson(response);
-        RequestParser rqparser(jsonStr);
-        // std::string key = "prompt";
-        // prompt = rqparser.getValue(key);
         prompt = jsonStr;
+        RequestParser rqparser(jsonStr);
+        std::string key = "prompt";
+        // prompt = rqparser.getValue(key);
       }
-
-      // prompt = response;
-
 
       screen.RequestAnimationFrame();
     }

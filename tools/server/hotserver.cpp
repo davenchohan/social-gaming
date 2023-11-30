@@ -19,7 +19,7 @@
 #include "RandomIdGenerator.h"
 #include "parser_test.h"
 #include "rule_interpreter.h"
-
+#include "ResponseQueue.h"
 
 #include <fstream>
 #include <sstream>
@@ -516,6 +516,8 @@ main(int argc, char* argv[]) {
 
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi", "Rock,Paper,Scissors"}};
 
+  ResponseQueue messageQueue;
+
   while (true) {
     bool errorUpdating = false;
     try {
@@ -544,20 +546,22 @@ main(int argc, char* argv[]) {
       try {
         if (request.request == " " || request.request == ""){
           std::cout << "No message from client" << std::endl;
-          server_response = log;
+          messageQueue.push(log);
         } else {
-          server_response = handleRequest(request, serverGameList, sessionHandlerDB, demoSessionHandlerDB);
+          std::string response = handleRequest(request, serverGameList, sessionHandlerDB, demoSessionHandlerDB);
+          messageQueue.push(response);
         }
       } catch (const UnknownGameException& e) {
         std::cerr << "UnknownGameException caught" << std::endl;
-        server_response = "Game not found";
+        messageQueue.push("Game not found");
       } catch (const UnknownRequestException& e) {
         std::cerr << "UnknownRequestException caught" << std::endl;
-        server_response = "Request Failed";
+        messageQueue.push("Request Failed");
       }
+      // Add Responses Queue Here
       // auto outgoing = buildOutgoing(server_response);
       // server.send(outgoing);
-      ServerNetworkManager::send(server, server_response, clients);
+      ServerNetworkManager::send(server, messageQueue.pop(), clients);
     }
 
     if (shouldQuit || errorUpdating) {
