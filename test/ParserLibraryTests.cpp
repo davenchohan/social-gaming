@@ -71,6 +71,20 @@ TEST(ParserLibraryTests, TestRequetParserGetNonExisitentValue){
     EXPECT_EQ(expected, generated);
 }
 
+TEST(ParserLibraryTests, TestRequestParserGetValue2){
+    RequestParser parser("{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
+    auto expected = "SomeGame";
+    auto generated = parser.getValue("GameName");
+    EXPECT_EQ(expected, generated);
+}
+
+TEST(ParserLibraryTests, TestRequestParserGetNullValue){
+    RequestParser parser("{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
+    auto expected = "NO_Value_Found";
+    auto generated = parser.getValue("nonexistent");
+    EXPECT_EQ(expected, generated);
+}
+
 TEST(ParserLibraryTests, TestRequestParserAppendBasic){
     RequestConstructor parser("ReqCreateGame");
     std::map<std::string, std::string> values = { {"Name","Gabe"}, {"GameName","Rock, Paper, Scissors"}};
