@@ -28,6 +28,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <variant>
 
 
 using networking::Server;
@@ -38,6 +39,7 @@ using Json = nlohmann::json;
 
 std::vector<Connection> clients;
 std::vector<Player> players;
+
 
 // Empty struct for hold server request items
 // This is a bad fake, to be used temporarily
@@ -50,6 +52,14 @@ struct serverRequest{
   std::string gameId;
   std::map<std::string, std::string> gameVariables;
 };
+class RequestHandler {
+  public:
+  virtual std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) = 0;
+  // virtual std::string process(serverRequest& request, GameSessionList& sessionHandlerDB) = 0;
+};
+
+
+std::map<std::string, std::shared_ptr<RequestHandler>> requestHandlers;
 
 
 //TODO: Implement this function
@@ -237,25 +247,36 @@ getHTTPMessage(const char* htmlLocation) {
   std::exit(-1);
 }
 
-std::string createNewGame(const std::string& gameName,
-                          serverRequest& request,
-                          GameList& serverGameList){
-  std::cout << "ReqCreateGame" << std::endl;
-  // Handle ReqCreateGame logic
-  // Example: Assume the request format is "ReqCreateGame GameName"
 
-  // Create the game and add it to the serverGameList
-  Game newGame(RandomIdGenerator::generateUniqueId());
-  newGame.SetGameName(gameName);
-  serverGameList.AddGame(newGame);
+// Request Handlers ================================================
+//   REQUEST_TYPE         -> HANDLER_NAME
+// -----------------------------------------------------------------
+//   ReqCreateGame        -> CreateGameHandler
+//   ReqCreateGameFilled  -> CreateFilledGameHandler
+//   ReqJoinGame          -> JoinGameHandler
+//   ReqViewGame          -> ViewGameHandler
+//   ReqUpdateGame        -> UpdateGameHandler
+//   ReqUpdatePlayer      -> UpdatePlayerHandler
+//   ReqGetGamesList      -> GetGamesListHandler
+//   ReqGetGame           -> GetGameHandler
+// =================================================================
+class CreateGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    // Example: Assume the request format is "ReqCreateGame GameName"
+    std::cout << "ReqCreateGame" << std::endl;
 
-      // Return a success response
-  return "Game created: " + gameName + ", GameID: " + std::to_string(newGame.GetGameId());
-}
+    Game newGame(RandomIdGenerator::generateUniqueId());
+    newGame.SetGameName(request.gameName);
+    serverGameList.AddGame(newGame);
 
-std::string createFilledGame(const std::string& gameName,
-                          serverRequest& request,
-                          GameSessionList& sessionHandlerDB){
+    // Return a success response
+    return "Game created: " + request.gameName + ", GameID: " + std::to_string(newGame.GetGameId());
+  }
+};
+class CreateFilledGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
     std::cout << "ReqCreateGameFilled" << std::endl;
     std::map<std::string, std::string> fakeGameSpec = {{"players","3-10"}, {"Rounds","3"}};
     evaluateFilledGame(fakeGameSpec, request.gameInfo);
@@ -287,176 +308,140 @@ std::string createFilledGame(const std::string& gameName,
     std::string server_status = "ReqCreateGameFilled Successful" + '\n' + newGame.GetGameName() + " created, GameID: " + std::to_string(newGame.GetGameId());
     server_response = server_status;
     return server_response;
-}
-
-std::string joinGame(const std::string& id,
-                      serverRequest& request,
-                      GameSessionList& sessionHandlerDB){
-  // Handle ReqJoinGame logic
-  if (sessionHandlerDB.DoesSessionExist(id)){
-    auto handler = sessionHandlerDB.GetGameSessionHandler(id);
-    Player player("dummy_player", 1);
-    handler.AddPlayer(player.GetName(), player);
-    //Construct response
-    std::string server_status = "ReqJoinGame Successful" + '\n' + player.GetName() + " added into " + std::to_string(handler.GetGame().GetGameId());
-    return server_status; 
-  }else{
-    throw UnknownGameException("Game not found: " + request.gameName);
-    return "Error with request";
   }
-}
-
-std::string viewGame(const std::string& id,
-                      serverRequest& request,
-                      GameSessionList& sessionHandlerDB){
-  std::string server_response = "";
-  if (sessionHandlerDB.DoesSessionExist(id)){
-    int newAudienceId = RandomIdGenerator::generateUniqueId();
-    AudienceMember member("dummy_viewer", newAudienceId); 
-    auto handler = sessionHandlerDB.GetGameSessionHandler(id);
-    handler.AddAudienceMember(member.GetName(), member);
-    auto status = "ReqViewGame Successful" + '\n' + member.GetName() + " added as an audience member for " + std::to_string(handler.GetGame().GetGameId());
-
-    server_response = status;
-  }else{
-    auto status = std::string("ReqViewGame Unsuccessful") + "\nGame with ID \"" + id + "\" does not exist!";
-    server_response = status;
+};
+class JoinGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    // Handle ReqJoinGame logic
+    if (sessionHandlerDB.DoesSessionExist(request.gameId)){
+      auto handler = sessionHandlerDB.GetGameSessionHandler(request.gameId);
+      Player player("dummy_player", 1);
+      handler.AddPlayer(player.GetName(), player);
+      //Construct response
+      std::string server_status = "ReqJoinGame Successful" + '\n' + player.GetName() + " added into " + std::to_string(handler.GetGame().GetGameId());
+      return server_status; 
+    }else{
+      throw UnknownGameException("Game not found: " + request.gameName);
+      return "Error with request";
+    }
   }
-  return server_response;
-}
+};
+class ViewGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    std::string server_response = "";
+    if (sessionHandlerDB.DoesSessionExist(request.gameId)){
+      int newAudienceId = RandomIdGenerator::generateUniqueId();
+      AudienceMember member("dummy_viewer", newAudienceId); 
+      auto handler = sessionHandlerDB.GetGameSessionHandler(request.gameId);
+      handler.AddAudienceMember(member.GetName(), member);
+      auto status = "ReqViewGame Successful" + '\n' + member.GetName() + " added as an audience member for " + std::to_string(handler.GetGame().GetGameId());
 
-std::string updateGame(serverRequest& request,
-                      GameSessionList& sessionHandlerDB){
-  std::cout<< "ReqUpdateGame" << std::endl;
-  std::string id = request.gameId;
-  std::string server_response = "";
-  if (sessionHandlerDB.DoesSessionExist(id)){
-    // Get variable from request
-    auto variableName = request.gameVariables.find("Paper");
-    auto variable = request.gameVariables.find("Paper");
-    std::string varName = variable->first;
-    std::string varVal = variable->second;
-    // Create new variable
-    GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
-    // Set updated variable
-    auto handler = sessionHandlerDB.GetGameSessionHandler(id);
-    handler.GetGame().AddVariable(varName, someVar);
-
-    // Construct Response
-    server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + handler.GetGame().GetGameName();
-  }else{
-    throw UnknownGameException("Game not found: " + request.gameName);
-    server_response = "Error with request";
+      server_response = status;
+    }else{
+      auto status = std::string("ReqViewGame Unsuccessful") + "\nGame with ID \"" + request.gameId + "\" does not exist!";
+      server_response = status;
+    }
+    return server_response;
   }
-  return server_response;
-}
+};
+class UpdateGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    std::cout<< "ReqUpdateGame" << std::endl;
+    std::string id = request.gameId;
+    std::string server_response = "";
+    if (sessionHandlerDB.DoesSessionExist(id)){
+      // Get variable from request
+      // auto variableName = request.gameVariables.find("Paper");
+      auto variable = request.gameVariables.find("Paper");
+      std::string varName = variable->first;
+      std::string varVal = variable->second;
+      // Create new variable
+      GameVariable someVar(varName, RandomIdGenerator::generateUniqueId(), varVal);
+      // Set updated variable
+      auto handler = sessionHandlerDB.GetGameSessionHandler(id);
+      handler.GetGame().AddVariable(varName, someVar);
 
-std::string updatePlayer(serverRequest& request,
-                      GameSessionList& sessionHandlerDB){
-  std::cout << "ReqUpdatePlayer" << std::endl;
-  auto id = request.gameId;
-  std::string server_response = "";
-  if (sessionHandlerDB.DoesSessionExist(id)){
-    // TODO: Evaluate if we need to update the player state
-    return "Update player still needs to be implemented";
-  }else{
-    throw UnknownGameException("Game not found: " + request.gameName);
-    server_response = "Error with request";
+      // Construct Response
+      server_response = "ReqUpdateGame Successful" + '\n' + varName + " was updated with value: " + varVal + ", in game: " + handler.GetGame().GetGameName();
+    }else{
+      throw UnknownGameException("Game not found: " + request.gameName);
+      server_response = "Error with request";
+    }
+    return server_response;
   }
-  return server_response;
-}
-
-std::string getGamesList(serverRequest& request,
-                      GameList& serverGameList){
+};
+class UpdatePlayerHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    std::cout << "ReqUpdatePlayer" << std::endl;
+    auto id = request.gameId;
+    std::string server_response = "";
+    if (sessionHandlerDB.DoesSessionExist(id)){
+      // TODO: Evaluate if we need to update the player state
+      return "Update player still needs to be implemented";
+    }else{
+      throw UnknownGameException("Game not found: " + request.gameName);
+      server_response = "Error with request";
+    }
+    return server_response;
+  }
+};
+class GetGamesListHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
     std::cout << "Got: ReqGetGamesList" << std::endl;
     auto gamesList = serverGameList.GetGameList();
     std::string server_response = "";
 
     std::string concatenatedNames = std::accumulate(gamesList.begin(), gamesList.end(), std::string(),
                                                       [](std::string& accumulated, const Game& game) {
-                                                          if (!accumulated.empty()) {
-                                                              accumulated += ", ";
-                                                          }
+                                                          if (!accumulated.empty()) { accumulated += ", "; }
                                                           return accumulated += "'" + game.GetGameName() + "'";
                                                       });
 
-    std::string final_response = "Req ReqGetGamesList Successful\n";
+    std::string final_response = "ReqGetGamesList Successful\n";
     server_response = final_response + "jsonObject={'gamesList':'[" + concatenatedNames + "]'}";
     std::cout << "Server Response: " + server_response << std::endl;
     return server_response;
-}
-
-std::string getGame(serverRequest& request,
-                      GameList& serverGameList){
-  std::cout << "Got: ReqGetGame and game name is: " << request.gameName << std::endl;
-  auto foundGame = serverGameList.GetGameSpec(request.gameName);
-  std::string server_response = "";
-  if( foundGame.GetGameId() != 0){
-    std::string final_response = "ReqGetGame Success\n";
-    server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
-  }else{
-    server_response = "ReqGetGame Failure: No such game\n";
   }
-  std::cout << server_response << std::endl;
-  return server_response;
-}
+};
+class GetGameHandler : public RequestHandler {
+  public:
+  std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
+    std::cout << "Got: ReqGetGame and game name is: " << request.gameName << std::endl;
+    auto foundGame = serverGameList.GetGameSpec(request.gameName);
+    std::string server_response = "";
+    if( foundGame.GetGameId() != 0){
+      std::string final_response = "ReqGetGame Success\n";
+      server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
+    }else{
+      server_response = "ReqGetGame Failure: No such game\n";
+    }
+    std::cout << server_response << std::endl;
+    return server_response;
+  }
+};
 
 std::string handleRequest(serverRequest& request,
                           GameList& serverGameList,
                           GameSessionList& sessionHandlerDB,
                           const std::map<std::string, std::string>& demoSessionHandlerDB) {
-
+    
     std::string requestType = request.request;
-    std::string gameId = request.gameId;
-    std::string gameName = request.gameName;
+    auto it = requestHandlers.find(requestType);
 
-    if (requestType == "ReqCreateGame") {
-        std::string server_response = createNewGame(gameName, request, serverGameList);
-        return server_response;
-    } else if (requestType == "ReqJoinGame") {
-        std::string server_response = joinGame(gameId, request, sessionHandlerDB);
-        return server_response;
-    }
-    else if (requestType == "ReqViewGame") {
-        std::string server_response = viewGame(gameId, request, sessionHandlerDB);
-        return server_response;
-    }
-    else if (requestType == "ReqUpdateGame") {
-      std::string server_response = updateGame(request, sessionHandlerDB);
-      return server_response;
-    }
-    else if (requestType == "ReqUpdateGame") {
-      std::string server_response = updateGame(request, sessionHandlerDB);
-      return server_response;
-    }
-    else if (requestType == "ReqUpdateGame") {
-      std::string server_response = updateGame(request, sessionHandlerDB);
-      return server_response;
-    }
-    else if (requestType == "ReqUpdatePlayer") {
-      std::string server_response = updatePlayer(request, sessionHandlerDB);
-      return server_response;
-    }
-    else if (requestType == "ReqGetGamesList") {
-      std::string server_response = getGamesList(request, serverGameList);
-      return server_response;
-    }
-    else if (requestType == "ReqGetGame") {
-      std::string server_response = getGame(request, serverGameList);
-      return server_response;
-    }   
-    else if (requestType == "ReqCreateGameFilled") {
-      std::string server_response = createFilledGame(gameName, request, sessionHandlerDB);
-      return server_response;
-    } else {
-      std::cout << "Bad Request: " + request.request << std::endl;
-      throw UnknownRequestException("Unknown Request: " + request.request);
-      // If the request type is not recognized, return an error response
+    if(it == requestHandlers.end()) {
+      std::cout << "Bad Request: " + requestType << std::endl;
+      throw UnknownRequestException("Unknown Request: " + requestType);
       return "Unknown request type: " + requestType;
     }
 
-    // Add more cases for other request types as needed
-
+    auto handler = it->second;
+    std::string server_response = handler->process(request, serverGameList, sessionHandlerDB);
+    return server_response;
 }
 
 
@@ -470,6 +455,17 @@ main(int argc, char* argv[]) {
   std::vector<std::string> allMessages;
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
+
+  // add requests that server can handle
+  requestHandlers["ReqCreateGame"] = std::make_shared<CreateGameHandler>();
+  requestHandlers["ReqCreateGameFilled"] = std::make_shared<CreateFilledGameHandler>();
+  requestHandlers["ReqJoinGame"] = std::make_shared<JoinGameHandler>();
+  requestHandlers["ReqViewGame"] = std::make_shared<ViewGameHandler>();
+  requestHandlers["ReqUpdateGame"] = std::make_shared<UpdateGameHandler>();
+  requestHandlers["ReqUpdatePlayer"] = std::make_shared<UpdatePlayerHandler>();
+  requestHandlers["ReqGetGamesList"] = std::make_shared<GetGamesListHandler>();
+  requestHandlers["ReqGetGame"] = std::make_shared<GetGameHandler>();
+
 
   GameList serverGameList = GameList();
   GameSessionList sessionHandlerDB = GameSessionList();
