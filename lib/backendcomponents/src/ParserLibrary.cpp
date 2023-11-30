@@ -50,18 +50,25 @@ RequestParser::RequestParser(const std::string& logStr){
     subject = Json::parse(logStr);
 }
 
+std::string RequestParser::dumpVal(){
+    return subject.dump();
+}
+
+Json RequestParser::getSubject(){
+    return subject;
+}
+
 std::string RequestParser::getValue(const std::string &key){
     return getValue(key, subject);
 }
 
 std::string RequestParser::getValue(const std::string &key, Json& jsonItem){
     std::string item;
-    try{
-        jsonItem.at(key).get_to(item);
-        return item;
-    }catch(...){
-        return "NO_Value_Found";
+    if(jsonItem.contains(key)){
+        auto result = jsonItem.find(key);
+        return result.value();
     }
+    return "No_Value_Found";
 }
 
 // Expected formats:

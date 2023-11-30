@@ -110,6 +110,8 @@ class RequestParser{
         RequestParser(){}
         RequestParser(const std::string&);
         RequestInfo getRequestStruct();
+        std::string dumpVal();
+        Json getSubject();
         std::string getValue(const std::string &);
         std::string getValue(const std::string &, Json &);
 };

@@ -361,8 +361,10 @@ int main(int argc, char* argv[]) {
         std::string jsonStr = getJson(response);
         prompt = jsonStr;
         RequestParser rqparser(jsonStr);
+        auto nested = rqparser.getSubject()["rounds"];
+        RequestParser p2(nested.dump());
         std::string key = "prompt";
-        // prompt = rqparser.getValue(key);
+        prompt = p2.getValue(key);
       }
 
       screen.RequestAnimationFrame();

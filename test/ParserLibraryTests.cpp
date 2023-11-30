@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "ParserLibrary.h"
+#include "parser_test.h"
 #include <string>
 #include <map>
 #include <vector>
@@ -66,7 +67,7 @@ TEST(ParserLibraryTests, TestRequestParserGetValue){
 TEST(ParserLibraryTests, TestRequetParserGetNonExisitentValue){
     Json someJson;
     RequestParser parser;
-    auto expected = "NO_Value_Found";
+    auto expected = "No_Value_Found";
     auto generated = parser.getValue("nonexistent", someJson);
     EXPECT_EQ(expected, generated);
 }
@@ -80,8 +81,21 @@ TEST(ParserLibraryTests, TestRequestParserGetValue2){
 
 TEST(ParserLibraryTests, TestRequestParserGetNullValue){
     RequestParser parser("{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
-    auto expected = "NO_Value_Found";
+    auto expected = "No_Value_Found";
     auto generated = parser.getValue("nonexistent");
+    EXPECT_EQ(expected, generated);
+}
+
+TEST(ParserLibraryTests, TestRequestParserBadVal){
+    SGParser p("/home/gabek/Desktop/social-gaming/tools/parser/gameSpecs/rock_paper_scissors.txt");
+    auto subject = p.setupToJson().dump();
+    RequestParser parser(subject);
+
+    
+    auto nested_subject = parser.getSubject()["rounds"];
+    RequestParser p2(nested_subject.dump());
+    auto generated = p2.getValue("prompt");
+    auto expected = "\"The number of rounds to play\"";
     EXPECT_EQ(expected, generated);
 }
 

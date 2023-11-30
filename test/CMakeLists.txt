@@ -19,6 +19,7 @@ target_link_libraries(runAllTests
     exceptions
     backendcomponents
     backendClasses
+    sgparser
 )
 
 set_target_properties(runAllTests
