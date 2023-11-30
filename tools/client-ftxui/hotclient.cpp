@@ -17,6 +17,7 @@
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
 #include "Constants.h"
 #include "GameComponent.h"
+#include "ParserLibrary.h"
 
 // #include "GameComponentsManager.h"
 
@@ -68,15 +69,21 @@ std::vector<std::string> parseServerResponseGameList(const std::string &response
 
     return {};
 }
-std::string parseServerResponseType(const std::string &response) {
-    std::string_view response_view{response};
-  // find req type (response type)
-    size_t first_space = response_view.find(' ');
-    response_view = response_view.substr(first_space+1, response_view.size()-first_space);
-    size_t second_space = response_view.find(' ');
-    std::string reqType{response_view.substr(0, second_space)};
-    return reqType;
+std::string getJson(const std::string &response) {
+  size_t start = response.find('=');
+  if(start != std::string::npos) {
+    return response.substr(start + 1);
+  }
+
+  return "";
 }
+
+std::string parseServerResponseType(const std::string &response) {
+  size_t first_space = response.find(' ');
+  std::string reqType = response.substr(0, first_space);
+  return reqType;
+}
+
 
 // (still testing out design) function that manages dynamiclly generated components for the game play page
 // void addParagraphComponent()
@@ -161,6 +168,7 @@ int main(int argc, char* argv[]) {
   // variabels - create game session page
   int create_pagenum = 0;
   std::string game_session_name;
+  std::string prompt = "prompt: ";
 
   // EXPERIMENTING COMPONENT GENERATION
   std::vector<ComponentData> data_list;
@@ -220,7 +228,7 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state, client);
+  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, prompt, game_session_name, radiobox_list, radiobox_selected, view_state, client);
   auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
 
   // MAIN PAGES
@@ -347,7 +355,18 @@ int main(int argc, char* argv[]) {
       if(reqType == "ReqGetGamesList") {
           radiobox_list = parseServerResponseGameList(response, text_list);
           options = parseServerResponseGameList(response, texts);
+      }else if(reqType == "ReqGetGame") {
+        
+        // display game configuration
+        std::string jsonStr = getJson(response);
+        RequestParser rqparser(jsonStr);
+        // std::string key = "prompt";
+        // prompt = rqparser.getValue(key);
+        prompt = jsonStr;
       }
+
+      // prompt = response;
+
 
       screen.RequestAnimationFrame();
     }

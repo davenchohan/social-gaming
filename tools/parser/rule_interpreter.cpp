@@ -18,6 +18,7 @@ using json = nlohmann::json;
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <unordered_map> 
 #include "Nodes.h"
 #include "Tree.h"
 #include "ExpressNodes.h"
@@ -535,21 +536,32 @@ void rulesHandler(ActiveGame& active, ExecutionTree& tree ,ts::Node node ){
 }
 
 
-int main() {
-    Player mockPlayer = {"test",1};
-    Game game {1};
-    std::cout << "start"<<"\n";
-    SGParser p("./lib/gameSpecs/rock_paper_scissors.txt");
-    game.setSource(p.source);
-    auto tree = p.getRoot();
-    auto rules = p.getRules();
-    treePrinter("",rules);
-    std::cout << tree.getType()<<"\n";
-    ActiveGame mockGame(game);
-    rulesHandler(mockGame,mockGame.gameloop,rules);
-    mockGame.gameloop.print();
-   // treePrinter("",rules);
-    
 
-    //std::cout << p.configToJson().dump();
-}
+
+// int main() {
+//     std::unordered_map<std::string, std::string> games;
+//     games["Rock,Paper,Scissors"] = "./lib/gameSpecs/rock_paper_scissors.txt";
+
+//     const std::string selectedGame = "Rock,Paper,Scissors";
+//     if(games.find(selectedGame) == games.end()) {
+//         std::cout << "Server not loaded with game named: " << selectedGame << std::endl;
+//         return 0;
+//     }
+
+
+//     // Player mockPlayer = {"test",1};
+//     Game game {1};
+//     std::cout << "start"<<"\n";
+//     SGParser p(games[selectedGame]);
+//     game.setSource(p.source);
+//     // auto tree = p.getRoot();
+//     auto rules = p.getRules();
+//     treePrinter("",rules);
+//     // std::cout << tree.getType()<<"\n";
+//     ActiveGame mockGame(game);
+//     rulesHandler(mockGame,mockGame.gameloop,rules);
+//     mockGame.gameloop.print();
+//     auto setupFields = p.setupToJson();
+//     std::cout << setupFields.dump() << std::endl;
+//    // treePrinter("",rules);
+// }

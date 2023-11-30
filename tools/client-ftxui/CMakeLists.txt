@@ -38,6 +38,7 @@ target_link_libraries(mobile-client-ftxui
   PRIVATE ftxui::component
   PRIVATE components
   PRIVATE constants
+  PRIVATE backendcomponents
 )
 
 target_link_libraries(client-ftxui
@@ -47,6 +48,7 @@ target_link_libraries(client-ftxui
   PRIVATE ftxui::component
   PRIVATE components
   PRIVATE constants
+  PRIVATE backendcomponents
 )
 
 install(TARGETS client-ftxui

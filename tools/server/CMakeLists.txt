@@ -19,6 +19,7 @@ target_link_libraries(hotserver
   backendClasses
   backendcomponents
   generators
+  sgparser
   ${CMAKE_THREAD_LIBS_INIT}
 )
 

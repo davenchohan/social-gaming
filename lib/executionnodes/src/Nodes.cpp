@@ -8,15 +8,16 @@
 #include "ExpressNodes.h"
 #include "ParserLibrary.h"
 
+
 // ExecutionNode class
 //______________________________________________________________________________________________________________________________
 ExecutionNode::ExecutionNode() {
      // I don't think we need a base node class
 }
 
-std::unique_ptr<ExecutionNode> ExecutionNode::execute() {
-    //executeImpl();
-}
+// std::unique_ptr<ExecutionNode> ExecutionNode::execute() {
+//     //executeImpl();
+// }
 
 
 

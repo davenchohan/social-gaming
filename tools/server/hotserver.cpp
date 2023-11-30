@@ -17,6 +17,9 @@
 #include "ParserLibrary.h"
 #include "GameSessionList.h"
 #include "RandomIdGenerator.h"
+#include "parser_test.h"
+#include "rule_interpreter.h"
+
 
 #include <fstream>
 #include <sstream>
@@ -35,9 +38,25 @@ using networking::Message;
 using Json = nlohmann::json;
 
 
+class ServerNetworkManager {
+    public:
+    static void send(Server& server, const std::string& message, std::vector<Connection>& receivers) {
+      std::deque<Message> outgoing;
+      for (auto receiver : receivers) {
+          outgoing.push_back({receiver, message});
+      }
+      server.send(outgoing);
+    }
+};
+
+
 std::vector<Connection> clients;
 std::vector<Player> players;
+std::unordered_map<std::string, std::string> games;
 
+void loadSupportedGames() {
+  games["Rock,Paper,Scissors"] = "./lib/gameSpecs/rock_paper_scissors.txt";
+}
 // Empty struct for hold server request items
 // This is a bad fake, to be used temporarily
 // TODO: Replace this struct with a better one that will be created by parseRequest() function
@@ -379,7 +398,7 @@ std::string getGamesList(serverRequest& request,
                                                           return accumulated += "'" + game.GetGameName() + "'";
                                                       });
 
-    std::string final_response = "Req ReqGetGamesList Successful\n";
+    std::string final_response = "ReqGetGamesList Successful\n";
     server_response = final_response + "jsonObject={'gamesList':'[" + concatenatedNames + "]'}";
     std::cout << "Server Response: " + server_response << std::endl;
     return server_response;
@@ -388,16 +407,29 @@ std::string getGamesList(serverRequest& request,
 std::string getGame(serverRequest& request,
                       GameList& serverGameList){
   std::cout << "Got: ReqGetGame and game name is: " << request.gameName << std::endl;
+
   auto foundGame = serverGameList.GetGameSpec(request.gameName);
   std::string server_response = "";
-  if( foundGame.GetGameId() != 0){
-    std::string final_response = "ReqGetGame Success\n";
-    server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
-  }else{
-    server_response = "ReqGetGame Failure: No such game\n";
+
+
+  if(games.find(request.gameName) == games.end()) {
+    std::cout << "Server not loaded with game named: " << request.gameName << std::endl;
+    return "ReqGetGame Failure: No such game\n";
   }
-  std::cout << server_response << std::endl;
+
+  SGParser p(games[request.gameName]);
+  server_response = "ReqGetGame Success\njsonObject=" + p.setupToJson().dump();
   return server_response;
+
+  
+  // if( foundGame.GetGameId() != 0){
+  //   std::string final_response = "ReqGetGame Success\n";
+  //   server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
+  // }else{
+  //   server_response = "ReqGetGame Failure: No such game\n";
+  // }
+  // std::cout << server_response << std::endl;
+  // return server_response;
 }
 
 std::string handleRequest(serverRequest& request,
@@ -470,6 +502,8 @@ main(int argc, char* argv[]) {
   const unsigned short port = std::stoi(argv[1]);
   Server server{port, getHTTPMessage(argv[2]), onConnect, onDisconnect};
 
+  // load server with games
+  loadSupportedGames();
   GameList serverGameList = GameList();
   GameSessionList sessionHandlerDB = GameSessionList();
 
@@ -498,9 +532,10 @@ main(int argc, char* argv[]) {
     allMessages.push_back(log+"\n");
 
     if (returnAll) {
-      for (std::string str : allMessages) {
-        auto outgoing = buildOutgoing(str);
-        server.send(outgoing);
+      for (std::string msg : allMessages) {
+        // auto outgoing = buildOutgoing(msg);
+        // server.send(outgoing);
+        ServerNetworkManager::send(server, msg, clients);
       }
     }else {
       // Space to parse log file into specific sections: request, gameInfo, data, etc
@@ -520,8 +555,9 @@ main(int argc, char* argv[]) {
         std::cerr << "UnknownRequestException caught" << std::endl;
         server_response = "Request Failed";
       }
-      auto outgoing = buildOutgoing(server_response);
-      server.send(outgoing);
+      // auto outgoing = buildOutgoing(server_response);
+      // server.send(outgoing);
+      ServerNetworkManager::send(server, server_response, clients);
     }
 
     if (shouldQuit || errorUpdating) {

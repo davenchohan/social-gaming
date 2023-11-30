@@ -63,6 +63,7 @@ RequestParser::getRequestStruct(){
     return retStruct;
 }
 
+
 Json JsonConverter::GetJsonItem(const std::string item){
     return Json::parse(item);
 }

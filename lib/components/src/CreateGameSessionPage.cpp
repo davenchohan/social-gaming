@@ -16,7 +16,7 @@
 
 using namespace ftxui;
 namespace Pages{
-Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client){
+Component CreateGameSession(int &create_pagenum, std::string &prompt, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client){
 
      networking::ClientWrapper wrapper;
      wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
@@ -24,14 +24,15 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      const int max_pagenum = 1;// starting 0
      auto game_selector = Radiobox(&radiobox_list, &radiobox_selected);
 
+
      auto title1 = Renderer([] {
           return text("Select a game") | bold;
      });
      auto title2 = Renderer([] {
           return text("Basic Configuration") | bold | color(Color::GreenLight);
      });
-     auto title3 = Renderer([] {
-          return paragraph("Game Session Name");
+     auto title3 = Renderer([&] {
+          return paragraph(prompt);
      });
 
      auto selectedGameTitle = Renderer([&] {
@@ -61,7 +62,6 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                //reqConstructor.appendItem("MaxPlayers", "6");
                auto json_string = reqConstructor.ConstructRequest();
                GetGameName getGameName = GetGameName(json_string);
-               GetGame getGame = GetGame("Hi");
                wrapper.sendReq(constants::ReqType::GETGAME, getGameName, client);
 
 
@@ -73,7 +73,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
           title2,
           selectedGameTitle,
           title3,
-          Input(&session_name, "Enter game session name."),
+          Input(&session_name, "integer"),
           Renderer([] {
                return filler();
             }),

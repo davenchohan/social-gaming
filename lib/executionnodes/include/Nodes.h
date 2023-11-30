@@ -15,7 +15,7 @@ class ExecutionTree;
 class ExecutionNode {
 public:
     ExecutionNode();
-    std::unique_ptr<ExecutionNode> execute();
+    // std::unique_ptr<ExecutionNode> execute();
     std::unique_ptr<ExecutionNode> next;
     virtual void print()=0;
     virtual ~ExecutionNode() = default;

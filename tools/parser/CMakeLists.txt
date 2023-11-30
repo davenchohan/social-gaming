@@ -22,14 +22,20 @@ add_grammar_from_repo(tree-sitter-socialgaming
     0.0.1
 )
 
-add_executable(parser_test)
-target_sources(parser_test
-    PRIVATE
-        parser_test.cpp
-        rule_interpreter.cpp
+
+add_library(sgparser
+    parser_test.cpp
+    rule_interpreter.cpp
+)
+target_include_directories(sgparser
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(parser_test
+target_link_libraries(sgparser
     tree-sitter-json
     tree-sitter-socialgaming
     cpp-tree-sitter
@@ -39,20 +45,47 @@ target_link_libraries(parser_test
     backendClasses
 )
 
-set_target_properties(parser_test
-    PROPERTIES CXX_STANDARD 17
+
+set_target_properties(sgparser
+                      PROPERTIES
+                      CXX_STANDARD 17
 )
 
-
-target_include_directories(parser_test
-  PUBLIC
-    $<INSTALL_INTERFACE:include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+install(TARGETS sgparser
+  ARCHIVE DESTINATION lib
 )
 
+# add_executable(parser_test)
+# target_sources(parser_test
+#     PRIVATE
+#         parser_test.cpp
+#         rule_interpreter.cpp
+# )
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(DESTINATION_DIR "${CMAKE_BINARY_DIR}/lib")
-file(COPY ${SOURCE_DIR} DESTINATION ${DESTINATION_DIR})
+# target_link_libraries(parser_test
+#     tree-sitter-json
+#     tree-sitter-socialgaming
+#     cpp-tree-sitter
+#     nlohmann_json::nlohmann_json
+#     executionnodes
+#     datatypes
+#     backendClasses
+# )
+
+# set_target_properties(parser_test
+#     PROPERTIES CXX_STANDARD 17
+# )
+
+
+# target_include_directories(parser_test
+#   PUBLIC
+#     $<INSTALL_INTERFACE:include>
+#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   PRIVATE
+#     ${CMAKE_CURRENT_SOURCE_DIR}
+# )
+
+
+# set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+# set(DESTINATION_DIR "${CMAKE_BINARY_DIR}/lib")
+# file(COPY ${SOURCE_DIR} DESTINATION ${DESTINATION_DIR})
