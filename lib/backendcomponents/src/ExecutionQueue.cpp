@@ -1,6 +1,6 @@
 #include "ExecutionQueue.h"
 
-void ExecutionQueue::push(const std::unique_ptr<ExecutionNode> node){
+void ExecutionQueue::push(std::unique_ptr<ExecutionNode> node){
     baseQ.push(std::move(node));
 }
 
@@ -14,7 +14,7 @@ void ExecutionQueue::pop(){
 
 void ExecutionQueue::executeAll(){
     while(!baseQ.empty()){
-        ExecutionNode* node_ptr = baseQ.front();
+        std::unique_ptr<ExecutionNode> node_ptr = std::move(baseQ.front());
         node_ptr->execute();
         baseQ.pop();
     }

@@ -9,7 +9,7 @@ private:
     std::queue<std::unique_ptr<ExecutionNode>> baseQ;
 public:
     ExecutionQueue() {}
-    void push(const std::unique_ptr<ExecutionNode>);
+    void push(std::unique_ptr<ExecutionNode> );
     void pop();
     void executeAll();
-}
+    };
