@@ -93,7 +93,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                auto json_string = reqConstructor.ConstructRequest();
                //CreateGame createGame = CreateGame();
                //wrapper.sendReq(constants::ReqType::CREATEGAME, getGameName, client);
-               view_state = 1;
+               view_state = 2;
             }),// transfer page to game play page
         }) | flex,
      });

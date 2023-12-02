@@ -30,6 +30,7 @@ target_link_libraries(components
   PRIVATE backendClasses
   PRIVATE backendcomponents
   PRIVATE networking
+  PRIVATE generators
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
