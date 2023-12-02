@@ -86,10 +86,18 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                return filler();
             }),
             Button("Create", [&]{
+               RequestConstructor reqConstructor("ReqCreateGame");
+               reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+               //reqConstructor.appendItem("MinPlayers", "3");
+               //reqConstructor.appendItem("MaxPlayers", "6");
+               auto json_string = reqConstructor.ConstructRequest();
+               //CreateGame createGame = CreateGame();
+               //wrapper.sendReq(constants::ReqType::CREATEGAME, getGameName, client);
                view_state = 1;
             }),// transfer page to game play page
         }) | flex,
      });
+     
 
      auto page = Container::Vertical({
           page1 | Maybe([&] {return create_pagenum == 0;}),

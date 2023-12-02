@@ -9,6 +9,7 @@
 #include "Server.h"
 #include "CustomExceptions.h"
 #include "Player.h"
+#include "User.h"
 #include "Game.h"
 #include "GameSessionHandler.h"
 #include "GameVariable.h"
@@ -38,7 +39,7 @@ using Json = nlohmann::json;
 
 
 std::vector<Connection> clients;
-std::vector<Player> players;
+std::vector<User> users;
 
 
 // Empty struct for hold server request items
@@ -163,10 +164,10 @@ Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
   return newGame;
 }
 
-void registerNewPlayer(int id){
-  std::string name = "player";
+void registerNewUser(int id){
+  std::string name = "user";
   name.append(std::to_string(id));
-  players.push_back(Player(name, id));
+  users.push_back(User(name, id));
 }
 
 void
@@ -174,7 +175,7 @@ onConnect(Connection c) {
   std::cout << "New connection found: " << c.id << "\n";
   clients.push_back(c);
   int newId = c.id;
-  registerNewPlayer(newId);
+  registerNewUser(newId);
 }
 
 
@@ -183,12 +184,12 @@ onDisconnect(Connection c) {
   std::cout << "Connection lost: " << c.id << "\n";
   auto eraseBegin = std::remove(std::begin(clients), std::end(clients), c);
   clients.erase(eraseBegin, std::end(clients));
-  int playerIdToRemove = c.id;
-  players.erase(std::remove_if(players.begin(), players.end(),
-                  [playerIdToRemove](const Player& player) {
-                      return player.GetUserId() == playerIdToRemove;
+  int userIdToRemove = c.id;
+  users.erase(std::remove_if(users.begin(), users.end(),
+                  [userIdToRemove](const User& user) {
+                      return user.GetUserId() == userIdToRemove;
                   }),
-                  players.end());
+                  users.end());
 }
 
 

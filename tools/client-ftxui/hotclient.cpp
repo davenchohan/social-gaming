@@ -5,6 +5,7 @@
 #include "Client.h"
 #include "LandingPage.h"
 #include "CreateGamePage.h"
+#include "NamePage.h"
 #include "JoinGamePage.h"
 #include "CreateGameSessionPage.h"
 // #include "GamePlayPage.h"
@@ -133,6 +134,9 @@ int main(int argc, char* argv[]) {
   };
   // screen view state 0: landing page 1: game play
   int view_state = 0;
+
+  //User name for the client
+  std::string userName;
   
 
   // DATA - landing page
@@ -230,6 +234,7 @@ int main(int argc, char* argv[]) {
   game_page_components.push_back(testGamePageElements);
 
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
+  auto namePageElements = Pages::namePage(create_pagenum, view_state, client, userName);
 
 
 
@@ -238,7 +243,7 @@ int main(int argc, char* argv[]) {
     Container::Horizontal({
       Button(
         "Home", [&] { 
-          view_state = 0;
+          view_state = 1;
           // reset game component data
           texts.clear();
           options.clear();
@@ -258,9 +263,10 @@ int main(int argc, char* argv[]) {
 
 
   auto pageContent = Container::Vertical({
-    landingPageElements | Maybe([&] {return view_state == 0;}),
+    landingPageElements | Maybe([&] {return view_state == 1;}),
     // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-    testGamePageElements | Maybe([&] {return view_state == 1;}),
+    testGamePageElements | Maybe([&] {return view_state == 2;}),
+    namePageElements | Maybe([&] {return view_state == 0;}),
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
