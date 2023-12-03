@@ -19,7 +19,7 @@ TEST(ParserLibraryTests, TestParserClassInitializeEmpty){
 
 TEST(ParserLibraryTests, TestParserClassInitializeBasic){
     RequestConstructor parser("ReqCreateGame");
-    std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    std::string expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -30,7 +30,7 @@ TEST(ParserLibraryTests, TestParserClassAppendBasic){
     for (auto const&[key, val] : values){
         parser.appendItem(key, val);
     }
-    std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    std::string expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -42,14 +42,14 @@ TEST(ParserLibraryTests, TestParserClassAppendReplace){
         parser.appendItem(key, val);
     }
     parser.appendItem("GameName", "Chess");
-    std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    std::string expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     std::string generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserClassInitialize){
     RequestConstructor parser("SomeRequest");
-    auto expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"SomeRequest\",\"misc\":null}";
+    auto expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"SomeRequest\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -72,14 +72,14 @@ TEST(ParserLibraryTests, TestRequetParserGetNonExisitentValue){
 }
 
 TEST(ParserLibraryTests, TestRequestParserGetValue2){
-    RequestParser parser("{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
+    RequestParser parser("{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
     auto expected = "SomeGame";
     auto generated = parser.getValue("GameName");
     EXPECT_EQ(expected, generated);
 }
 
 TEST(ParserLibraryTests, TestRequestParserGetNullValue){
-    RequestParser parser("{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
+    RequestParser parser("{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"SomeGame\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}");
     auto expected = "NO_Value_Found";
     auto generated = parser.getValue("nonexistent");
     EXPECT_EQ(expected, generated);
@@ -91,7 +91,7 @@ TEST(ParserLibraryTests, TestRequestParserAppendBasic){
     for (auto const&[key, val] : values){
         parser.appendItem(key, val);
     }
-    std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    std::string expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -106,7 +106,7 @@ TEST(ParserLibraryTests, TestRequestParserAppendMultiTypes){
     std::vector<std::string> rules = {"Move", "Cannot stand still", "Must Jump every 2 turns"};
     gameConfig["Rules"] = rules;
     parser.appendItem("GameConfig", gameConfig);
-    auto expected = "{\"GameConfig\":{\"Rules\":[\"Move\",\"Cannot stand still\",\"Must Jump every 2 turns\"]},\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    auto expected = "{\"ConnID\":\"\",\"GameConfig\":{\"Rules\":[\"Move\",\"Cannot stand still\",\"Must Jump every 2 turns\"]},\"GameID\":\"\",\"GameName\":\"Rock, Paper, Scissors\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -118,7 +118,7 @@ TEST(ParserLibraryTests, TestRequestParserReplace){
         parser.appendItem(key, val);
     }
     parser.appendItem("GameName", "Chess");
-    std::string expected = "{\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
+    std::string expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"Chess\",\"Name\":\"Gabe\",\"Players\":{},\"Request\":\"ReqCreateGame\",\"misc\":null}";
     auto generated = parser.ConstructRequest();
     EXPECT_EQ(expected, generated);
 }
@@ -147,7 +147,7 @@ TEST(ParserLibraryTests, TestRequestParserConstructor){
     RequestConstructor constructor(req);
 
     auto generated = constructor.ConstructRequest();
-    auto expected = "{\"GameConfig\":null,\"GameID\":\"1111\",\"GameName\":\"Chess\",\"Players\":[{\"id\":1234,\"name\":\"Gabe\",\"playerState\":\"WaitingTurn\"},{\"id\":1212,\"name\":\"Peter\",\"playerState\":\"WaitingTurn\"}],\"Request\":\"ReqGetGame\",\"misc\":null}";
+    auto expected = "{\"ConnID\":\"\",\"GameConfig\":null,\"GameID\":\"1111\",\"GameName\":\"Chess\",\"Players\":[{\"id\":1234,\"name\":\"Gabe\",\"playerState\":\"WaitingTurn\"},{\"id\":1212,\"name\":\"Peter\",\"playerState\":\"WaitingTurn\"}],\"Request\":\"ReqGetGame\",\"misc\":null}";
     EXPECT_EQ(generated, expected);
 }
 
@@ -252,6 +252,12 @@ TEST(ParserLibraryTests, TestConvertToGameFilled){
     EXPECT_EQ(generated, expectedGame);
 }
 
-
+TEST(ParserLibraryTests, TestRequestParserConnId){
+    RequestConstructor parser("SomeRequest");
+    parser.appendItem("ConnID","123456");
+    auto expected = "{\"ConnID\":\"123456\",\"GameConfig\":null,\"GameID\":\"\",\"GameName\":\"\",\"Players\":{},\"Request\":\"SomeRequest\",\"misc\":null}";
+    auto generated = parser.ConstructRequest();
+    EXPECT_EQ(expected, generated);
+}
 
 
