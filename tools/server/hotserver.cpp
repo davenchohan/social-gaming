@@ -61,6 +61,29 @@ class RequestHandler {
 
 std::map<std::string, std::shared_ptr<RequestHandler>> requestHandlers;
 
+std::string addConnId(const std::string &message_text, const std::string &connId) {
+  JsonConverter converter;
+  size_t equalsPos = message_text.find('=');
+  std::string new_message;
+  new_message.reserve(message_text.length() + connId.length());
+  std::string afterEquals = (equalsPos != std::string::npos) ? message_text.substr(equalsPos + 1) : "";
+  if (!afterEquals.empty())
+  {
+    std::string substringBeforeEqual = message_text.substr(0, equalsPos + 1);
+    Json json_object = converter.GetJsonItem(afterEquals);
+    json_object["ConnID"] = connId;
+    new_message = json_object.dump();
+    return substringBeforeEqual.append(new_message);
+  }
+  else {
+    RequestConstructor reqConstructor("ReqGetGamesList");
+    reqConstructor.appendItem("ConnID", connId);
+    auto json_string = reqConstructor.ConstructRequest();
+    return message_text +" jsonData=" +json_string;
+  }
+
+}
+
 
 //TODO: Implement this function
 // Can be implemented here or in server.cpp
@@ -207,7 +230,7 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
   bool returnAll = false;
   
   for (const auto& message : incoming) {
-    std::cout << "New message found: " << message.text << "\n";
+    std::string connId = std::to_string(message.connection.id);
     if (message.text == "quit") {
       server.disconnect(message.connection);
     } else if (message.text == "shutdown") {
@@ -217,8 +240,9 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
       returnAll = true;
 
     } else {
-      result << message.text;
+      result << addConnId(message.text, connId);;
     }
+    std::cout << "New message found: " << result.str() << "\n";
   }
   return MessageResult{result.str(), quit, returnAll};
 }
