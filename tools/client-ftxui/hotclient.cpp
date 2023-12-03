@@ -6,6 +6,7 @@
 #include "LandingPage.h"
 #include "CreateGamePage.h"
 #include "NamePage.h"
+#include "LoadingPage.h"
 #include "JoinGamePage.h"
 #include "CreateGameSessionPage.h"
 // #include "GamePlayPage.h"
@@ -236,14 +237,14 @@ int main(int argc, char* argv[]) {
   // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
   auto namePageElements = Pages::namePage(create_pagenum, view_state, client, userName);
 
-
+  auto loadingPageElements = Pages::loadingPage(create_pagenum, view_state, client);
 
 //components can be grouped together so that they can be passed into the render together 
  auto homeButton = Container::Vertical({
     Container::Horizontal({
       Button(
         "Home", [&] { 
-          view_state = 1;
+          view_state = 2;
           // reset game component data
           texts.clear();
           options.clear();
@@ -263,10 +264,11 @@ int main(int argc, char* argv[]) {
 
 
   auto pageContent = Container::Vertical({
-    landingPageElements | Maybe([&] {return view_state == 1;}),
+    landingPageElements | Maybe([&] {return view_state == 2;}),
     // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-    testGamePageElements | Maybe([&] {return view_state == 2;}),
+    testGamePageElements | Maybe([&] {return view_state == 3;}),
     namePageElements | Maybe([&] {return view_state == 0;}),
+    loadingPageElements | Maybe([&] {return view_state == 1;}),
   }) | flex;
 
   // all components that need to be interactive will be added to the main container.
@@ -350,6 +352,7 @@ int main(int argc, char* argv[]) {
       if(reqType == "ReqGetGamesList") {
           radiobox_list = parseServerResponseGameList(response, text_list);
           options = parseServerResponseGameList(response, texts);
+          view_state = 2;
       }
 
       screen.RequestAnimationFrame();

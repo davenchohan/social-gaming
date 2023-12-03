@@ -12,6 +12,7 @@ add_library(components
     # src/GamePlayPage.cpp #added
     src/TestGameComponent.cpp #added
     src/NamePage.cpp
+    src/LoadingPage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui

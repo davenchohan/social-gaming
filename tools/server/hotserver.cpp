@@ -58,26 +58,35 @@ class RequestHandler {
   virtual std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) = 0;
 };
 
+void registerNewUser(const std::string userName, int id){
+  users.push_back(User(userName, id));
+}
 
 std::map<std::string, std::shared_ptr<RequestHandler>> requestHandlers;
 
-std::string addConnId(const std::string &message_text, const std::string &connId) {
+std::string addConnId(const std::string &message_text, int connId) {
+  std::string strConnId = std::to_string(connId);
   JsonConverter converter;
   size_t equalsPos = message_text.find('=');
   std::string new_message;
-  new_message.reserve(message_text.length() + connId.length());
+  new_message.reserve(message_text.length() + strConnId.length());
   std::string afterEquals = (equalsPos != std::string::npos) ? message_text.substr(equalsPos + 1) : "";
   if (!afterEquals.empty())
   {
     std::string substringBeforeEqual = message_text.substr(0, equalsPos + 1);
     Json json_object = converter.GetJsonItem(afterEquals);
-    json_object["ConnID"] = connId;
+    json_object["ConnID"] = strConnId;
+    if(json_object.find("misc") != json_object.end()){
+      std::string clientUserName = json_object["misc"].dump();
+      clientUserName.erase(std::remove(clientUserName.begin(), clientUserName.end(), '\"'), clientUserName.end());
+      registerNewUser(clientUserName, connId);
+    }
     new_message = json_object.dump();
     return substringBeforeEqual.append(new_message);
   }
   else {
     RequestConstructor reqConstructor("ReqGetGamesList");
-    reqConstructor.appendItem("ConnID", connId);
+    reqConstructor.appendItem("ConnID", strConnId);
     auto json_string = reqConstructor.ConstructRequest();
     return message_text +" jsonData=" +json_string;
   }
@@ -187,18 +196,10 @@ Game instantiateGame(serverRequest gameRequest, Player& gameHost) {
   return newGame;
 }
 
-void registerNewUser(int id){
-  std::string name = "user";
-  name.append(std::to_string(id));
-  users.push_back(User(name, id));
-}
-
 void
 onConnect(Connection c) {
   std::cout << "New connection found: " << c.id << "\n";
   clients.push_back(c);
-  int newId = c.id;
-  registerNewUser(newId);
 }
 
 
@@ -230,7 +231,6 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
   bool returnAll = false;
   
   for (const auto& message : incoming) {
-    std::string connId = std::to_string(message.connection.id);
     if (message.text == "quit") {
       server.disconnect(message.connection);
     } else if (message.text == "shutdown") {
@@ -240,7 +240,7 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
       returnAll = true;
 
     } else {
-      result << addConnId(message.text, connId);;
+      result << addConnId(message.text, message.connection.id);;
     }
     std::cout << "New message found: " << result.str() << "\n";
   }

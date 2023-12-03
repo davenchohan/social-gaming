@@ -19,11 +19,12 @@ using namespace ftxui;
 namespace Pages{
 Component namePage(int &pagenum, int &view_state, networking::Client &client, std::string &userName) {
 
-     const int max_pagenum = 0;// starting 0
+     //const int max_pagenum = 0;// starting 0
      //auto game_selector = Radiobox(&radiobox_list, &radiobox_selected);
 
      bool errorName = false;
-
+     
+     networking::ClientWrapper wrapper;
 
      auto title1 = Renderer([] {
           return paragraph("Enter your Username");
@@ -47,17 +48,25 @@ Component namePage(int &pagenum, int &view_state, networking::Client &client, st
                return filler();
             }),
             Button("Confirm", [&]{
-               // TODO: send name to server
-               // wrapper.sendReq(constants::ReqType::, )
+               // Also sends the name to the server and acquires games list
+               RequestConstructor reqConstructor("ReqGetGamesList");
                if (userName.empty())
                {
-                int randomID = RandomIdGenerator::generateUniqueId();
-                userName = "dummy_name";
-                userName.append(std::to_string(randomID));
-                view_state = 1;
+                  int randomID = RandomIdGenerator::generateUniqueId();
+                  userName = "Anon_Player";
+                  userName.append(std::to_string(randomID));
+                  reqConstructor.appendItem("misc", userName);
+                  auto json_string = reqConstructor.ConstructRequest();
+                  GetGamesList getGamesList = GetGamesList(json_string);
+                  wrapper.sendReq(constants::ReqType::GETGAMES, getGamesList, client);
+                  view_state = 1;
                }
                else {
-                view_state = 1;
+                  reqConstructor.appendItem("misc", userName);
+                  auto json_string = reqConstructor.ConstructRequest();
+                  GetGamesList getGamesList = GetGamesList(json_string);
+                  wrapper.sendReq(constants::ReqType::GETGAMES, getGamesList, client);
+                  view_state = 1;
                }
             }),
         }) | flex,
@@ -85,7 +94,7 @@ Component namePage(int &pagenum, int &view_state, networking::Client &client, st
                 pagenum -= 1;
                }
                else {
-                view_state = 1;
+                view_state = 2;
                }
             }),
         }) | flex,

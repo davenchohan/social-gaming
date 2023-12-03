@@ -45,3 +45,12 @@ public:
     GetGameName(const std::string& gameName);
     std::string toJSON() override;
 };
+
+class GetGamesList : public DataClass {
+private:
+    std::string userName;
+
+public:
+    GetGamesList(const std::string& userName);
+    std::string toJSON() override;
+};
