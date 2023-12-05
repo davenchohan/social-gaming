@@ -65,3 +65,12 @@ TEST(ExecutionNodeQueueTests, TestPushPop2){
     EXPECT_TRUE(item2 != item3);
     ASSERT_EQ(Q.getSize(), 1);
 }
+
+TEST(ExecutionNodeQueueTests, TestDifferentTypes){
+    ExecutionQueue Q;
+    EXPECT_NO_THROW({
+        Q.push(std::make_unique<FakeExecutionNode>("1111"));
+        Q.push(std::make_unique<FakeExecutionNode2>("1123"));
+    });
+    ASSERT_EQ(Q.getSize(), 2);
+}
