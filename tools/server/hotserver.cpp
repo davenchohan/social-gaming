@@ -19,6 +19,7 @@
 #include "GameSessionList.h"
 #include "RandomIdGenerator.h"
 #include "ResponseQueue.h"
+#include "ExecutionQueue.h"
 
 #include <fstream>
 #include <sstream>
@@ -621,6 +622,7 @@ main(int argc, char* argv[]) {
   std::map<std::string, std::string> demoSessionHandlerDB = {{"Hi", "Rock,Paper,Scissors"}};
 
   ResponseQueue messageQueue;
+  ExecutionQueue excNodeQueue;
 
   while (true) {
     bool errorUpdating = false;

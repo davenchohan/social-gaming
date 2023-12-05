@@ -10,6 +10,7 @@ add_executable(runAllTests
     GameClassTests.cpp
     GameListTests.cpp
     ResponseQueueTests.cpp
+    ExecutionNodeQueueTests.cpp
     RandomIdGeneratorTests.cpp
     RoomCodeGeneratorTests.cpp
     AudienceMemberTests.cpp
