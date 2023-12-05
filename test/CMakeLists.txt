@@ -10,6 +10,14 @@ add_executable(runAllTests
     GameClassTests.cpp
     GameListTests.cpp
     ResponseQueueTests.cpp
+    RandomIdGeneratorTests.cpp
+    RoomCodeGeneratorTests.cpp
+    AudienceMemberTests.cpp
+    GameConstantTests.cpp
+    GameSessionListTests.cpp
+    GameVariableTests.cpp
+    PlayerTests.cpp
+    UserTests.cpp
 )
 
 target_link_libraries(runAllTests
@@ -19,6 +27,7 @@ target_link_libraries(runAllTests
     exceptions
     backendcomponents
     backendClasses
+    generators
 )
 
 set_target_properties(runAllTests
