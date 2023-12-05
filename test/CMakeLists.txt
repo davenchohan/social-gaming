@@ -10,6 +10,7 @@ add_executable(runAllTests
     GameClassTests.cpp
     GameListTests.cpp
     ResponseQueueTests.cpp
+    ExecutionNodeQueueTests.cpp
 )
 
 target_link_libraries(runAllTests
