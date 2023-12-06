@@ -81,7 +81,7 @@ const std::map<std::string, ExpressionTypes> expToValue = {
     {"*", ExpressionTypes::OPERATION},
     {"/", ExpressionTypes::OPERATION},
     {"builtin",ExpressionTypes::BUILTIN},
-    {"indentifier",ExpressionTypes::IDENTIFIER},
+    {"identifier",ExpressionTypes::IDENTIFIER},
 
 
 };
@@ -151,7 +151,7 @@ void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts
 void handleMessageRule(ActiveGame &active, ExecutionTree &tree, ts::Node node); 
 
 
-
+ExpressionNode* parseIdentifierExpression(ActiveGame & active, ExecutionTree& tree,ts::Node node);
 ExpressionNode* parseExpression(ActiveGame &active, ExecutionTree& tree,ts::Node node);
 ExpressionNode* parseBuiltIn(ActiveGame &active, ExecutionTree& tree,ts::Node node);
 void recursiveIdent(ActiveGame &active,std::vector<std::string>& identifiers, ts::Node node);

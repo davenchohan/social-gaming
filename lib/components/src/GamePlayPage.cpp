@@ -24,7 +24,7 @@ Component GamePlay(int &view_state, GameComponent &gameComponent, networking::Cl
     auto content = Container::Vertical({
         text,
         Button("Return non-game-play view (state 0)", [&]{
-            view_state = 0;
+            view_state = 2;
         }),
         gameComponent.getGameComponent(),
     });

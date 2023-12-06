@@ -30,17 +30,18 @@ struct RequestInfo{
     std::vector<Player> players;
     // std::vector<AudienceMember> audienceMembers;
     Json misc;
+    std::string connID;
 
     // Custom < operator definition, allows struct to be used in sets/maps
     bool operator<(const RequestInfo& a)const
     {
-        return (request < a.request && gameName < a.gameName && gameID < a.gameID && gameConfig < a.gameConfig && players < a.players && misc < a.misc);
+        return (request < a.request && gameName < a.gameName && gameID < a.gameID && gameConfig < a.gameConfig && players < a.players && misc < a.misc && connID < a.connID);
     }
 
     //Custom equality comparison operator definition
     bool operator==(const RequestInfo& a) const
     {
-        return (request == a.request && gameName == a.gameName && gameID == a.gameID && gameConfig == a.gameConfig && players == a.players && misc == a.misc);
+        return (request == a.request && gameName == a.gameName && gameID == a.gameID && gameConfig == a.gameConfig && players == a.players && misc == a.misc && connID == a.connID);
     }
 };
 
@@ -107,7 +108,10 @@ class RequestParser{
         Json subject;
         JsonConverter converter;
     public:
-        RequestParser(std::string&);
+        RequestParser(){}
+        RequestParser(const std::string&);
         RequestInfo getRequestStruct();
+        std::string getValue(const std::string &);
+        std::string getValue(const std::string &, Json &);
 };
 

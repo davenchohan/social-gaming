@@ -13,6 +13,7 @@ RequestConstructor::RequestConstructor(RequestInfo &info){
     appendItem("GameConfig", info.gameConfig);
     appendItem("Players", info.players);
     appendItem("misc", info.misc);
+    appendItem("ConnID", info.connID);
 }
 
 // Sets json item to blank classes, as returnReqInfoFromSubject can be called anytime
@@ -25,6 +26,7 @@ RequestConstructor::RequestConstructor(std::string request){
     subject["GameConfig"] = blankJson;
     subject["Players"] = blankPlayers;
     subject["misc"] = blankJson;
+    subject["ConnID"] = "";
 }
 
 std::string RequestConstructor::ConstructRequest(){
@@ -37,6 +39,7 @@ RequestConstructor::returnReqInfo(){
     subject.at("Request").get_to(temp.request);
     subject.at("GameName").get_to(temp.gameName);
     subject.at("GameID").get_to(temp.gameID);
+    subject.at("ConnID").get_to(temp.connID);
     temp.gameConfig = subject.at("GameConfig");
     auto players_arr = subject.at("Players");
     converter.convertJsonToPlayersArr(players_arr, temp.players);
@@ -46,8 +49,22 @@ RequestConstructor::returnReqInfo(){
 
 // Takes a message received from server and sets the request subject as the parsed JSon item
 // logStr should be in string format 
-RequestParser::RequestParser(std::string& logStr){
+RequestParser::RequestParser(const std::string& logStr){
     subject = Json::parse(logStr);
+}
+
+std::string RequestParser::getValue(const std::string &key){
+    return getValue(key, subject);
+}
+
+std::string RequestParser::getValue(const std::string &key, Json& jsonItem){
+    std::string item;
+    try{
+        jsonItem.at(key).get_to(item);
+        return item;
+    }catch(...){
+        return "NO_Value_Found";
+    }
 }
 
 // Expected formats:
@@ -57,6 +74,7 @@ RequestParser::getRequestStruct(){
     subject.at("Request").get_to(retStruct.request);
     subject.at("GameName").get_to(retStruct.gameName);
     subject.at("GameID").get_to(retStruct.gameID);
+    subject.at("ConnID").get_to(retStruct.connID);
     retStruct.gameConfig = subject.at("GameConfig");
     converter.convertJsonToPlayersArr(subject.at("Players"), retStruct.players);
     retStruct.misc = subject.at("misc");

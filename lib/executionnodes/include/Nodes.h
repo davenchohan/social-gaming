@@ -85,7 +85,7 @@ public:
     void print(); 
 private:
     std::unique_ptr<ExecutionNode> executeImpl();
-    ExpressionNode* condition;
+    std::unique_ptr<ExpressionNode> condition;
     std::string identifier; 
     std::unique_ptr<ExecutionTree> loop;
 
