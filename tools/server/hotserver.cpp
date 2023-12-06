@@ -246,6 +246,22 @@ getHTTPMessage(const char* htmlLocation) {
   std::exit(-1);
 }
 
+// constructs a server response with display content
+std::string ConstructResponseForDisplayContent(std::string& description, std::string& buttonLabel, std::string& endpoint) {
+  RequestConstructor constructor{"success", description, "display", "[]", "", buttonLabel, "", endpoint};
+  return constructor.ConstructRequest();
+}
+// constructs a server response with selection content
+std::string ConstructResponseForSelectionContent(std::string& prompt, Json& options, std::string& buttonLabel, std::string& field, std::string& endpoint) {
+  RequestConstructor constructor{"success", "", "selection", options, prompt, buttonLabel, field, endpoint};
+  return constructor.ConstructRequest();
+}
+// constructs a server response with input content
+std::string ConstructResponseForInputContent(std::string& prompt, std::string& buttonLabel, std::string& field, std::string& endpoint) {
+  RequestConstructor constructor{"success", "", "input", "[]", prompt, buttonLabel, field, endpoint};
+  return constructor.ConstructRequest();
+}
+
 
 // Request Handlers ================================================
 //   REQUEST_TYPE         -> HANDLER_NAME
@@ -395,14 +411,17 @@ class GetGamesListHandler : public RequestHandler {
     auto gamesList = serverGameList.GetGameList();
     std::string server_response = "";
 
-    std::string concatenatedNames = std::accumulate(gamesList.begin(), gamesList.end(), std::string(),
-                                                      [](std::string& accumulated, const Game& game) {
-                                                          if (!accumulated.empty()) { accumulated += ", "; }
-                                                          return accumulated += "'" + game.GetGameName() + "'";
-                                                      });
+    Json games = Json::array();
+    for(const Game& game: gamesList) {
+      games.push_back(game.GetGameName());
+    }
 
-    std::string final_response = "ReqGetGamesList Successful\n";
-    server_response = final_response + "jsonObject={'gamesList':'[" + concatenatedNames + "]'}";
+    std::string prompt = "Select the game you want to play";
+    std::string buttonLabel = "Confirm";
+    std::string field = "GameName";
+    std::string endpoint = "ReqGetGame";
+    server_response = ConstructResponseForSelectionContent(prompt, games, buttonLabel, field, endpoint);
+
     std::cout << "Server Response: " + server_response << std::endl;
     return server_response;
   }
@@ -412,14 +431,22 @@ class GetGameHandler : public RequestHandler {
   std::string process(serverRequest& request, GameList& serverGameList, GameSessionList& sessionHandlerDB) override {
     std::cout << "Got: ReqGetGame and game name is: " << request.gameName << std::endl;
     auto foundGame = serverGameList.GetGameSpec(request.gameName);
+
     std::string server_response = "";
     if( foundGame.GetGameId() != 0){
-      std::string final_response = "ReqGetGame Success\n";
-      server_response = final_response + "jsonObject={'game':" + "'" + foundGame.GetGameName() + "'" + "}";
+      std::string prompt = "Select the number of rounds.";
+      std::string buttonLabel = "Confirm";
+      std::string field = "NumRounds";
+      std::string endpoint = "ReqCreateGame";
+      server_response = ConstructResponseForInputContent(prompt, buttonLabel, field, endpoint);
     }else{
-      server_response = "ReqGetGame Failure: No such game\n";
+      std::string description = "Request ReqGetGame failed: No such game";
+      std::string buttonLabel = "get games list";
+      std::string endpoint = "ReqGetGamesList";
+      server_response = ConstructResponseForDisplayContent(description, buttonLabel, endpoint);
     }
-    std::cout << server_response << std::endl;
+
+    std::cout << "Server Response: " + server_response << std::endl;
     return server_response;
   }
 };

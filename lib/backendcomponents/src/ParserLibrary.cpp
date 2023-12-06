@@ -27,6 +27,25 @@ RequestConstructor::RequestConstructor(std::string request){
     subject["misc"] = blankJson;
 }
 
+RequestConstructor::RequestConstructor(
+                                std::string state, 
+                                std::string description, 
+                                std::string type, 
+                                Json options, 
+                                std::string prompt, 
+                                std::string button, 
+                                std::string field, 
+                                std::string endpoint){
+    subject["state"] = state;
+    subject["description"] = description;
+    subject["type"] = type;
+    subject["options"] = options;
+    subject["prompt"] = prompt;
+    subject["button"] = button;
+    subject["field"] = field;
+    subject["endpoint"] = endpoint;
+}
+
 std::string RequestConstructor::ConstructRequest(){
     return subject.dump();
 }
@@ -55,9 +74,13 @@ std::string RequestParser::getValue(const std::string &key){
 }
 
 std::string RequestParser::getValue(const std::string &key, Json& jsonItem){
+    std::cout << "key: " << key << std::endl;
+    std::cout << "jsonItem: " << jsonItem << std::endl;
     std::string item;
     try{
-        jsonItem.at(key).get_to(item);
+        // jsonItem.at("state").get_to(item);
+        jsonItem["state"].get_to(item);
+        std::cout << "item: " << item << std::endl;
         return item;
     }catch(...){
         return "NO_Value_Found";

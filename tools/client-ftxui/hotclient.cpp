@@ -2,81 +2,75 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+
 #include "Client.h"
+#include "ClientWrapper.h"
+#include "ParserLibrary.h"
+#include "Constants.h"
+#include "GameComponent.h"
+
 #include "LandingPage.h"
 #include "CreateGamePage.h"
 #include "JoinGamePage.h"
+#include "MainPageContent.h"
 #include "CreateGameSessionPage.h"
-// #include "GamePlayPage.h"
 #include "TestGameComponent.h"
+
 #include "ftxui/component/captured_mouse.hpp"  // for ftxui
 #include "ftxui/component/component.hpp"  
 #include "ftxui/component/loop.hpp"
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"  // for separator, gauge, text, Element, operator|, vbox, border
-#include "Constants.h"
-#include "GameComponent.h"
 
-// #include "GameComponentsManager.h"
+
 
 using namespace ftxui;
-// using namespace ui;
+using Json = nlohmann::json;
+
+
+
+
 
 
 
 // FUNCTIONS #####################################################
 // ###########################################################
 // placeholder (until parser library is implemented)
-std::vector<std::string> parseServerResponseGameList(const std::string &response, std::vector<Element> &text_list) {
+void handleServerResponse(
+                    const std::string& response, 
+                    std::string& state, 
+                    std::string& description, 
+                    std::string& type, 
+                    std::vector<std::string>& options, 
+                    int& selection,
+                    std::string& prompt, 
+                    std::string& input, 
+                    std::string& button, 
+                    std::string& field, 
+                    std::string& endpoint) {
+  // decompose server resonse
+  RequestParser parser{response};
 
-    // find the start of json
-    size_t start = response.find('[');
-    size_t end = response.find(']');
-    if(start != std::string::npos && end != std::string::npos) {
-        if(start <= end) {
-            std::vector<std::string> result_list;
-            std::string_view response_view{response};
-            std::string_view list_view = response_view.substr(start+1, end - start-1);
-            // std::cout << list_view << std::endl;
+  Json jsonObj = Json::parse(response);
+  state = jsonObj["state"].template get<std::string>();
+  button = jsonObj["button"].template get<std::string>();
+  description = jsonObj["description"].template get<std::string>();
+  type = jsonObj["type"].template get<std::string>();
+  prompt = jsonObj["prompt"].template get<std::string>();
+  endpoint = jsonObj["endpoint"].template get<std::string>();
+  field = jsonObj["field"].template get<std::string>();
 
-            // find pair of '
-            bool start = false;
-            std::string_view games = list_view;
-            size_t position = games.find("'");
+  input = "";
+  options.clear();
+  selection = 0;
 
-            while(position != std::string_view::npos) {
-                if(start) {
-                    // found the end
-                    std::string game{games.substr(0, position)};
-                    // std::cout << "found: " << game << std::endl;
-                    result_list.push_back(game);
-                    text_list.push_back(paragraph(game));
-                    start = false;
-                }else {
-                    // found teh start
-                    start = true;
-                }
-                games = games.substr(position+1, games.size()-position);
-                // std::cout << "[" << games << "]" << std::endl;
-                position = games.find("'");
-            }
-
-            return result_list;
-        }
-    }
-
-    return {};
-}
-std::string parseServerResponseType(const std::string &response) {
-  size_t first_space = response.find(' ');
-  std::string reqType = response.substr(0, first_space);
-  return reqType;
-
+  if(type == "selection") {
+    options = jsonObj["options"].template get<std::vector<std::string>>();
+  }
 }
 
-// (still testing out design) function that manages dynamiclly generated components for the game play page
-// void addParagraphComponent()
 
 // STYLE #####################################################
 // styling can be defined outside of component definitions
@@ -110,16 +104,8 @@ int main(int argc, char* argv[]) {
   }
 
 
-
-// DATA ######################################################
-// data (varaibles) for interactive components to be
-// passed to pages 
-// ###########################################################
-  // TEST VARIABLE FOR STORING JSON RESPONSE FROM BACKEND
-  std::string test_json_response = "default";
-
-  // global variable
   networking::Client client{argv[1], argv[2]};
+  networking::ClientWrapper wrapper;
   bool done = false;
   std::string entry;
   std::vector<Element> history;
@@ -131,8 +117,33 @@ int main(int argc, char* argv[]) {
       client.send(std::move(text));
     }
   };
+
+  
+
+  // DATA ######################################################
+  // data (varaibles) for interactive components to be
+  // passed to pages 
+  // ###########################################################
+
+  // TEST VARIABLE FOR STORING JSON RESPONSE FROM BACKEND
+  std::string test_json_response = "default";
+
+  // main rendering data variables
+  std::string state = "__uninitialized__";
+  std::string description = "Welcome to Social Gaming Platform!";
+  std::string type = "init";
+  std::vector<std::string> options_;
+  int selection_ = 0;
+  std::string prompt = "__uninitialized__";
+  std::string input = "__uninitialized__";
+  std::string buttonLabel = "__uninitialized__";
+  std::string field = "__uninitialized__";
+  std::string endpoint = "__uninitialized__";
+
+
+
   // screen view state 0: landing page 1: game play
-  int view_state = 0;
+  // int view_state = 0;
   
 
   // DATA - landing page
@@ -142,133 +153,73 @@ int main(int argc, char* argv[]) {
   };
   int tab_selected = 0;
 
-  // data - create game session page
-  std::vector<std::string> radiobox_list = {
-      "Class Quiz",
-      "Rock, Paper, Scissors",
-      "Tic Tac Toe",
-      "Tetris",
-  };
-  int radiobox_selected = 0;
-
-  // variables - join game session page
-  int pagenum = 0;
-  std::string invite_code;
-  std::string display_name;
-  // variabels - create game session page
-  int create_pagenum = 0;
-  std::string game_session_name;
-
-  // EXPERIMENTING COMPONENT GENERATION
-  std::vector<ComponentData> data_list;
-  std::vector<std::string> dummy_list {
-    "dummy1:; Lorem Ipsum is simply dummy text of the print.",
-    "dummy2: There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.",
-    "dummy3: Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.",
-  };
-  std::string dummy_string = "Just testing component generation prototype!";
-  int dummy_selected = 0;
-  // ComponentData dummy_data{dummy_list, dummy_string, dummy_selected};
-  // GameComponent dummy_game_component{constants::GameComponentType::DISPLAY, dummy_data};
-  ComponentData test_game_component_data{constants::GameComponentType::DISPLAY, dummy_list, dummy_selected};
-  data_list.push_back(test_game_component_data);
-  std::vector<std::string> item1;
-  item1.push_back("item1: Option 1");
-  item1.push_back("item1: Option 2");
-  item1.push_back("item1: Option 3");
-  std::vector<std::string> item2;
-  item1.push_back("item2: Option 1");
-  item1.push_back("item2: Option 2");
-  item1.push_back("item2: Option 3");
-  std::vector<std::vector<std::string>> block_data;
-  block_data.push_back(item1);
-  block_data.push_back(item2);
-  int selected_item1 = 0;
-  int selected_item2 = 0;
-  std::vector<int> selected_items;
-  selected_items.push_back(selected_item1);
-  selected_items.push_back(selected_item2);
-
-  std::vector<Element> text_list;
-  text_list.push_back(paragraph("Randome text1"));
-  text_list.push_back(paragraph("Randome text2"));
-  text_list.push_back(paragraph("Randome text3"));
-  text_list.push_back(paragraph("Randome text4"));
-  std::vector<Element> text_list2;
-  text_list2.push_back(paragraph("TEXT_LIST2: Randome text1"));
-  text_list2.push_back(paragraph("TEXT_LIST2: Randome text2"));
-  text_list2.push_back(paragraph("TEXT_LIST2: Randome text3"));
-  text_list2.push_back(paragraph("TEXT_LIST2: Randome text4"));
-
-  std::vector<Component> game_page_components;
-
-  // Data for Game UI MVP
-  Elements texts; // DISPLAY
-  std::vector<std::string> options; // SINGLE_SELECT
-  int selection = 0;
-
-
 
 // COMPONENTS ################################################
 // page components
-// * landing page
-//    * create game session page
-//    * join game session page
+// * tab_view,
+// * actionButton,
+// * optionSelector,
+// * inputComponent,
 // ###########################################################
-
-  // SUBPAGES/TABS
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state, client);
-  auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
-
-  // MAIN PAGES
-  auto landingPageElements = Pages::Landing(createGameSessionElements, joinGameSessionElements, client, tab_values, tab_selected, entry);
-  // auto gamePlayPageElements = Pages::GamePlay(view_state, dummy_game_component, client);
-
-  // testing page with dynamic components
-  // auto testGamePageElements = Pages::TestGamePage(data_list, client);
-  auto testGamePageElements = Pages::TestGamePage(block_data, selected_items, text_list, texts, options, selection, client);
-  game_page_components.push_back(testGamePageElements);
-
-  // auto createGameElements = Pages::CreateGame(showLanding, showJoin, showCreate, client);
-
-
-
-//components can be grouped together so that they can be passed into the render together 
- auto homeButton = Container::Vertical({
-    Container::Horizontal({
-      Button(
-        "Home", [&] { 
-          view_state = 0;
-          // reset game component data
-          texts.clear();
-          options.clear();
-          selection = 0;
-        }, ButtonStyle()
-      ), 
-    }) | flex,
-  });
-
-  // maybes allow for components to be shown conditionally  
-  // the first argument is the component the second is the boolean
-  // we will use this to render the different pages requrired for the desktop
-  // by passing the components into this as a component and then having the renderer call render on page content 
-
-  // PASSING LIST OF COMPONENTS
-  // auto pageContent = Container::Vertical(game_page_components) | flex;
-
-
-  auto pageContent = Container::Vertical({
-    landingPageElements | Maybe([&] {return view_state == 0;}),
-    // gamePlayPageElements | Maybe([&] {return view_state == 1;}),
-    testGamePageElements | Maybe([&] {return view_state == 1;}),
-  }) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
   // the component passed into here will need to be called with -> Render() again in the actual renderer 
+  auto actionButton = Button(&buttonLabel, [&] {
+    if(type == "display") {
+      client.send(endpoint + ",");
+      return;
+    }
+
+    RequestConstructor reqConstructor(endpoint);
+    if(type == "selection") {
+      reqConstructor.appendItem(field, options_[selection_]);
+    }else if(type == "input") {
+      reqConstructor.appendItem(field, input);
+    }
+
+    auto json_string = reqConstructor.ConstructRequest();
+    GetGameName getGameName = GetGameName(json_string);
+    wrapper.sendReq(endpoint, getGameName, client);
+  }) | Maybe([&] { return (endpoint != ""); });
+  auto optionSelector = Radiobox(&options_, &selection_);
+  auto inputComponent = Input(&input, "Enter here");
+  auto tab1 = Renderer([&] {
+    wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+    return vbox({
+      separator(),
+      paragraph(" "),
+    });
+  });
+  auto tab2 = Renderer([&] {
+    type = "input";
+    prompt = "Invite code:";
+    input = "";
+    buttonLabel = "Join";
+    field = "InviteCode";
+    endpoint = "ReqJoinGame";
+    return vbox({
+      separator(),
+      paragraph(" "),
+    });
+  });
+
+  auto tab_toggle = Toggle(&tab_values, &tab_selected);
+  auto tab_container = Container::Tab({
+    Container::Vertical({ tab1 }),
+    Container::Vertical({ tab2 }),
+  }, &tab_selected);
+
+
+  auto tab_view = Container::Vertical({
+    tab_toggle,
+    tab_container,
+  });
   auto main_container = Container::Vertical({
-    homeButton,
-    pageContent,
+    tab_view,
+    actionButton,
+    optionSelector,
+    inputComponent,
   });
 
 
@@ -280,26 +231,92 @@ int main(int argc, char* argv[]) {
   // the initial component that gets passed into the Renderer seems to be the only one that is interactive
   // multiple components can be grouped into containers so that multiple can be interactive 
   // ###########################################################
+
+  // wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+
+
   auto renderer = Renderer(main_container, [&] {
-    return vbox({
-      hbox({
-        homeButton->Render(),
-        filler(),
-        text("Hot Root Soup"),
-      }),
-      // filler(),
-      hbox({
-        // filler(),
-        pageContent->Render(),
-        // filler(),
-      }) | flex | borderStyled(ROUNDED),
-      // filler(),
-      hbox({
-        // history.back(),
-        paragraph(test_json_response) | color(Color::GreenLight),
-      }),
-      // history.back() | flex,
-    }) | flex;
+    if(type == "display") {
+      return vbox({
+        vbox({
+          tab_view->Render(),
+          hbox({
+            paragraph(description),
+          }),
+          hbox({
+            actionButton->Render(),
+          }),
+        }) | flex | borderStyled(ROUNDED),
+        vbox({
+          paragraph(test_json_response) | color(Color::GreenLight),
+        }),
+      }) | flex;
+    }else if(type == "selection") {
+      return vbox({
+        vbox({
+          tab_view->Render(),
+          hbox({
+            paragraph(prompt),
+          }),
+          hbox({
+            optionSelector->Render(),
+          }),
+          hbox({
+            actionButton->Render(),
+          }),
+          hbox({
+            paragraph(endpoint + ' ' + field),
+          }),
+        }) | flex | borderStyled(ROUNDED),
+        vbox({
+          paragraph(test_json_response) | color(Color::GreenLight),
+        }),
+      }) | flex;
+    }else if(type == "input") {
+      return vbox({
+        vbox({
+          tab_view->Render(),
+          hbox({
+            paragraph(prompt),
+          }),
+          hbox({
+            inputComponent->Render(),
+          }),
+          hbox({
+            actionButton->Render(),
+          }),
+          hbox({
+            paragraph(endpoint + ' ' + field),
+          }),
+        }) | flex | borderStyled(ROUNDED),
+        vbox({
+          paragraph(test_json_response) | color(Color::GreenLight),
+        }),
+      }) | flex;
+    }else if(type == "init") {
+      return vbox({
+        vbox({
+          tab_view->Render(),
+          hbox({
+            paragraph(description),
+          }),
+        }) | flex | borderStyled(ROUNDED),
+        vbox({
+          paragraph(test_json_response) | color(Color::GreenLight),
+        }),
+      }) | flex;
+      }else {
+      return vbox({
+          vbox({
+            hbox({
+              paragraph("Something went wrong. Please refresh your browser."),
+            }),
+          }) | flex | borderStyled(ROUNDED),
+          vbox({
+            paragraph(test_json_response) | color(Color::GreenLight),
+          }),
+        }) | flex;
+    }
   });
 
   auto screen = ScreenInteractive::Fullscreen();
@@ -336,16 +353,8 @@ int main(int argc, char* argv[]) {
       history.push_back(paragraphAlignLeft(response));
 
       test_json_response = response;
-      // TODO: implement response handler (if response for reqgamelist then parse list of games and store in radiobox_list etc.)
-      // TODO: determine type of response (reuse ReqType?)
-      std::string reqType = parseServerResponseType(response);
 
-      // handle based on reponse type
-      if(reqType == "ReqGetGamesList") {
-          radiobox_list = parseServerResponseGameList(response, text_list);
-          options = parseServerResponseGameList(response, texts);
-      }
-
+      handleServerResponse(response, state, description, type, options_, selection_, prompt, input, buttonLabel, field, endpoint); 
       screen.RequestAnimationFrame();
     }
 

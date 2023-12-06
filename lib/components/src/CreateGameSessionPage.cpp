@@ -41,7 +41,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      // pages
      auto page1 = Container::Vertical({
           title1,
-          game_selector,
+          // game_selector,
           Renderer([] {
                return filler();
             }),
@@ -49,24 +49,17 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             Renderer([] {
                return filler();
             }),
-            Button("Next", [&]{
-               // TODO: get list of fields to be configured
-               // std::string req_game_config_list = radiobox_list[radiobox_selected];
-               // wrapper.sendReq(constants::ReqType::, )
+          //   Button("Next", [&]{
+          //      RequestConstructor reqConstructor("ReqGetGame");
+          //      reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+          //      //reqConstructor.appendItem("MinPlayers", "3");
+          //      //reqConstructor.appendItem("MaxPlayers", "6");
+          //      auto json_string = reqConstructor.ConstructRequest();
+          //      GetGameName getGameName = GetGameName(json_string);
+          //      wrapper.sendReq(constants::ReqType::GETGAME, getGameName, client);
 
-               // testing sending request from component
-               RequestConstructor reqConstructor("ReqGetGame");
-               reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
-               //reqConstructor.appendItem("MinPlayers", "3");
-               //reqConstructor.appendItem("MaxPlayers", "6");
-               auto json_string = reqConstructor.ConstructRequest();
-               GetGameName getGameName = GetGameName(json_string);
-               GetGame getGame = GetGame("Hi");
-               wrapper.sendReq(constants::ReqType::GETGAME, getGameName, client);
-
-
-               create_pagenum++;
-            }),
+          //      create_pagenum++;
+          //   }),
         }) | flex,
      });
      auto page2 = Container::Vertical({
