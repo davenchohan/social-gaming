@@ -48,6 +48,7 @@ target_link_libraries(client-ftxui
   PRIVATE components
   PRIVATE constants
   PRIVATE backendcomponents
+  PRIVATE generators
 )
 
 install(TARGETS client-ftxui

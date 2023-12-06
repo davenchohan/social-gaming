@@ -1,7 +1,7 @@
 #include "AudienceMember.h"
 
 // Constructor
-AudienceMember::AudienceMember(const std::string& name, int userId) : User(name, userId) {
+AudienceMember::AudienceMember(const std::string& name, int userId) : User(name, userId), audienceState(Inactive) {
 
 }
 

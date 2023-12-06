@@ -9,6 +9,7 @@
 #include "ParserLibrary.h"
 #include "Constants.h"
 #include "GameComponent.h"
+#include "RandomIdGenerator.h"
 
 #include "LandingPage.h"
 #include "CreateGamePage.h"
@@ -129,21 +130,24 @@ int main(int argc, char* argv[]) {
   std::string test_json_response = "default";
 
   // main rendering data variables
-  std::string state = "__uninitialized__";
+  std::string state = "success";
   std::string description = "Welcome to Social Gaming Platform!";
   std::string type = "init";
   std::vector<std::string> options_;
   int selection_ = 0;
-  std::string prompt = "__uninitialized__";
-  std::string input = "__uninitialized__";
-  std::string buttonLabel = "__uninitialized__";
-  std::string field = "__uninitialized__";
-  std::string endpoint = "__uninitialized__";
+  std::string prompt = "Enter your Username";
+  std::string input = "";
+  std::string buttonLabel = "Confirm";
+  std::string field = "misc";
+  std::string endpoint = "ReqGetGamesList";
 
 
 
   // screen view state 0: landing page 1: game play
   // int view_state = 0;
+
+  //User name for the client
+  std::string userName;
   
 
   // DATA - landing page
@@ -172,6 +176,20 @@ int main(int argc, char* argv[]) {
     }
 
     RequestConstructor reqConstructor(endpoint);
+
+    if(type == "init") {
+      if (input.empty()) {
+        int randomID = RandomIdGenerator::generateUniqueId();
+        input = "Anon_Player";
+        input.append(std::to_string(randomID));
+      }
+      reqConstructor.appendItem(field, input);
+      auto json_string = reqConstructor.ConstructRequest();
+      GetGamesList getGamesList = GetGamesList(json_string);
+      wrapper.sendReq(endpoint, getGamesList, client);
+      return;
+    }
+
     if(type == "selection") {
       reqConstructor.appendItem(field, options_[selection_]);
     }else if(type == "input") {
@@ -182,10 +200,11 @@ int main(int argc, char* argv[]) {
     GetGameName getGameName = GetGameName(json_string);
     wrapper.sendReq(endpoint, getGameName, client);
   }) | Maybe([&] { return (endpoint != ""); });
+  
   auto optionSelector = Radiobox(&options_, &selection_);
   auto inputComponent = Input(&input, "Enter here");
   auto tab1 = Renderer([&] {
-    wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+    // wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
     return vbox({
       separator(),
       paragraph(" "),
@@ -294,17 +313,26 @@ int main(int argc, char* argv[]) {
         }),
       }) | flex;
     }else if(type == "init") {
-      return vbox({
-        vbox({
-          tab_view->Render(),
-          hbox({
-            paragraph(description),
+        return vbox({
+          vbox({
+            tab_view->Render(),
+            hbox({
+              paragraph(prompt),
+            }),
+            hbox({
+              inputComponent->Render(),
+            }),
+            hbox({
+              actionButton->Render(),
+            }),
+            hbox({
+              paragraph(endpoint + ' ' + field),
+            }),
+          }) | flex | borderStyled(ROUNDED),
+          vbox({
+            paragraph(test_json_response) | color(Color::GreenLight),
           }),
-        }) | flex | borderStyled(ROUNDED),
-        vbox({
-          paragraph(test_json_response) | color(Color::GreenLight),
-        }),
-      }) | flex;
+        }) | flex;
       }else {
       return vbox({
           vbox({

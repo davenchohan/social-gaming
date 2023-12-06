@@ -19,9 +19,9 @@ namespace Pages{
 Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client){
 
      networking::ClientWrapper wrapper;
-     wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+     //wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
 
-     const int max_pagenum = 1;// starting 0
+     //const int max_pagenum = 1;// starting 0
      auto game_selector = Radiobox(&radiobox_list, &radiobox_selected);
 
      auto title1 = Renderer([] {
@@ -79,10 +79,18 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
                return filler();
             }),
             Button("Create", [&]{
-               view_state = 1;
+               RequestConstructor reqConstructor("ReqCreateGame");
+               reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+               //reqConstructor.appendItem("MinPlayers", "3");
+               //reqConstructor.appendItem("MaxPlayers", "6");
+               auto json_string = reqConstructor.ConstructRequest();
+               //CreateGame createGame = CreateGame();
+               //wrapper.sendReq(constants::ReqType::CREATEGAME, getGameName, client);
+               view_state = 3;
             }),// transfer page to game play page
         }) | flex,
      });
+     
 
      auto page = Container::Vertical({
           page1 | Maybe([&] {return create_pagenum == 0;}),

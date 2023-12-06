@@ -9,6 +9,7 @@ CPMAddPackage(
 add_library(backendcomponents
     src/ParserLibrary.cpp
     src/ResponseQueue.cpp
+    src/ExecutionQueue.cpp
 )
 
 target_include_directories(backendcomponents
@@ -22,6 +23,7 @@ target_include_directories(backendcomponents
 target_link_libraries(backendcomponents
     nlohmann_json::nlohmann_json
     backendClasses
+    executionnodes
 )
 
 set_target_properties(backendcomponents
