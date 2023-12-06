@@ -8,7 +8,7 @@ std::string JoinGame::toJSON() {
 }
 
 CreateGame::CreateGame(const std::string& userID, const std::string& gameID, const std::string& config)
-    : userID(userID), gameID(gameID), config(config) {}
+    : gameID(gameID), config(config), userID(userID) {}
 
 std::string CreateGame::toJSON() {
     return "{\"UserID\":\"" + userID + "\",\"GameID\":\"" + gameID + "\",\"Config\":\"" + config + "\"}";
@@ -26,4 +26,11 @@ GetGameName::GetGameName(const std::string& gameName) : gameName(gameName) {}
 
 std::string GetGameName::toJSON() {
     return gameName;
+}
+
+// Implementation to pass the username in
+GetGamesList::GetGamesList(const std::string& userName) : userName(userName) {}
+
+std::string GetGamesList::toJSON() {
+    return userName;
 }
