@@ -13,6 +13,7 @@ using Json = nlohmann::json;
 #include "Game.h"
 
 
+
 // Helper function to convert general Map to vector (discards keys)
 template <class M, class V>
 void MapToVec(const std::map<M,V>& map, std::vector<V>& vector){
@@ -93,6 +94,15 @@ public:
     RequestConstructor(){}
     RequestConstructor(RequestInfo& );
     RequestConstructor(std::string);
+    RequestConstructor(
+                                std::string state, 
+                                std::string description, 
+                                std::string type, 
+                                Json options, 
+                                std::string prompt, 
+                                std::string button, 
+                                std::string field, 
+                                std::string endpoint);
     // This is dumb, have to implement template function in .h file
     template <class T1> void appendItem(const std::string key, const T1 val){ subject[key] = val;}
     // Override appendItem function for custom behaviour when appending a list of players into request
