@@ -536,6 +536,19 @@ void rulesHandler(ActiveGame& active, ExecutionTree& tree ,ts::Node node ){
 
 
 int main() {
+
+    SimpleExpression testOne(SimpleType::NUMBER, "5");
+    SimpleExpression testTwo(SimpleType::NUMBER, "5");
+    SimpleExpression testThree(SimpleType::STRING, "not a 5");
+    SimpleExpression testFour(SimpleType::BOOLEAN, "true");
+
+    int resultOne = testOne.evaluate<SimpleType::NUMBER>();
+    std::string resultTwo = testThree.evaluate<SimpleType::STRING>();
+
+    std::cout << resultOne << "\n";
+    std::cout << resultTwo << "\n";
+
+
     Player mockPlayer = {"test",1};
     Game game {1};
     std::cout << "start"<<"\n";
