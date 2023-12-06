@@ -8,9 +8,9 @@ add_library(components
     src/MobileLandingPage.cpp
     src/CreateFromExistingPage.cpp
     src/CreateGameSessionPage.cpp
-    src/GameComponent.cpp #added
-    # src/GamePlayPage.cpp #added
-    src/TestGameComponent.cpp #added
+    src/GameComponent.cpp
+    src/TestGameComponent.cpp
+    src/MainPageContent.cpp
     src/NamePage.cpp
     src/LoadingPage.cpp
 )
