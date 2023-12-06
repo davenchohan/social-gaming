@@ -20,7 +20,7 @@ Component JoinGame(int &pagenum, std::string &code, std::string &name, networkin
         return paragraph("Invite Code");
     });
     auto title2 = Renderer([] {
-        return paragraph("Display Name");
+        return paragraph("Attempting to Join Game...");
     });
     auto page1 = Container::Vertical({
         title1,
@@ -45,7 +45,7 @@ Component JoinGame(int &pagenum, std::string &code, std::string &name, networkin
     });
     auto page2 = Container::Vertical({
         title2,
-        Input(&name, "Enter a displayed name."),
+        //Input(&name, "Enter a displayed name."),
         Renderer([] {
                return filler();
             }),

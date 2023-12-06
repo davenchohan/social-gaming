@@ -12,6 +12,8 @@
 
 #include "LandingPage.h"
 #include "CreateGamePage.h"
+#include "NamePage.h"
+#include "LoadingPage.h"
 #include "JoinGamePage.h"
 #include "MainPageContent.h"
 #include "CreateGameSessionPage.h"
@@ -49,7 +51,8 @@ void handleServerResponse(
                     std::string& input, 
                     std::string& button, 
                     std::string& field, 
-                    std::string& endpoint) {
+                    std::string& endpoint,
+                    int& view_state) {
   // decompose server resonse
   RequestParser parser{response};
 
@@ -68,6 +71,7 @@ void handleServerResponse(
 
   if(type == "selection") {
     options = jsonObj["options"].template get<std::vector<std::string>>();
+    view_state = 2;
   }
 }
 
@@ -143,7 +147,10 @@ int main(int argc, char* argv[]) {
 
 
   // screen view state 0: landing page 1: game play
-  // int view_state = 0;
+  int view_state = 0;
+
+  //User name for the client
+  std::string userName;
   
 
   // DATA - landing page
@@ -161,6 +168,20 @@ int main(int argc, char* argv[]) {
 // * optionSelector,
 // * inputComponent,
 // ###########################################################
+
+  // SUBPAGES/TABS
+  int create_pagenum = 0;
+  auto namePageElements = Pages::namePage(create_pagenum, view_state, client, userName);
+
+  auto loadingPageElements = Pages::loadingPage(create_pagenum, view_state, client);
+
+  // maybes allow for components to be shown conditionally  
+  // the first argument is the component the second is the boolean
+  // we will use this to render the different pages requrired for the desktop
+  // by passing the components into this as a component and then having the renderer call render on page content 
+
+  // PASSING LIST OF COMPONENTS
+  // auto pageContent = Container::Vertical(game_page_components) | flex;
 
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
@@ -234,8 +255,7 @@ int main(int argc, char* argv[]) {
 
   // wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
 
-
-  auto renderer = Renderer(main_container, [&] {
+  auto renderer2 = Renderer(main_container, [&] {
     if(type == "display") {
       return vbox({
         vbox({
@@ -319,6 +339,40 @@ int main(int argc, char* argv[]) {
     }
   });
 
+  auto mainPage = Container::Vertical({
+        Renderer([&] {
+              return renderer2;
+          }),
+    });
+
+  auto pageContent = Container::Vertical({
+    mainPage | Maybe([&] {return view_state == 2;}),
+    namePageElements | Maybe([&] {return view_state == 0;}),
+    loadingPageElements | Maybe([&] {return view_state == 1;}),
+  }) | flex;
+
+  auto main_container2 = Container::Vertical({
+    pageContent,
+  });
+
+  auto renderer = Renderer(main_container2, [&] {
+    return vbox({
+      // filler(),
+      hbox({
+        // filler(),
+        pageContent->Render(),
+        // filler(),
+      }) | flex | borderStyled(ROUNDED),
+      // filler(),
+      hbox({
+        // history.back(),
+        paragraph(test_json_response) | color(Color::GreenLight),
+      }),
+      // history.back() | flex,
+    }) | flex;
+  });
+
+
   auto screen = ScreenInteractive::Fullscreen();
 
 
@@ -354,7 +408,7 @@ int main(int argc, char* argv[]) {
 
       test_json_response = response;
 
-      handleServerResponse(response, state, description, type, options_, selection_, prompt, input, buttonLabel, field, endpoint); 
+      handleServerResponse(response, state, description, type, options_, selection_, prompt, input, buttonLabel, field, endpoint, view_state); 
       screen.RequestAnimationFrame();
     }
 

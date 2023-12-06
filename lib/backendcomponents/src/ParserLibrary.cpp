@@ -13,6 +13,7 @@ RequestConstructor::RequestConstructor(RequestInfo &info){
     appendItem("GameConfig", info.gameConfig);
     appendItem("Players", info.players);
     appendItem("misc", info.misc);
+    appendItem("ConnID", info.connID);
 }
 
 // Sets json item to blank classes, as returnReqInfoFromSubject can be called anytime
@@ -25,6 +26,7 @@ RequestConstructor::RequestConstructor(std::string request){
     subject["GameConfig"] = blankJson;
     subject["Players"] = blankPlayers;
     subject["misc"] = blankJson;
+    subject["ConnID"] = "";
 }
 
 RequestConstructor::RequestConstructor(
@@ -56,6 +58,7 @@ RequestConstructor::returnReqInfo(){
     subject.at("Request").get_to(temp.request);
     subject.at("GameName").get_to(temp.gameName);
     subject.at("GameID").get_to(temp.gameID);
+    subject.at("ConnID").get_to(temp.connID);
     temp.gameConfig = subject.at("GameConfig");
     auto players_arr = subject.at("Players");
     converter.convertJsonToPlayersArr(players_arr, temp.players);
@@ -94,6 +97,7 @@ RequestParser::getRequestStruct(){
     subject.at("Request").get_to(retStruct.request);
     subject.at("GameName").get_to(retStruct.gameName);
     subject.at("GameID").get_to(retStruct.gameID);
+    subject.at("ConnID").get_to(retStruct.connID);
     retStruct.gameConfig = subject.at("GameConfig");
     converter.convertJsonToPlayersArr(subject.at("Players"), retStruct.players);
     retStruct.misc = subject.at("misc");
