@@ -20,3 +20,7 @@ bool GameConstant::operator<(const GameConstant& other) const {
     return this->GetConstantValue() < other.GetConstantValue();
 }
 
+std::string GameConstant::GetName() const {
+    return constantName;
+}
+

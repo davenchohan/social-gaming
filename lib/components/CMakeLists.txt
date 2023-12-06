@@ -8,9 +8,11 @@ add_library(components
     src/MobileLandingPage.cpp
     src/CreateFromExistingPage.cpp
     src/CreateGameSessionPage.cpp
-    src/GameComponent.cpp #added
-    # src/GamePlayPage.cpp #added
-    src/TestGameComponent.cpp #added
+    src/GameComponent.cpp
+    src/TestGameComponent.cpp
+    src/MainPageContent.cpp
+    src/NamePage.cpp
+    src/LoadingPage.cpp
 )
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
@@ -26,7 +28,10 @@ if(NOT ftxui_POPULATED)
 endif()
 
 target_link_libraries(components
+  PRIVATE backendClasses
+  PRIVATE backendcomponents
   PRIVATE networking
+  PRIVATE generators
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component

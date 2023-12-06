@@ -13,7 +13,8 @@ class ClientWrapper
 private:
     
 public:
-    void sendReq(constants::ReqType reqtype,  DataClass& body,Client& client )  ;
+    void sendReq(constants::ReqType reqtype,  DataClass& body,Client& client);
+    void sendReq(std::string reqType, DataClass& body, Client& client);
     void sendNoBody(constants::ReqType reqType, Client& client);
 };
 

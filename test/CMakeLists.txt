@@ -5,6 +5,20 @@ add_executable(runAllTests
     dummy.cpp
     CustomExceptionsTests.cpp
     ParserLibraryTests.cpp
+    GameSessionHandlerTests.cpp
+    GamesDatabaseTests.cpp
+    GameClassTests.cpp
+    GameListTests.cpp
+    ResponseQueueTests.cpp
+    ExecutionNodeQueueTests.cpp
+    RandomIdGeneratorTests.cpp
+    RoomCodeGeneratorTests.cpp
+    AudienceMemberTests.cpp
+    GameConstantTests.cpp
+    GameSessionListTests.cpp
+    GameVariableTests.cpp
+    PlayerTests.cpp
+    UserTests.cpp
 )
 
 target_link_libraries(runAllTests
@@ -13,6 +27,8 @@ target_link_libraries(runAllTests
     networking
     exceptions
     backendcomponents
+    backendClasses
+    generators
 )
 
 set_target_properties(runAllTests

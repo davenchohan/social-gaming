@@ -12,15 +12,16 @@
 #include "CreateGameSessionPage.h"
 #include "ClientWrapper.h"
 #include "Constants.h"
+#include "ParserLibrary.h"
 
 using namespace ftxui;
 namespace Pages{
 Component CreateGameSession(int &create_pagenum, std::string &session_name, std::vector<std::string> &radiobox_list, int &radiobox_selected, int &view_state, networking::Client &client){
 
      networking::ClientWrapper wrapper;
-     wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+     //wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
 
-     const int max_pagenum = 1;// starting 0
+     //const int max_pagenum = 1;// starting 0
      auto game_selector = Radiobox(&radiobox_list, &radiobox_selected);
 
      auto title1 = Renderer([] {
@@ -40,7 +41,7 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
      // pages
      auto page1 = Container::Vertical({
           title1,
-          game_selector,
+          // game_selector,
           Renderer([] {
                return filler();
             }),
@@ -48,18 +49,17 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             Renderer([] {
                return filler();
             }),
-            Button("Next", [&]{
-               // TODO: get list of fields to be configured
-               // std::string req_game_config_list = radiobox_list[radiobox_selected];
-               // wrapper.sendReq(constants::ReqType::, )
+          //   Button("Next", [&]{
+          //      RequestConstructor reqConstructor("ReqGetGame");
+          //      reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+          //      //reqConstructor.appendItem("MinPlayers", "3");
+          //      //reqConstructor.appendItem("MaxPlayers", "6");
+          //      auto json_string = reqConstructor.ConstructRequest();
+          //      GetGameName getGameName = GetGameName(json_string);
+          //      wrapper.sendReq(constants::ReqType::GETGAME, getGameName, client);
 
-               // testing sending request from component
-               GetGame getGame = GetGame("252434");
-               wrapper.sendReq(constants::ReqType::DEMOGETGAME, getGame, client);
-
-
-               create_pagenum++;
-            }),
+          //      create_pagenum++;
+          //   }),
         }) | flex,
      });
      auto page2 = Container::Vertical({
@@ -72,17 +72,25 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             }),
           Container::Horizontal({
             Button("Back", [&]{
-               wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
+               wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
                create_pagenum--;
             }) | Maybe([&] {return create_pagenum > 0;}),
             Renderer([] {
                return filler();
             }),
             Button("Create", [&]{
-               view_state = 1;
+               RequestConstructor reqConstructor("ReqCreateGame");
+               reqConstructor.appendItem("GameName", "Rock,Paper,Scissors");
+               //reqConstructor.appendItem("MinPlayers", "3");
+               //reqConstructor.appendItem("MaxPlayers", "6");
+               auto json_string = reqConstructor.ConstructRequest();
+               //CreateGame createGame = CreateGame();
+               //wrapper.sendReq(constants::ReqType::CREATEGAME, getGameName, client);
+               view_state = 3;
             }),// transfer page to game play page
         }) | flex,
      });
+     
 
      auto page = Container::Vertical({
           page1 | Maybe([&] {return create_pagenum == 0;}),
