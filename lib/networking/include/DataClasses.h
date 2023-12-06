@@ -36,3 +36,14 @@ public:
     GetGame(const std::string& gameID);
     std::string toJSON() override;
 };
+ 
+class GameConfig : public DataClass {
+  private:
+    std::string gameConfig;
+
+  public:
+    std::string toJSON() override;
+    GameConfig(std::string str){
+      gameConfig = str;
+    }
+};

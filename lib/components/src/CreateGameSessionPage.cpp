@@ -89,7 +89,8 @@ Component CreateGameSession(int &create_pagenum, std::string &session_name, std:
             }),
             Button("Create", [&]{
                view_state = 1;
-               wrapper.sendReq(constants::ReqType::CREATEGAME, input_num_rounds, client);
+               //need to send input here
+               wrapper.sendBody(constants::ReqType::CREATEGAME, data.toJson(), client);
             }),// transfer page to game play page
         }) | flex,
      });

@@ -29,7 +29,7 @@ Component GameConfig(networking::Client &client, std::string &input_num_rounds){
   networking::ClientWrapper wrapper;
   //wrapper.sendNoBody(constants::ReqType::DEMOGETGAMES, client);
 
-  InputData data = InputData();  
+  //InputData data = InputData();  
   
 
 
@@ -38,17 +38,17 @@ Component GameConfig(networking::Client &client, std::string &input_num_rounds){
   
   
  
-  Component num_rounds = Input(&input_num_rounds, "Number of Rounds");
+  //Component num_rounds = Input(&input_num_rounds, "Number of Rounds");
   
 
-  data.addInputField("num_rounds", input_num_rounds);
+  //data.addInputField("num_rounds", input_num_rounds);
   
 
   
 
 
   auto configPage = Container::Vertical({
-    num_rounds,
+    //num_rounds,
     Renderer([] {
       return filler();
     }),

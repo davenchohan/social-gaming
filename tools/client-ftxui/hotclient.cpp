@@ -228,8 +228,8 @@ int main(int argc, char* argv[]) {
 // ###########################################################
 
   // SUBPAGES/TABS
-  auto gameConfig = Pages::GameConfig(client, input_num_rounds);
-  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state,gameConfig, client);
+  //auto gameConfig = Pages::GameConfig(client, input_num_rounds);
+  auto createGameSessionElements = Pages::CreateGameSession(create_pagenum, game_session_name, radiobox_list, radiobox_selected, view_state, input_num_rounds, client);
   auto joinGameSessionElements = Pages::JoinGame(pagenum, invite_code, display_name, client);
 
   // MAIN PAGES
