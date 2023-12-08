@@ -3,7 +3,7 @@ include (cmake/CPM.cmake)
 CPMAddPackage(
     NAME cpp-tree-sitter
     GIT_REPOSITORY https://github.com/nsumner/cpp-tree-sitter.git
-    GIT_TAG v0.0.1
+    GIT_TAG v0.0.2
 )
 
 CPMAddPackage(
@@ -21,6 +21,7 @@ add_grammar_from_repo(tree-sitter-socialgaming
     https://github.com/nsumner/tree-sitter-socialgaming.git
     0.0.1
 )
+
 
 add_executable(parser_test)
 target_sources(parser_test
@@ -45,6 +46,33 @@ set_target_properties(parser_test
 
 
 target_include_directories(parser_test
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+
+
+add_executable(variable_parser)
+target_sources(variable_parser
+    PRIVATE
+        variable_parser.cpp
+)
+
+target_link_libraries(variable_parser
+    tree-sitter-json
+    tree-sitter-socialgaming
+    cpp-tree-sitter
+)
+
+set_target_properties(variable_parser
+    PROPERTIES CXX_STANDARD 17
+)
+
+
+target_include_directories(variable_parser
   PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
