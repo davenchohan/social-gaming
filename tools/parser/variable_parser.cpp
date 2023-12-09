@@ -9,6 +9,8 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <any>
+
 
 extern "C" {
 TSLanguage* tree_sitter_socialgaming();
@@ -23,6 +25,39 @@ static void printChildren(const ts::Node& node) {
         } while (cursor.gotoNextSibling());
     }
 }
+
+struct compareValue {
+    bool operator()(const int& val1, const int& val2) {
+        return val1 == val2;
+    }
+    bool operator()(const std::string& val1, const std::string& val2) {
+        return val1 == val2;
+    }    
+    bool operator()(const std::pair<int, int>& val1, const std::pair<int, int>& val2) {
+        return val1.first == val2.first && val1.second == val2.second;
+    }
+    bool operator()(const bool& val1, const bool& val2) {
+        return val1 == val2;
+    }
+    bool operator()(const std::vector<Value>& val1, const std::vector<Value>& val2) {
+        if(val1.size() != val2.size()){
+            return false;
+        }
+        // to do 
+        return true;
+    }
+    bool operator()(const std::map<std::string, Value>& val1, const std::map<std::string, Value>& val2) {
+        if(val1.size() != val2.size()){
+            return false;
+        }
+        // to do
+        return true;
+    }
+     template <typename T, typename U> 
+     bool operator()(T const &val1, U const &val2) {
+        return false; 
+    } 
+};
 
 struct printValue {
     int depth = 0;
@@ -157,7 +192,7 @@ int main() {
     ts::Language language = tree_sitter_socialgaming();
     ts::Parser parser{language};
 
-    std::ifstream t("./lib/gameSpecs/rock_paper_scissors.txt");
+    std::ifstream t("./lib/gameSpecs/test_spec.txt");
     if (!t.is_open()) {
         throw("[ERROR] incorrect filepath");
     }
@@ -170,9 +205,14 @@ int main() {
 
     ExpressionMap map{source};
     map.sourceToMap(root);
-    std::visit(printValue(), map.find("weapons2").value);
-    std::visit(printValue(), map.find("something4").value);
-    std::visit(printValue(), map.find("wins").value);
-    std::visit(printValue(), map.find("winners").value);
-    // Value value{tree.getRootNode().getChildByFieldName("configuration").getChildByFieldName("name"), source, map};
+    std::visit(printValue(), map.find("weapons").value);
+    std::visit(printValue(), map.find("a").value);
+    std::visit(printValue(), map.find("c").value);
+    std::visit(printValue(), map.find("e").value);
+    std::cout << std::visit(compareValue(), map.find("a").value, map.find("b").value) << std::endl;
+    std::cout << std::visit(compareValue(), map.find("a").value, map.find("c").value) << std::endl;
+    std::cout << std::visit(compareValue(), map.find("d").value, map.find("e").value) << std::endl;
+    std::cout << std::visit(compareValue(), map.find("d").value, map.find("f").value) << std::endl;
+    std::cout << std::visit(compareValue(), map.find("g").value, map.find("h").value) << std::endl;
+    std::cout << std::visit(compareValue(), map.find("g").value, map.find("i").value) << std::endl;
 }

@@ -81,6 +81,6 @@ target_include_directories(variable_parser
 )
 
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gameSpecs")
 set(DESTINATION_DIR "${CMAKE_BINARY_DIR}/lib")
 file(COPY ${SOURCE_DIR} DESTINATION ${DESTINATION_DIR})
