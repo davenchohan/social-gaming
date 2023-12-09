@@ -6,6 +6,8 @@
 #include "Tree.h"
 #include "ExpressNodes.h"
 #include <iostream>
+#include <stdexcept>
+
 ExpressionNode::ExpressionNode(){
     // contains a boolean expression
 }
