@@ -32,56 +32,132 @@ using Json = nlohmann::json;
 
 
 
-
-
-
-
-// FUNCTIONS #####################################################
-// ###########################################################
-// placeholder (until parser library is implemented)
-void handleServerResponse(
-                    const std::string& response, 
-                    std::string& state, 
-                    std::string& description, 
-                    std::string& type, 
-                    std::vector<std::string>& options, 
-                    int& selection,
-                    std::string& prompt, 
-                    std::string& input, 
-                    std::string& button, 
-                    std::string& field, 
-                    std::string& endpoint) {
-  // decompose server resonse
-  RequestParser parser{response};
-
-  Json jsonObj = Json::parse(response);
-  state = jsonObj["state"].template get<std::string>();
-  button = jsonObj["button"].template get<std::string>();
-  description = jsonObj["description"].template get<std::string>();
-  type = jsonObj["type"].template get<std::string>();
-  prompt = jsonObj["prompt"].template get<std::string>();
-  endpoint = jsonObj["endpoint"].template get<std::string>();
-  field = jsonObj["field"].template get<std::string>();
-
-  input = "";
-  options.clear();
-  selection = 0;
-
-  if(type == "selection") {
-    options = jsonObj["options"].template get<std::vector<std::string>>();
+class ConfigData {
+  public:
+  ConfigData(): username("") {}
+  void setUsername(std::string& usrnm) {
+    username = usrnm;
   }
-}
+  std::string& getUsername() {
+    return username;
+  }
+  private:
+  std::string username;
+};
+
+class DisplayData {
+  public:
+  DisplayData() = delete;
+  DisplayData(
+      std::string init_state,
+      std::string init_description,
+      std::string init_type,
+      std::vector<std::string> init_options,
+      std::string init_prompt,
+      std::string init_button,
+      std::string init_field,
+      std::string init_endpoint) : 
+      state(init_state), 
+      description(init_description), 
+      type(init_type),
+      options(init_options),
+      prompt(init_prompt),
+      input(""),
+      button(init_button),
+      field(init_field),
+      endpoint(init_endpoint) {}
+  void updateDisplayData(const std::string& response) {
+    Json jsonRes = Json::parse(response);
+    state       = jsonRes["state"].template get<std::string>();
+    button      = jsonRes["button"].template get<std::string>();
+    description = jsonRes["description"].template get<std::string>();
+    type        = jsonRes["type"].template get<std::string>();
+    prompt      = jsonRes["prompt"].template get<std::string>();
+    endpoint    = jsonRes["endpoint"].template get<std::string>();
+    field       = jsonRes["field"].template get<std::string>();
+
+    input = "";
+    options.clear();
+    selection = 0;
+
+    if(type == "selection") {
+      options = jsonRes["options"].template get<std::vector<std::string>>();
+    }
+  }
+
+  std::string state;
+  std::string description;
+  std::string type;
+  std::vector<std::string> options;
+  int selection = 0;
+  std::string prompt;
+  std::string input;
+  std::string button;
+  std::string field;
+  std::string endpoint;
+};
+
+class ViewManager {
+  public:
+  ViewManager() = default;
+  ViewManager(ConfigData&& config, DisplayData&& disp, std::string_view address, std::string_view port): config_data(config), disp_data(disp), client(address, port) {}
+  void handleServerResponse(const std::string& response) {
+    disp_data.updateDisplayData(response);
+  }
+  void sendRequest(RequestConstructor reqConstructor) {
+    if(disp_data.state == "init") {
+      initRequest(reqConstructor);
+      return;
+    }
+    
+    if(disp_data.type == "display") {
+      client.send(disp_data.endpoint + ",");
+    }else if(disp_data.type == "selection") {
+      reqConstructor.appendItem(disp_data.field, disp_data.options[disp_data.selection]);
+    }else if(disp_data.type == "input") {
+      reqConstructor.appendItem(disp_data.field, disp_data.input);
+    }
+
+    auto json_string = reqConstructor.ConstructRequest();
+    GetGameName getGameName = GetGameName(json_string);
+    wrapper.sendReq(disp_data.endpoint, getGameName, client);
+  }
+  void initRequest(RequestConstructor reqConstructor) {
+    if (disp_data.input.empty()) {
+      int randomID = RandomIdGenerator::generateUniqueId();
+      disp_data.input = "Anon_Player";
+      disp_data.input.append(std::to_string(randomID));
+    }
+
+    reqConstructor.appendItem(disp_data.field, disp_data.input);
+    auto json_string = reqConstructor.ConstructRequest();
+    GetGamesList getGamesList = GetGamesList(json_string);
+    wrapper.sendReq(disp_data.endpoint, getGamesList, client);
+
+    config_data.setUsername(disp_data.input);
+    disp_data.input = "";
+  }
+
+  void setJoinTabData() {
+    disp_data.state = "success";
+    disp_data.type = "input";
+    disp_data.input = "";
+    disp_data.prompt = "Invite code: ";
+    disp_data.button = "Join";
+    disp_data.field = "InviteCode";
+    disp_data.endpoint = "ReqJoinGame";
+  }
+
+  ConfigData config_data;
+  DisplayData disp_data;
+  networking::Client client;
+  networking::ClientWrapper wrapper;
+};
 
 
 // STYLE #####################################################
-// styling can be defined outside of component definitions
 // -----------------------------------------------------------
-// This is a helper function to create a button with a custom style.
-// The style is defined by a lambda function that takes an EntryState and
-// returns an Element.
-// We are using `center` to center the text inside the button, then `border` to
-// add a border around the button, and finally `flex` to make the button fill
-// the available space.
+// * Button
 // ###########################################################
 ButtonOption ButtonStyle() {
   auto option = ButtonOption::Animated();
@@ -105,6 +181,11 @@ int main(int argc, char* argv[]) {
   }
 
 
+  ConfigData config{};
+  DisplayData disp{"init", "", "", {}, "Username: ", "Confirm", "misc", "ReqGetGamesList"};
+  ViewManager viewMan{std::move(config), std::move(disp), argv[1], argv[2]};
+
+
   networking::Client client{argv[1], argv[2]};
   networking::ClientWrapper wrapper;
   bool done = false;
@@ -126,31 +207,8 @@ int main(int argc, char* argv[]) {
   // passed to pages 
   // ###########################################################
 
-  // TEST VARIABLE FOR STORING JSON RESPONSE FROM BACKEND
-  std::string test_json_response = "default";
+  std::string test_json_response = "none";
 
-  // main rendering data variables
-  std::string state = "success";
-  std::string description = "Welcome to Social Gaming Platform!";
-  std::string type = "init";
-  std::vector<std::string> options_;
-  int selection_ = 0;
-  std::string prompt = "Enter your Username";
-  std::string input = "";
-  std::string buttonLabel = "Confirm";
-  std::string field = "misc";
-  std::string endpoint = "ReqGetGamesList";
-
-
-
-  // screen view state 0: landing page 1: game play
-  // int view_state = 0;
-
-  //User name for the client
-  std::string userName;
-  
-
-  // DATA - landing page
   std::vector<std::string> tab_values {
     "CREATE GAME SESSION",
     "JOIN GAME SESSION",
@@ -169,54 +227,24 @@ int main(int argc, char* argv[]) {
   // all components that need to be interactive will be added to the main container.
   // this allows them to be tracked by the renderer
   // the component passed into here will need to be called with -> Render() again in the actual renderer 
-  auto actionButton = Button(&buttonLabel, [&] {
-    if(type == "display") {
-      client.send(endpoint + ",");
-      return;
-    }
-
-    RequestConstructor reqConstructor(endpoint);
-
-    if(type == "init") {
-      if (input.empty()) {
-        int randomID = RandomIdGenerator::generateUniqueId();
-        input = "Anon_Player";
-        input.append(std::to_string(randomID));
-      }
-      reqConstructor.appendItem(field, input);
-      auto json_string = reqConstructor.ConstructRequest();
-      GetGamesList getGamesList = GetGamesList(json_string);
-      wrapper.sendReq(endpoint, getGamesList, client);
-      return;
-    }
-
-    if(type == "selection") {
-      reqConstructor.appendItem(field, options_[selection_]);
-    }else if(type == "input") {
-      reqConstructor.appendItem(field, input);
-    }
-
-    auto json_string = reqConstructor.ConstructRequest();
-    GetGameName getGameName = GetGameName(json_string);
-    wrapper.sendReq(endpoint, getGameName, client);
-  }) | Maybe([&] { return (endpoint != ""); });
+  auto actionButton = Button(&viewMan.disp_data.button, [&] {
+    RequestConstructor reqConstructor(viewMan.disp_data.endpoint);
+    viewMan.sendRequest(reqConstructor);
+  }) | Maybe([&] { return (viewMan.disp_data.endpoint != ""); });
   
-  auto optionSelector = Radiobox(&options_, &selection_);
-  auto inputComponent = Input(&input, "Enter here");
+  auto optionSelector = Radiobox(&viewMan.disp_data.options, &viewMan.disp_data.selection);
+  auto inputComponent = Input(&viewMan.disp_data.input, "enter here");
   auto tab1 = Renderer([&] {
-    // wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
+    viewMan.disp_data.endpoint = "ReqGetGamesList";
+    RequestConstructor reqConstructor(viewMan.disp_data.endpoint);
+    viewMan.sendRequest(reqConstructor);
     return vbox({
       separator(),
       paragraph(" "),
     });
   });
   auto tab2 = Renderer([&] {
-    type = "input";
-    prompt = "Invite code:";
-    input = "";
-    buttonLabel = "Join";
-    field = "InviteCode";
-    endpoint = "ReqJoinGame";
+    viewMan.setJoinTabData();
     return vbox({
       separator(),
       paragraph(" "),
@@ -253,97 +281,123 @@ int main(int argc, char* argv[]) {
 
   // wrapper.sendNoBody(constants::ReqType::GETGAMES, client);
 
+  auto display_view = [&]() {
+    return vbox({
+        vbox({
+          tab_view->Render(),
+          hbox({
+            paragraph(viewMan.disp_data.description),
+          }),
+          hbox({
+            actionButton->Render(),
+          }),
+        }) | flex | borderStyled(ROUNDED),
+        vbox({
+          paragraph(test_json_response) | color(Color::GreenLight),
+        }),
+      }) | flex;
+  };
+  auto selection_view = [&]() {
+    return vbox({
+      vbox({
+        tab_view->Render(),
+        hbox({
+          paragraph(viewMan.disp_data.prompt),
+        }),
+        hbox({
+          optionSelector->Render(),
+        }),
+        hbox({
+          actionButton->Render(),
+        }),
+        hbox({
+          paragraph(viewMan.disp_data.endpoint + ' ' + viewMan.disp_data.field),
+        }),
+      }) | flex | borderStyled(ROUNDED),
+      vbox({
+        paragraph(test_json_response) | color(Color::GreenLight),
+      }),
+    }) | flex;
+  };
+  auto input_view = [&]() {
+    return vbox({
+      vbox({
+        tab_view->Render(),
+        hbox({
+          paragraph(viewMan.disp_data.prompt),
+        }),
+        hbox({
+          inputComponent->Render(),
+        }),
+        hbox({
+          actionButton->Render(),
+        }),
+        hbox({
+          paragraph(viewMan.disp_data.endpoint + ' ' + viewMan.disp_data.field),
+        }),
+      }) | flex | borderStyled(ROUNDED),
+      vbox({
+        paragraph(test_json_response) | color(Color::GreenLight),
+      }),
+    }) | flex;
+  };
+  auto init_view = [&]() {
+    return vbox({
+      vbox({
+        vbox({
+            paragraphAlignCenter("Welcome to the Social Gaming Server developed by HotrootSoup!") | color(Color::GreenLight),
+            paragraphAlignCenter("Please enter a username to start (^_^)") | color(Color::GreenLight),
+            paragraph(" "),
+            separator(),
+        }),
+        vbox({
+          paragraph(" "),
+          hbox({
+            filler(),
+            text(viewMan.disp_data.prompt),
+            inputComponent->Render(),
+            filler(),
+          }),
+          paragraph(" "),
+        }),
+        vbox({
+          hbox({
+            filler(),
+            actionButton->Render(),
+          }),
+        }),
+      }) | flex,
+      vbox({ // debug
+        separator(),
+        paragraph("Next Request Endpoint: " + viewMan.disp_data.endpoint + ' ' + viewMan.disp_data.field) | color(Color::Cyan),
+        paragraph("Server Response: " + test_json_response) | color(Color::GreenLight),
+      }),
+    }) | flex;
+  };
+  auto error_view = [&]() {
+    return vbox({
+      vbox({
+        hbox({
+          paragraph("Something went wrong. Please reload your browser."),
+        }),
+      }) | flex | borderStyled(ROUNDED),
+      vbox({
+        paragraph(test_json_response) | color(Color::GreenLight),
+      }),
+    }) | flex;
+  };
 
   auto renderer = Renderer(main_container, [&] {
-    if(type == "display") {
-      return vbox({
-        vbox({
-          tab_view->Render(),
-          hbox({
-            paragraph(description),
-          }),
-          hbox({
-            actionButton->Render(),
-          }),
-        }) | flex | borderStyled(ROUNDED),
-        vbox({
-          paragraph(test_json_response) | color(Color::GreenLight),
-        }),
-      }) | flex;
-    }else if(type == "selection") {
-      return vbox({
-        vbox({
-          tab_view->Render(),
-          hbox({
-            paragraph(prompt),
-          }),
-          hbox({
-            optionSelector->Render(),
-          }),
-          hbox({
-            actionButton->Render(),
-          }),
-          hbox({
-            paragraph(endpoint + ' ' + field),
-          }),
-        }) | flex | borderStyled(ROUNDED),
-        vbox({
-          paragraph(test_json_response) | color(Color::GreenLight),
-        }),
-      }) | flex;
-    }else if(type == "input") {
-      return vbox({
-        vbox({
-          tab_view->Render(),
-          hbox({
-            paragraph(prompt),
-          }),
-          hbox({
-            inputComponent->Render(),
-          }),
-          hbox({
-            actionButton->Render(),
-          }),
-          hbox({
-            paragraph(endpoint + ' ' + field),
-          }),
-        }) | flex | borderStyled(ROUNDED),
-        vbox({
-          paragraph(test_json_response) | color(Color::GreenLight),
-        }),
-      }) | flex;
-    }else if(type == "init") {
-        return vbox({
-          vbox({
-            tab_view->Render(),
-            hbox({
-              paragraph(prompt),
-            }),
-            hbox({
-              inputComponent->Render(),
-            }),
-            hbox({
-              actionButton->Render(),
-            }),
-            hbox({
-              paragraph(endpoint + ' ' + field),
-            }),
-          }) | flex | borderStyled(ROUNDED),
-          vbox({
-            paragraph(test_json_response) | color(Color::GreenLight),
-          }),
-        }) | flex;
-      }else {
-      return vbox({
-          vbox({
-            hbox({
-              paragraph("Something went wrong. Please refresh your browser."),
-            }),
-          }) | flex | borderStyled(ROUNDED),
-          vbox({
-            paragraph(test_json_response) | color(Color::GreenLight),
-          }),
-        }) | flex;
+    if(viewMan.disp_data.state == "init") {
+      return init_view();
+    }
+
+    if(viewMan.disp_data.state == "success") {
+      if     (viewMan.disp_data.type == "display")   { return display_view(); }
+      else if(viewMan.disp_data.type == "selection") { return selection_view(); }
+      else if(viewMan.disp_data.type == "input")     { return input_view(); }
+    }else {
+      return error_view();
     }
   });
 
@@ -382,7 +436,8 @@ int main(int argc, char* argv[]) {
 
       test_json_response = response;
 
-      handleServerResponse(response, state, description, type, options_, selection_, prompt, input, buttonLabel, field, endpoint); 
+      viewMan.handleServerResponse(response);
+      // handleServerResponse(response, state, description, type, options_, selection_, prompt, input, button, field, endpoint); 
       screen.RequestAnimationFrame();
     }
 

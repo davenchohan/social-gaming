@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <variant>
+#include <stdexcept>
 
 enum class Builtins {
     SIZE,

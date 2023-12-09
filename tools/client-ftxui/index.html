@@ -11,7 +11,7 @@
   </head>
   <body>
     <div class="page ">
-      <h1>Hot Soup Client </h1>
+      <h1>Social Gaming Platform </h1>
       <div id="terminal"></div>
     </div>
   </body>
@@ -84,7 +84,7 @@
   </script>
   <style>
     body {
-      background-color:#EEE;
+      background-color:#000;
       padding:20px;
       font-family: Helvetica, sans-serif;
       font-size: 130%;
@@ -96,7 +96,9 @@
     }
 
     h1 {
-      text-decoration: underline;
+      margin-left: 16px;
+      text-decoration: none;
+      color: aliceblue;
     }
 
     select {
@@ -115,12 +117,21 @@
       transition: color 0.2s linear;
       transition: background-color 0.2s linear;
     }
-
+    
+    
     #terminal {
       padding:10px;
       border:none;
       background-color:black;
       padding:auto;
+    }
+    #terminal .xterm .xterm-viewport {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    #terminal .xterm .xterm-viewport::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </html>
